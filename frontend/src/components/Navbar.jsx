@@ -3,7 +3,7 @@ import { Home, User, MessageSquare, Bell, Calendar, Settings, LogOut, Mic } from
 export default function Navbar() {
   return (
     <nav 
-      className="flex flex-col h-screen w-64 text-white"
+      className="flex flex-col h-screen w-[215px] text-white"
       style={{
         background: 'linear-gradient(180deg, #A376A2 0%, #8D5F8C 50%, #7E5179 100%)'
       }}
