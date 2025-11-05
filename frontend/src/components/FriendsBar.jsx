@@ -11,7 +11,7 @@ export default function FriendsBar() {
   ];
 
   return (
-    <div className="w-[280px] h-screen bg-gray-100 p-4">
+    <div className="flex flex-col w-[280px] h-screen bg-gray-100 p-4">
       {/* Custom Dropdown */}
       <div className="mb-6 flex justify-center">
         <div className="flex w-[255px] h-8 items-center justify-center px-[15px] py-1.5 bg-white rounded-[20px] border border-[#a376a2] relative">
