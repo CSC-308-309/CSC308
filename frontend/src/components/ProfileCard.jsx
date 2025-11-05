@@ -1,5 +1,6 @@
 import { Mic, Cake, User, Music, FileText } from 'lucide-react';
 import SwipeButtons from './SwipeButtons';
+import concertImage from '../assets/concert_image.png'
 
 export default function ProfileCard() {
   const profile = {
@@ -10,7 +11,7 @@ export default function ProfileCard() {
     genre: "Pop/Country",
     experience: "12 years of experience",
     mainImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop",
-    concertImage: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=300&h=250&fit=crop",
+    concertImage: concertImage,
     lastSong: "Dracula by Tame Impala",
     lastSongDesc: "The last song that gave me chills is..."
   };
@@ -23,7 +24,7 @@ export default function ProfileCard() {
   return (
     <div className="w-full flex flex-col items-center justify-center min-h-screen p-4">
       {/* Card Container */}
-      <div className="w-full max-w-3xl bg-gradient-to-b from-purple-200 to-purple-100 rounded-3xl p-6 shadow-2xl">
+      <div className="w-full max-w-3xl bg-gradient-to-b from-purple-200 to-purple-100 rounded-3xl p-6 shadow-md">
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Left Column - Info */}
