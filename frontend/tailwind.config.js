@@ -9,6 +9,9 @@ export default {
         'melodious-purple': '#7E5179',
         'melodious-dark-purple': '#3A1250',
       },
+      fontFamily: {
+        sans: ['Nunito', 'sans-serif'],
+      },
     },
   },
   plugins: [],
