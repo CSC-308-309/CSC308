@@ -1,9 +1,9 @@
 import { Mic, Cake, User, Music, FileText } from 'lucide-react';
-import SwipeButtons from './SwipeButtons';
-import concertImage from '../assets/concert_image.png'
+import SwipeDragController from './SwipeDragController';
+import concertImage from '../assets/concert_image.png';
 
-export default function ProfileCard() {
-  const profile = {
+export default function ProfileCard({ profile, isActive = true, onSwipe }) {
+  const defaultProfile = {
     name: "Taylor Swift",
     role: "Vocalist",
     age: "35 y.o.",
@@ -16,69 +16,78 @@ export default function ProfileCard() {
     lastSongDesc: "The last song that gave me chills is..."
   };
 
-  const handleUndo = () => console.log('Undo clicked');
-  const handleReject = () => console.log('Reject clicked');
-  const handleAccept = () => console.log('Accept clicked');
-  const handleSuperLike = () => console.log('Super like clicked');
+  const profileData = profile || defaultProfile;
+
+  const handleSwipe = (direction) => {
+    console.log(`Swiped ${direction} on ${profileData.name}`);
+    if (onSwipe) {
+      onSwipe(direction);
+    }
+  };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center min-h-screen p-4">
-      {/* Card Container */}
-      <div className="w-full max-w-3xl bg-gradient-to-b from-purple-200 to-purple-100 rounded-3xl p-6 shadow-md">
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {/* Left Column - Info */}
-          <div className="bg-white rounded-2xl p-6 flex flex-col justify-center">
-            <h2 className="text-5xl font-bold mb-6 break-words overflow-wrap-anywhere">{profile.name}</h2>
-            
-            <div className="space-y-3">
-              <InfoItem icon={<Mic className="w-5 h-5" />} text={profile.role} />
-              <InfoItem icon={<Cake className="w-5 h-5" />} text={profile.age} />
-              <InfoItem icon={<User className="w-5 h-5" />} text={profile.gender} />
-              <InfoItem icon={<Music className="w-5 h-5" />} text={profile.genre} />
-              <InfoItem icon={<FileText className="w-5 h-5" />} text={profile.experience} />
+    <SwipeDragController onSwipe={handleSwipe} isActive={isActive}>
+      {({ isDragging, dragOffset, rotation, opacity }) => (
+        <div className="w-full flex flex-col items-center justify-center">
+          {/* Card Container with swipe transforms */}
+          <div 
+            className="w-full max-w-3xl bg-gradient-to-b from-purple-200 to-purple-100 rounded-3xl p-6 shadow-md cursor-grab active:cursor-grabbing select-none"
+            style={{
+              transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y}px) rotate(${rotation}deg)`,
+              transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+              opacity: opacity,
+            }}
+          >
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Left Column - Info */}
+              <div className="bg-white rounded-2xl p-6 flex flex-col justify-center">
+                <h2 className="text-5xl font-bold mb-6 break-words overflow-wrap-anywhere">
+                  {profileData.name}
+                </h2>
+                
+                <div className="space-y-3">
+                  <InfoItem icon={<Mic className="w-5 h-5" />} text={profileData.role} />
+                  <InfoItem icon={<Cake className="w-5 h-5" />} text={profileData.age} />
+                  <InfoItem icon={<User className="w-5 h-5" />} text={profileData.gender} />
+                  <InfoItem icon={<Music className="w-5 h-5" />} text={profileData.genre} />
+                  <InfoItem icon={<FileText className="w-5 h-5" />} text={profileData.experience} />
+                </div>
+              </div>
+
+              {/* Right Column - Main Image */}
+              <div className="bg-gray-400 rounded-2xl overflow-hidden">
+                <img 
+                  src={profileData.mainImage} 
+                  alt={profileData.name}
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                />
+              </div>
+            </div>
+
+            {/* Bottom Row */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Concert Image */}
+              <div className="bg-gray-400 rounded-2xl overflow-hidden h-48">
+                <img 
+                  src={profileData.concertImage} 
+                  alt="Concert"
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                />
+              </div>
+
+              {/* Last Song Card */}
+              <div className="bg-white rounded-2xl p-4 flex flex-col justify-center">
+                <p className="text-lg text-gray-600 mb-2">{profileData.lastSongDesc}</p>
+                <p className="text-4xl font-semibold">{profileData.lastSong}</p>
+              </div>
             </div>
           </div>
-
-          {/* Right Column - Main Image */}
-          <div className="bg-gray-400 rounded-2xl overflow-hidden">
-            <img 
-              src={profile.mainImage} 
-              alt={profile.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
         </div>
-
-        {/* Bottom Row */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* Concert Image */}
-          <div className="bg-gray-400 rounded-2xl overflow-hidden h-48">
-            <img 
-              src={profile.concertImage} 
-              alt="Concert"
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Last Song Card */}
-          <div className="bg-white rounded-2xl p-4 flex flex-col justify-center p-6">
-            <p className="text-lg text-gray-600 mb-2">{profile.lastSongDesc}</p>
-            <p className="text-4xl font-semibold">{profile.lastSong}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Swipe Buttons - Imported from seperate file */}
-      <div className="mt-6">
-        <SwipeButtons 
-          onUndo={handleUndo}
-          onReject={handleReject}
-          onAccept={handleAccept}
-          onSuperLike={handleSuperLike}
-        />
-      </div>
-    </div>
+      )}
+    </SwipeDragController>
   );
 }
 
