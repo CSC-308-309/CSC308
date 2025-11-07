@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 import FriendsBar from "../components/FriendsBar";
 import ProfileCard from "../components/ProfileCard";
 import ProfilesPage from "../components/ProfilesPage";
