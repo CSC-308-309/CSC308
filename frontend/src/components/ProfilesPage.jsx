@@ -1,66 +1,33 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import ProfileCard from './ProfileCard';
 import SwipeButtons from './SwipeButtons';
 import concertImage from '../assets/concert_image.png';
 
 export default function ProfilesPage() {
-  const [profiles] = useState([
-    {
-      id: 1,
-      name: "Taylor Swift",
-      role: "Vocalist",
-      age: "35 y.o.",
-      gender: "Woman (she/her)",
-      genre: "Pop/Country",
-      experience: "12 years of experience",
-      mainImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop",
-      concertImage: concertImage,
-      lastSong: "Dracula by Tame Impala",
-      lastSongDesc: "The last song that gave me chills is..."
-    },
-    {
-      id: 2,
-      name: "Ed Sheeran",
-      role: "Guitarist/Vocalist",
-      age: "33 y.o.",
-      gender: "Man (he/him)",
-      genre: "Pop/Folk",
-      experience: "15 years of experience",
-      mainImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop",
-      concertImage: concertImage,
-      lastSong: "Bohemian Rhapsody by Queen",
-      lastSongDesc: "The last song that gave me chills is..."
-    },
-    {
-      id: 3,
-      name: "Billie Eilish",
-      role: "Vocalist/Songwriter",
-      age: "22 y.o.",
-      gender: "Woman (she/her)",
-      genre: "Alternative/Pop",
-      experience: "8 years of experience",
-      mainImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop",
-      concertImage: concertImage,
-      lastSong: "Ocean Eyes (own song)",
-      lastSongDesc: "The last song that gave me chills is..."
-    },
-    {
-      id: 4,
-      name: "Bruno Mars",
-      role: "Vocalist/Performer",
-      age: "38 y.o.",
-      gender: "Man (he/him)",
-      genre: "R&B/Funk/Pop",
-      experience: "18 years of experience",
-      mainImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop",
-      concertImage: concertImage,
-      lastSong: "Superstition by Stevie Wonder",
-      lastSongDesc: "The last song that gave me chills is..."
-    },
-  ]);
-  
+  const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const swipeControllerRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/profiles');
+        if (!response.ok) {
+          throw new Error('Failed to fetch profiles');
+        }
+        const data = await response.json();
+        setProfiles(data);
+      } catch (err) {
+        console.error('Error fetching profiles:', err);
+        setError('Failed to load profiles. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfiles();
+  }, []);
 
   const handleSwipe = (direction) => {
     console.log(`Swiped ${direction} on ${profiles[currentIndex].name}`);
@@ -75,6 +42,14 @@ export default function ProfilesPage() {
     // This will trigger the swipe on the top card
     handleSwipe(direction);
   };
+
+  if (isLoading) {
+    return <div className="text-center mt-10">Loading profiles...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-10">Error: {error}</div>;
+  }
 
   if (currentIndex >= profiles.length) {
     return (
