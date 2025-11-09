@@ -1,10 +1,11 @@
 import { Home, User, MessageSquare, Bell, Calendar, Settings, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import logoIcon from '../assets/logo.svg';
 
 export default function Navbar() {
   return (
     <nav 
-      className="flex flex-col h-screen w-[300px] text-white"
+      className="flex flex-col w-[215px] text-white"
       style={{
         background: 'linear-gradient(180deg, #A376A2 0%, #8D5F8C 50%, #7E5179 100%)'
       }}
@@ -19,8 +20,14 @@ export default function Navbar() {
 
       {/* Navigation Links */}
       <div className="flex-1 py-4">
-        <NavItem icon={<Home />} label="Home" />
-        <NavItem icon={<User />} label="Profile" />
+        <Link to="/" className="block">
+          <NavItem icon={<Home />} label="Home" />
+        </Link>
+
+        <Link to="/profile" className="block">
+          <NavItem icon={<User />} label="Profile" />
+        </Link>
+        
         <NavItem icon={<MessageSquare />} label="Messages" />
         <NavItem icon={<Bell />} label="Notifications" />
         <NavItem icon={<Calendar />} label="Events" />
