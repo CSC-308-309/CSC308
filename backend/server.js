@@ -1,82 +1,30 @@
-const dotenv = require('dotenv');
-dotenv.config({path: '../.env'});
-const Profile = require('./models/Profile.js');
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
+// backend/server.js
+console.log("Backend running");
 
-const app = express();
-const port = process.env.PORT || 3000;
+import { createApp } from "./app.js";
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+const port = process.env.PORT || 8000;
+const dbType = process.env.DB || "testDatabase";
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-    dbName: 'music-app',
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+let db;
 
-app.get('/api/db-info', (req, res) => {
-  res.json({
-    dbName: mongoose.connection.name,
-    dbHost: mongoose.connection.host,
-    dbPort: mongoose.connection.port
-  });
+if (dbType === "testDatabase") {
+  const { connectToTestDatabase } = await import("./db/testDatabase.js");
+  db = await connectToTestDatabase();
+} else if (dbType === "productionDatabase") {
+  throw new Error("Production database not implemented yet");
+} else {
+  throw new Error(`Unknown database type: ${dbType}`);
+}
+
+const app = createApp({ db });
+
+const server = app.listen(port, () => {
+  console.log(`Server listening at http://localhost:${port} (DB=${dbType})`);
 });
 
-app.get('/api/profiles', async (req, res) => {
-  try {
-    const profiles = await Profile.find({});
-    
-    if (profiles.length === 0) {
-      return res.status(404).json({ 
-        message: 'No profiles found',
-        suggestion: 'Visit /api/seed-users to add sample data'
-      });
-    }
-    
-    res.json(profiles);
-  } catch (err) {
-    console.error('Error fetching profiles:', err);
-    res.status(500).json({ 
-      error: 'Failed to fetch profiles',
-      details: err.message 
-    });
-  }
+// Optional: graceful shutdown
+process.on("SIGINT", () => {
+  console.log("Shutting down...");
+  server.close(() => process.exit(0));
 });
-
-// Add this before your other routes
-app.get('/api/test', async (req, res) => {
-  try {
-    const count = await Profile.countDocuments();
-    res.json({
-      connected: true,
-      documentCount: count,
-      database: mongoose.connection.name,
-      collections: await mongoose.connection.db.listCollections().toArray()
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/', (req, res) => {
-  res.json({ status: 'Server is running' });
-});
-
-// Error handling
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
-
-console.log('Backend running');
