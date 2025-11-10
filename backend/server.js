@@ -1,67 +1,50 @@
-const dotenv = require('dotenv');
-dotenv.config({path: '../.env'});
-const Profile = require('./models/Profile.js');
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
+const {pool} = require('./models');
+const Profile = require('./models/Profile');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-    dbName: 'music-app',
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
-
-app.get('/api/db-info', (req, res) => {
-  res.json({
-    dbName: mongoose.connection.name,
-    dbHost: mongoose.connection.host,
-    dbPort: mongoose.connection.port
-  });
+// Routes
+app.get('/profiles', async (req, res) => {
+  try {
+    const profiles = await Profile.findAll();
+    res.json(profiles);
+  } catch (error) {
+    console.error('Error fetching profiles:', error);
+    res.status(500).json({ error: 'Failed to fetch profiles' });
+  }
 });
 
-app.get('/api/profiles', async (req, res) => {
+// Test database connection
+app.get('/test-db', async (req, res) => {
   try {
-    const profiles = await Profile.find({});
-    
-    if (profiles.length === 0) {
-      return res.status(404).json({ 
-        message: 'No profiles found',
-        suggestion: 'Visit /api/seed-users to add sample data'
-      });
-    }
-    
-    res.json(profiles);
-  } catch (err) {
-    console.error('Error fetching profiles:', err);
-    res.status(500).json({ 
-      error: 'Failed to fetch profiles',
-      details: err.message 
+    const result = await pool.query('SELECT current_database(), current_user, version()');
+    res.json({
+      connected: true,
+      database: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Database connection test failed:', error);
+    res.status(500).json({
+      connected: false,
+      error: error.message
     });
   }
 });
 
-// Add this before your other routes
-app.get('/api/test', async (req, res) => {
+app.post('/profiles', async (req, res) => {
   try {
-    const count = await Profile.countDocuments();
-    res.json({
-      connected: true,
-      documentCount: count,
-      database: mongoose.connection.name,
-      collections: await mongoose.connection.db.listCollections().toArray()
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.log(req.body);
+    const newProfile = await Profile.create(req.body);
+    res.status(201).json(newProfile);
+  } catch (error) {
+    console.error('Error creating profile:', error);
+    res.status(500).json({ error: 'Failed to create profile' });
   }
 });
 
@@ -69,14 +52,6 @@ app.get('/', (req, res) => {
   res.json({ status: 'Server is running' });
 });
 
-// Error handling
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
-
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
-
-console.log('Backend running');

@@ -1,8 +1,11 @@
 import { Mic, Cake, User, Music, FileText } from 'lucide-react';
+import { useRef } from 'react';
 import SwipeDragController from './SwipeDragController';
 import concertImage from '../assets/concert_image.png';
 
 export default function ProfileCard({ profile, isActive = true, onSwipe }) {
+  const swipeControllerRef = useRef(null);
+
   const defaultProfile = {
     name: "Taylor Swift",
     role: "Vocalist",
@@ -80,8 +83,8 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
 
               {/* Last Song Card */}
               <div className="bg-white rounded-2xl p-4 flex flex-col justify-center">
-                <p className="text-lg text-gray-600 mb-2">{profileData.lastSongDesc}</p>
-                <p className="text-4xl font-semibold">{profileData.lastSong}</p>
+                <p className="text-lg text-gray-600 mb-2">{profileData.last_song_desc}</p>
+                <p className="text-4xl font-semibold">{profileData.last_song}</p>
               </div>
             </div>
           </div>

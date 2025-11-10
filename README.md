@@ -9,3 +9,18 @@ Code linter/style checker:
  To install these:
 - Open VScode, click the extensions tab on the left, search "Prettier" and install the "Prettier- Code Checker" option
 - Search "ESLint" and install 
+
+# Database Setup 
+
+1. **Connecting to the DB**
+   - Go to [Neon Tech](https://neon.tech/)
+   - In your Neon dashboard, go to the "Connection Details" section and get your connection string
+   - In your project's root directory, create a `.env` file if it doesn't exist and add the connection string:
+     ```
+     DATABASE_CONNECTION_STRING=your_neon_connection_string_here
+     ```
+
+2. **Install Dependencies**
+   Make sure you have these dependencies installed in your backend:
+   ```bash
+   npm install pg
