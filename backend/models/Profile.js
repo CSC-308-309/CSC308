@@ -1,5 +1,5 @@
 // models/Profile.js
-const { pool } = require('./index');
+const { pool } = require('../db/index');
 
 const Profile = {
   async findAll() {

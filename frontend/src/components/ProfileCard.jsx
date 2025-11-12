@@ -13,10 +13,10 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
     gender: "Woman (she/her)",
     genre: "Pop/Country",
     experience: "12 years of experience",
-    mainImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop",
-    concertImage: concertImage,
-    lastSong: "Dracula by Tame Impala",
-    lastSongDesc: "The last song that gave me chills is..."
+    main_image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop",
+    concert_image: concertImage,
+    last_song: "Dracula by Tame Impala",
+    last_song_desc: "The last song that gave me chills is..."
   };
 
   const profileData = profile || defaultProfile;
@@ -61,10 +61,14 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               {/* Right Column - Main Image */}
               <div className="bg-gray-400 rounded-2xl overflow-hidden">
                 <img 
-                  src={profileData.mainImage} 
+                  src={profileData.main_image} 
                   alt={profileData.name}
                   className="w-full h-full object-cover"
                   draggable={false}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://via.placeholder.com/400x500?text=No+Image';
+                  }}
                 />
               </div>
             </div>
@@ -74,10 +78,14 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               {/* Concert Image */}
               <div className="bg-gray-400 rounded-2xl overflow-hidden h-48">
                 <img 
-                  src={profileData.concertImage} 
+                  src={profileData.concert_image} 
                   alt="Concert"
                   className="w-full h-full object-cover"
                   draggable={false}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://via.placeholder.com/800x600?text=No+Concert+Image';
+                  }}
                 />
               </div>
 

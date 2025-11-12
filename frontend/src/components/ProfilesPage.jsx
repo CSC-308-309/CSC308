@@ -12,7 +12,7 @@ export default function ProfilesPage() {
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const response = await fetch('http://localhost:3000/profiles');
+        const response = await fetch('http://localhost:3000/api/profiles');
         if (!response.ok) {
           throw new Error('Failed to fetch profiles');
         }
