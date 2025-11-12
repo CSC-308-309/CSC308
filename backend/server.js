@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const express = require('express');
 const cors = require('cors');
 const { connectToDatabase, pool } = require('./db/index.js');
@@ -50,7 +49,7 @@ async function startServer() {
   try {
     await connectToDatabase();
     app.listen(port, () => {
-      console.log('Server running on http://localhost:' + port);
+      console.log(`Server running on http://localhost:${port}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
@@ -59,35 +58,3 @@ async function startServer() {
 }
 
 startServer();
-=======
-// backend/server.js
-console.log("Backend running");
-
-import { createApp } from "./app.js";
-
-const port = process.env.PORT || 8000;
-const dbType = process.env.DB || "testDatabase";
-
-let db;
-
-if (dbType === "testDatabase") {
-  const { connectToTestDatabase } = await import("./db/testDatabase.js");
-  db = await connectToTestDatabase();
-} else if (dbType === "productionDatabase") {
-  throw new Error("Production database not implemented yet");
-} else {
-  throw new Error(`Unknown database type: ${dbType}`);
-}
-
-const app = createApp({ db });
-
-const server = app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port} (DB=${dbType})`);
-});
-
-// Optional: graceful shutdown
-process.on("SIGINT", () => {
-  console.log("Shutting down...");
-  server.close(() => process.exit(0));
-});
->>>>>>> dcc4ba1d2ebfb29b64c04461006151db8adefc9a
