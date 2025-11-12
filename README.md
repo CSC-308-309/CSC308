@@ -1,4 +1,4 @@
-#Figma Storyboard
+# Figma Storyboard
 
 https://www.figma.com/files/team/1562171713696228317/project/478828045/user-profile-and-swiping-page-figma?fuid=1562170179457328451
 
@@ -11,16 +11,16 @@ Code linter/style checker:
 - Search "ESLint" and install 
 
 # Database Setup 
+This project uses **PostgreSQL** as the database with support for multiple environments (Production, Development). The database is hosted on [Neon](https://neon.tech/).
 
-1. **Connecting to the DB**
-   - Go to [Neon Tech](https://neon.tech/)
-   - In your Neon dashboard, go to the "Connection Details" section and get your connection string
-   - In your project's root directory, create a `.env` file if it doesn't exist and add the connection string:
-     ```
-     DATABASE_CONNECTION_STRING=your_neon_connection_string_here
-     ```
+## Environment Setup
+1. Go to [Neon Tech](https://neon.tech/) and Copy your connection strings from the dashboard (for production and development). It should look like: `postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require`
 
-2. **Install Dependencies**
-   Make sure you have these dependencies installed in your backend:
-   ```bash
-   npm install pg
+2. Create a `.env` file in the **root directory** of your project:
+
+```env
+DB_TYPE=PRODUCTION/DEVELOPMENT
+PRODUCTION_CONNECTION_STRING=
+TEST_CONNECTION_STRING= (Optional for local testing)
+DEVELOPMENT_CONNECTION_STRING=
+PORT=8000
