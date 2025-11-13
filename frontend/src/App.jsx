@@ -1,6 +1,7 @@
 import Home from './pages/Home';
 import { Routes, Route } from "react-router-dom";
 import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Routes>
       </div>
     </>
