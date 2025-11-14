@@ -29,7 +29,11 @@ export default function Navbar() {
         </Link>
         
         <NavItem icon={<MessageSquare />} label="Messages" />
-        <NavItem icon={<Bell />} label="Notifications" />
+
+        <Link to="/notifications" className="block">
+          <NavItem icon={<Bell />} label="Notifications" />
+        </Link>
+
         <NavItem icon={<Calendar />} label="Events" />
       </div>
 
