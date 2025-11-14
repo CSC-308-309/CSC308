@@ -61,7 +61,7 @@ export default function FriendsBar() {
   );
 }
 
-// CustomDropdown component (you can move this to a separate file)
+// CustomDropdown component
 function CustomDropdown({ 
   options, 
   value, 
