@@ -1,19 +1,42 @@
-const mongoose = require('mongoose');
+// models/Profile.js
+const { pool } = require('../db/index');
 
-const profileSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  role: { type: String, required: true },
-  age: { type: String, required: true },
-  gender: { type: String, required: true },
-  genre: { type: String, required: true },
-  experience: { type: String, required: true },
-  mainImage: { type: String, required: true },
-  concertImage: { type: String, required: true },
-  lastSong: { type: String, required: true },
-  lastSongDesc: { type: String, required: true }
-}, { collection: 'users',
-    timestamps: true });
+const Profile = {
+  async findAll() {
+    const query = `
+      SELECT * FROM profiles
+    `;
+    const { rows } = await pool.query(query);
+    return rows;
+  },
 
-const Profile = mongoose.model('Profile', profileSchema, 'users');
+  async create(profileData) {
+    const { 
+      name, role, age, gender, genre, 
+      experience, main_image, concert_image, last_song, last_song_desc 
+    } = profileData;
+
+    const query = `
+      INSERT INTO profiles (
+      name, role, age, gender, genre, 
+      experience, main_image, concert_image, last_song, last_song_desc 
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING *
+    `;
+    
+    const values = [
+      name, role, age, gender, genre, 
+      experience, main_image, concert_image, last_song, last_song_desc
+    ];
+
+    try {
+      const result = await pool.query(query, values);
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error in Profile.create:', error);
+      throw error;
+    }
+  }
+};
 
 module.exports = Profile;
