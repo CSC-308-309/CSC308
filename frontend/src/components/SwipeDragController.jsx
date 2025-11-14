@@ -51,7 +51,7 @@ const SwipeDragController = forwardRef(({ children, onSwipe, isActive }, ref) =>
     executeSwipe(direction);
   };
 
-  // 🔑 Add keyboard arrow key support
+  // Add keyboard arrow key support
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!isActive) return;
@@ -63,7 +63,7 @@ const SwipeDragController = forwardRef(({ children, onSwipe, isActive }, ref) =>
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isActive, isDragging]);
 
-  // 🧭 Expose swipe() to parent components
+  // Expose swipe() to parent components
   useImperativeHandle(ref, () => ({
     swipe: programmaticSwipe,
   }));
@@ -87,7 +87,7 @@ const SwipeDragController = forwardRef(({ children, onSwipe, isActive }, ref) =>
         dragOffset,
         rotation,
         opacity,
-        swipe: programmaticSwipe, // You can also trigger manually if needed
+        swipe: programmaticSwipe,
       })}
     </div>
   );
