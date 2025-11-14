@@ -1,30 +1,34 @@
-// backend/server.js
-console.log("Backend running");
+//backend/server.js
+import express from "express";
 
-import { createApp } from "./app.js";
-
+const app = express();
 const port = process.env.PORT || 8000;
-const dbType = process.env.DB || "testDatabase";
 
-let db;
+//middleware to parse json when sending requests
+app.use(express.json());
 
-if (dbType === "testDatabase") {
-  const { connectToTestDatabase } = await import("./db/testDatabase.js");
-  db = await connectToTestDatabase();
-} else if (dbType === "productionDatabase") {
-  throw new Error("Production database not implemented yet");
-} else {
-  throw new Error(`Unknown database type: ${dbType}`);
+//server health test  
+app.get("/health", (req, res) => {
+  res.send({ status: "Server is running" });
+});
+
+//placeholder for database connection (add later after yanitsa)
+async function startServer() {
+  try {
+    //placeholder for DB init
+    //example (later):
+    //const db = await connectToPostgres();
+    //app.locals.db = db;
+
+    app.listen(port, () => {
+      console.log(`Server running at http://localhost:${port}`);
+    });
+
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
 }
 
-const app = createApp({ db });
+startServer();
 
-const server = app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port} (DB=${dbType})`);
-});
-
-// Optional: graceful shutdown
-process.on("SIGINT", () => {
-  console.log("Shutting down...");
-  server.close(() => process.exit(0));
-});
