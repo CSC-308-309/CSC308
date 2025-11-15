@@ -30,7 +30,10 @@ export default function Navbar() {
         
         <NavItem icon={<MessageSquare />} label="Messages" />
         <NavItem icon={<Bell />} label="Notifications" />
-        <NavItem icon={<Calendar />} label="Events" />
+        
+        <Link to="/events" className='block'>
+          <NavItem icon={<Calendar />} label="Events" />
+        </Link>
       </div>
 
       {/* Bottom Settings */}
