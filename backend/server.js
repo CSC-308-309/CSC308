@@ -1,31 +1,28 @@
-//backend/server.js
 import express from "express";
-
+import { pool } from "./db/index.js";   
+import Profile from "./models/Profile.js"; 
 const app = express();
 const port = process.env.PORT || 8000;
 
-//middleware to parse json when sending requests
 app.use(express.json());
 
-//server health test  
+//health check
 app.get("/health", (req, res) => {
   res.send({ status: "Server is running" });
 });
 
-//placeholder for database connection (add later after yanitsa)
 async function startServer() {
   try {
-    //placeholder for DB init
-    //example (later):
-    //const db = await connectToPostgres();
-    //app.locals.db = db;
+    ///test database connection
+    await pool.query("SELECT NOW()");
+    console.log("Connected to PostgreSQL");
 
     app.listen(port, () => {
       console.log(`Server running at http://localhost:${port}`);
     });
 
   } catch (err) {
-    console.error("Failed to start server:", err);
+    console.error("Failed to connect to PostgreSQL:", err);
     process.exit(1);
   }
 }
