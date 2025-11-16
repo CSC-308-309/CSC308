@@ -1,11 +1,14 @@
 // src/pages/Profile.jsx
-import { useState } from "react";
-import Navbar from "../components/Navbar";
-import CoverPhoto from "../components/CoverPhoto";
-import EditProfilePhoto from "../components/ProfilePhoto";
-import TopProfileCard from "../components/TopProfileCard";
-import BioSection, { DEFAULT_PROFILE, getInitialProfileData } from "../components/BioSection";
-import EditBioButton from "../components/EditBioButton";
+import { useState } from 'react';
+import Navbar from '../components/Navbar';
+import CoverPhoto from '../components/CoverPhoto';
+import EditProfilePhoto from '../components/ProfilePhoto';
+import TopProfileCard from '../components/TopProfileCard';
+import BioSection, {
+  DEFAULT_PROFILE,
+  getInitialProfileData,
+} from '../components/BioSection';
+import EditBioButton from '../components/EditBioButton';
 
 export default function Profile() {
   const [profileData, setProfileData] = useState(getInitialProfileData);

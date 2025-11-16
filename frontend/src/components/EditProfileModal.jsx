@@ -1,16 +1,21 @@
 // src/components/EditProfileModal.jsx
-import { useState } from "react";
+import { useState } from 'react';
 
-export default function EditProfileModal({ isOpen, onClose, profileData, onSave }) {
+export default function EditProfileModal({
+  isOpen,
+  onClose,
+  profileData,
+  onSave,
+}) {
   const [formData, setFormData] = useState(profileData);
 
   if (!isOpen) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -20,7 +25,7 @@ export default function EditProfileModal({ isOpen, onClose, profileData, onSave 
   };
 
   const handleCancel = () => {
-    setFormData(profileData); 
+    setFormData(profileData);
     onClose();
   };
 
@@ -28,7 +33,7 @@ export default function EditProfileModal({ isOpen, onClose, profileData, onSave 
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl w-[500px] p-6 shadow-xl">
         <h2 className="text-xl font-bold text-gray-800 mb-6">Edit Profile</h2>
-        
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

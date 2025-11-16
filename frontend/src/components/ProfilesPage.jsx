@@ -31,7 +31,7 @@ export default function ProfilesPage() {
 
   const handleSwipe = (direction) => {
     console.log(`Swiped ${direction} on ${profiles[currentIndex].name}`);
-    setCurrentIndex(prev => prev + 1);
+    setCurrentIndex((prev) => prev + 1);
   };
 
   const handleRestart = () => {
@@ -74,39 +74,41 @@ export default function ProfilesPage() {
     <div className="w-full min-h-screen flex flex-col items-center justify-center p-4">
       {/* Card Stack Container with fixed height */}
       <div className="relative w-full max-w-3xl" style={{ height: '700px' }}>
-        {visibleCards.map((profile, index) => {
-          const isTopCard = index === 0;
-          
-          // Calculate z-index, scale, and position
-          const zIndex = visibleCards.length - index;
-          const scale = 1 - (index * 0.05);
-          const translateY = index * 20;
-          const opacity = 1 - (index * 0.2);
+        {visibleCards
+          .map((profile, index) => {
+            const isTopCard = index === 0;
 
-          return (
-            <div
-              key={profile.id}
-              className="absolute top-0 left-0 right-0"
-              style={{
-                zIndex: zIndex,
-                transform: `scale(${scale}) translateY(${translateY}px)`,
-                opacity: opacity,
-                pointerEvents: isTopCard ? 'auto' : 'none',
-              }}
-            >
-              <ProfileCard 
-                profile={profile} 
-                onSwipe={isTopCard ? handleSwipe : null}
-                isActive={isTopCard}
-              />
-            </div>
-          );
-        }).reverse()}
+            // Calculate z-index, scale, and position
+            const zIndex = visibleCards.length - index;
+            const scale = 1 - index * 0.05;
+            const translateY = index * 20;
+            const opacity = 1 - index * 0.2;
+
+            return (
+              <div
+                key={profile.id}
+                className="absolute top-0 left-0 right-0"
+                style={{
+                  zIndex: zIndex,
+                  transform: `scale(${scale}) translateY(${translateY}px)`,
+                  opacity: opacity,
+                  pointerEvents: isTopCard ? 'auto' : 'none',
+                }}
+              >
+                <ProfileCard
+                  profile={profile}
+                  onSwipe={isTopCard ? handleSwipe : null}
+                  isActive={isTopCard}
+                />
+              </div>
+            );
+          })
+          .reverse()}
       </div>
 
       {/* Swipe Buttons below the card stack */}
       <div className="mt-8">
-        <SwipeButtons 
+        <SwipeButtons
           onUndo={() => console.log('Undo')}
           onReject={() => handleButtonSwipe('left')}
           onAccept={() => handleButtonSwipe('right')}
