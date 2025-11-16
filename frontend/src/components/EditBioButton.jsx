@@ -1,13 +1,13 @@
 // src/components/EditBioButton.jsx
-import { useEffect, useRef, useState } from "react";
-import { DEFAULT_PROFILE, normalizeUsername } from "./BioSection";
+import { useEffect, useRef, useState } from 'react';
+import { DEFAULT_PROFILE, normalizeUsername } from './BioSection';
 
 export default function EditBioButton({
   profileData,
   onSave,
-  storageKey = "profileData",
-  label = "Edit Profile",
-  className = "",
+  storageKey = 'profileData',
+  label = 'Edit Profile',
+  className = '',
 }) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState(profileData ?? DEFAULT_PROFILE);
@@ -19,16 +19,16 @@ export default function EditBioButton({
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "state" ? value.toUpperCase() : value,
+      [name]: name === 'state' ? value.toUpperCase() : value,
     }));
   };
 
@@ -41,8 +41,7 @@ export default function EditBioButton({
 
     try {
       localStorage.setItem(storageKey, JSON.stringify(merged));
-    } catch {
-    }
+    } catch {}
 
     onSave?.(merged);
     setOpen(false);
@@ -100,7 +99,7 @@ export default function EditBioButton({
                 <input
                   type="text"
                   name="name"
-                  value={formData.name || ""}
+                  value={formData.name || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
                   autoFocus
@@ -114,7 +113,7 @@ export default function EditBioButton({
                 <input
                   type="text"
                   name="pronouns"
-                  value={formData.pronouns || ""}
+                  value={formData.pronouns || ''}
                   onChange={handleChange}
                   placeholder="e.g., she/her"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
@@ -130,7 +129,7 @@ export default function EditBioButton({
                   <input
                     type="text"
                     name="username"
-                    value={formData.username || ""}
+                    value={formData.username || ''}
                     onChange={handleChange}
                     className="flex-1 px-2 py-2 outline-none"
                   />
@@ -145,7 +144,7 @@ export default function EditBioButton({
                   <input
                     type="text"
                     name="city"
-                    value={formData.city || ""}
+                    value={formData.city || ''}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
                   />
@@ -157,7 +156,7 @@ export default function EditBioButton({
                   <input
                     type="text"
                     name="state"
-                    value={formData.state || ""}
+                    value={formData.state || ''}
                     onChange={handleChange}
                     maxLength={2}
                     className="w-full px-3 py-2 uppercase border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
@@ -171,7 +170,7 @@ export default function EditBioButton({
                 </label>
                 <textarea
                   name="bio"
-                  value={formData.bio || ""}
+                  value={formData.bio || ''}
                   onChange={handleChange}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent resize-none outline-none"
