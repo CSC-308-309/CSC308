@@ -5,7 +5,7 @@ import { Heart, ChevronDown } from 'lucide-react';
 export default function FriendsBar() {
   const [selectedCategory, setSelectedCategory] = useState('Concert Buddies');
 
-  const categories = ['Concert Buddies', 'Close Friends'];
+  const categories = ['Concert Buddies', 'Musicians'];
 
   // Define all people organized by categories
   const [allPeople, setAllPeople] = useState([
@@ -15,11 +15,11 @@ export default function FriendsBar() {
     { id: 4, name: 'Jazzy', isFavorite: true, category: 'Concert Buddies' },
     { id: 5, name: 'Abeyah', isFavorite: false, category: 'Concert Buddies' },
     { id: 6, name: 'Yaneli', isFavorite: false, category: 'Concert Buddies' },
-
-    { id: 7, name: 'Sarah', isFavorite: true, category: 'Close Friends' },
-    { id: 8, name: 'Mike', isFavorite: true, category: 'Close Friends' },
-    { id: 9, name: 'Emma', isFavorite: false, category: 'Close Friends' },
-    { id: 10, name: 'Alex', isFavorite: true, category: 'Close Friends' },
+    
+    { id: 7, name: 'Sarah', isFavorite: true, category: 'Musicians' },
+    { id: 8, name: 'Mike', isFavorite: true, category: 'Musicians' },
+    { id: 9, name: 'Emma', isFavorite: false, category: 'Musicians' },
+    { id: 10, name: 'Alex', isFavorite: true, category: 'Musicians' },
   ]);
 
   // Toggle favorite status
