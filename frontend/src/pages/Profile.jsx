@@ -6,6 +6,7 @@ import EditProfilePhoto from "../components/ProfilePhoto";
 import TopProfileCard from "../components/TopProfileCard";
 import BioSection, { DEFAULT_PROFILE, getInitialProfileData } from "../components/BioSection";
 import EditBioButton from "../components/EditBioButton";
+import AboutCard from "../components/AboutCard";
 
 export default function Profile() {
   const [profileData, setProfileData] = useState(getInitialProfileData);
@@ -46,6 +47,14 @@ export default function Profile() {
               <div className="col-span-12 lg:col-span-4" />
             </div>
           </TopProfileCard>
+
+          <div className="mt-5 ml-[calc(50%+277px)]">
+            <AboutCard>
+            <div className="p-4">
+              <h3 className="text-lg font-semibold text-[#7E3AF2]">About</h3>
+            </div>
+          </AboutCard>
+          </div>
         </div>
       </main>
     </div>
