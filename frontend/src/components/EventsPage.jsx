@@ -21,7 +21,7 @@ const EventCard = ({ image, date, title, location }) => {
 // Pagination Component
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   return (
-    <div className="flex items-center justify-center gap-2 mt-4">
+    <div className="flex items-center justify-center gap-2 m-6">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
@@ -30,25 +30,58 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         <ChevronLeft className="w-5 h-5" />
       </button>
       
+      {/* Show first page */}
+      {currentPage > 3 && (
+        <>
+          <button
+            onClick={() => onPageChange(1)}
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-purple-200 text-purple-700 hover:bg-purple-300"
+          >
+            1
+          </button>
+          <span className="text-gray-500 px-2">...</span>
+        </>
+      )}
+      
+      {/* Show previous page if exists */}
+      {currentPage > 1 && (
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-purple-200 text-purple-700 hover:bg-purple-300"
+        >
+          {currentPage - 1}
+        </button>
+      )}
+      
+      {/* Current page */}
       <button
-        onClick={() => onPageChange(1)}
-        className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-          currentPage === 1 ? 'bg-purple-400 text-white' : 'bg-purple-200 text-purple-700 hover:bg-purple-300'
-        }`}
+        className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-purple-400 text-white"
       >
-        1
+        {currentPage}
       </button>
       
-      <button
-        onClick={() => onPageChange(2)}
-        className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-          currentPage === 2 ? 'bg-purple-400 text-white' : 'bg-purple-200 text-purple-700 hover:bg-purple-300'
-        }`}
-      >
-        2
-      </button>
+      {/* Show next page if exists */}
+      {currentPage < totalPages && (
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-purple-200 text-purple-700 hover:bg-purple-300"
+        >
+          {currentPage + 1}
+        </button>
+      )}
       
-      <span className="text-gray-500 px-2">...</span>
+      {/* Show last page */}
+      {currentPage < totalPages - 2 && (
+        <>
+          <span className="text-gray-500 px-2">...</span>
+          <button
+            onClick={() => onPageChange(totalPages)}
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-purple-200 text-purple-700 hover:bg-purple-300"
+          >
+            {totalPages}
+          </button>
+        </>
+      )}
       
       <button
         onClick={() => onPageChange(currentPage + 1)}
