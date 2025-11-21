@@ -8,11 +8,9 @@ export default function Events() {
             <div className="flex">
                 <Navbar />
             </div>
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto h-dvh min-h-screen">
                 <EventsTitle />
-                <div className="mt-[10px]">
-                    <EventsPage />
-                </div>
+                <EventsPage />
             </div>
         </div>
     );

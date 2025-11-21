@@ -5,7 +5,7 @@ import { Search, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 const EventCard = ({ image, date, title, location }) => {
     return (
       <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-        <div className="bg-gray-400 h-48 w-full"></div>
+        <div className="bg-gray-400 aspect-[6/3] w-full rounded-t-lg"></div>
         <div className="p-4">
           <p className="text-sm text-gray-600 mb-2">{date}</p>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
@@ -21,7 +21,7 @@ const EventCard = ({ image, date, title, location }) => {
 // Pagination Component
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   return (
-    <div className="flex items-center justify-center gap-2 mt-8">
+    <div className="flex items-center justify-center gap-2 mt-4">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
@@ -107,10 +107,10 @@ export default function EventsPage() {
   ];
 
   return (
-    <div className="max-w-[1200px] w-full h-full bg-[#ECE6F0] mx-auto rounded-lg p-6">
-      <div className="max-w-7xl mx-auto items-center">
+    <div className="max-w-[1200px] min-h-[300px] bg-[#ECE6F0] mx-auto rounded-lg p-2 mb-4 m-4 sm: p-6 md:p-8 flex flex-col">
+      <div className="flex-shrink-0">
         {/* Header with Tabs and Search */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col md:flex-row items-center md:justify-between gap-4 mb-4">
           <div className="flex gap-4">
             <button
               onClick={() => setActiveTab('active')}
