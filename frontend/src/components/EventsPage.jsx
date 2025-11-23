@@ -6,14 +6,14 @@ const EventCard = ({ image, date, title, location }) => {
     return (
       <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
         <div className="bg-gray-400 aspect-[6/3] w-full rounded-t-lg"></div>
-        <div className="p-4">
-          <p className="text-sm text-gray-600 mb-2">{date}</p>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-          <div className="flex items-center text-gray-600 text-sm">
-            <MapPin className="w-4 h-4 mr-1" />
-            <span>{location}</span>
-          </div>
+        <div className="p-2">
+        <p className="text-xs text-gray-600 mb-1">{date}</p>
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">{title}</h3>
+        <div className="flex items-center text-gray-600 text-xs">
+          <MapPin className="w-3 h-3 mr-1" />
+          <span>{location}</span>
         </div>
+      </div>
       </div>
     );
   };
@@ -140,14 +140,14 @@ export default function EventsPage() {
   ];
 
   return (
-    <div className="max-w-[1200px] min-h-[300px] bg-[#ECE6F0] mx-auto rounded-lg p-2 mb-4 m-4 sm: p-6 md:p-8 flex flex-col">
+    <div className="max-w-[1200px] bg-[#ECE6F0] mx-auto rounded-lg p-2 mb-4 m-4 sm: p-6 md:p-8 flex flex-col">
       <div className="flex-shrink-0">
         {/* Header with Tabs and Search */}
         <div className="flex flex-col md:flex-row items-center md:justify-between gap-4 mb-4">
           <div className="flex gap-4">
             <button
               onClick={() => setActiveTab('active')}
-              className={`px-6 py-2 rounded-full font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-full font-medium transition-colors ${
                 activeTab === 'active'
                   ? 'bg-purple-400 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100'
@@ -157,7 +157,7 @@ export default function EventsPage() {
             </button>
             <button
               onClick={() => setActiveTab('past')}
-              className={`px-6 py-2 rounded-full font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-full font-medium transition-colors ${
                 activeTab === 'past'
                   ? 'bg-purple-400 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100'
@@ -173,7 +173,7 @@ export default function EventsPage() {
               placeholder="Search event, location, etc"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-4 pr-10 py-2 rounded-full border-none bg-white shadow-sm w-80 focus:outline-none focus:ring-2 focus:ring-purple-300"
+              className="pl-3 pr-10 py-1.5 rounded-full border-none bg-white shadow-sm w-80 focus:outline-none focus:ring-2 focus:ring-purple-300"
             />
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>

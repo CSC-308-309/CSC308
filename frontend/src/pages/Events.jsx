@@ -4,14 +4,16 @@ import EventsPage from "../components/EventsPage";
 
 export default function Events() {
     return (
-        <div className="flex h-screen overflow-hidden">
-            <div className="flex">
-                <Navbar />
-            </div>
-            <div className="flex-1 overflow-auto h-dvh min-h-screen">
+        <div className="flex h-screen">
+            <Navbar />
+
+            <div className="flex flex-col flex-1">
                 <EventsTitle />
-                <EventsPage />
+                <div className="flex-1 overflow-y-auto">
+                    <EventsPage />
+                </div>
             </div>
         </div>
+
     );
 }
