@@ -1,5 +1,5 @@
 // models/Profile.js
-const { pool } = require('../db/index').default;
+const { pool } = require('../db/index');
 
 const Profile = {
   async findAll() {
@@ -54,5 +54,4 @@ const Profile = {
     }
   },
 };
-
 module.exports = Profile;
