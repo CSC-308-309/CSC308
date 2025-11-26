@@ -1,5 +1,5 @@
 // models/Profile.js
-const { pool } = require('../db/index');
+const { pool } = require('../db/index').default;
 
 const Profile = {
   async findAll() {
@@ -11,9 +11,17 @@ const Profile = {
   },
 
   async create(profileData) {
-    const { 
-      name, role, age, gender, genre, 
-      experience, main_image, concert_image, last_song, last_song_desc 
+    const {
+      name,
+      role,
+      age,
+      gender,
+      genre,
+      experience,
+      main_image,
+      concert_image,
+      last_song,
+      last_song_desc,
     } = profileData;
 
     const query = `
@@ -23,10 +31,18 @@ const Profile = {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *
     `;
-    
+
     const values = [
-      name, role, age, gender, genre, 
-      experience, main_image, concert_image, last_song, last_song_desc
+      name,
+      role,
+      age,
+      gender,
+      genre,
+      experience,
+      main_image,
+      concert_image,
+      last_song,
+      last_song_desc,
     ];
 
     try {
@@ -36,7 +52,7 @@ const Profile = {
       console.error('Error in Profile.create:', error);
       throw error;
     }
-  }
+  },
 };
 
 module.exports = Profile;
