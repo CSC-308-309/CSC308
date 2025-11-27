@@ -2,25 +2,25 @@ const { Pool } = require('pg');
 const dotenv = require('dotenv');
 dotenv.config({ path: '../.env' });
 
-// Get DB_TYPE from environment (e.g., 'PRODUCTION', 'TEST', 'DEVELOPMENT')
+// get DB_TYPE from environment
 const dbType = process.env.DB_TYPE || 'PRODUCTION';
 
-// Construct the connection string variable name: {DB_TYPE}_CONNECTION_STRING
+// construct the connection string var name: {DB_TYPE}_CONNECTION_STRING
 const connectionStringKey = `${dbType}_CONNECTION_STRING`;
 const connectionString = process.env[connectionStringKey];
 
 if (!connectionString) {
-  throw new Error(`Missing environment variable: ${connectionStringKey}. Please set DB_TYPE and ${connectionStringKey} in your .env file.`);
+  throw new Error(`Missing environment variable: ${connectionStringKey}. Please set DB_TYPE and ${connectionStringKey} in .env.`);
 }
 
-console.log(`🔗 Using ${dbType} database connection`);
+console.log(`Using ${dbType} database connection`);
 
-// Configure pool based on DB_TYPE
+// configure pool based on DB_TYPE
 const poolConfig = {
   connectionString: connectionString,
 };
 
-// Add SSL for production databases (like Neon)
+// SSL for production databases 
 if (dbType === 'PRODUCTION') {
   poolConfig.ssl = {
     rejectUnauthorized: false
@@ -32,10 +32,10 @@ const pool = new Pool(poolConfig);
 async function connectToDatabase() {
   try {
     const result = await pool.query('SELECT current_database(), current_user, version()');
-    console.log(`✅ Connected to ${dbType} database:`, result.rows[0].current_database);
+    console.log(`Connected to ${dbType} database:`, result.rows[0].current_database);
     return pool;
   } catch (error) {
-    console.error(`❌ Failed to connect to ${dbType} database:`, error.message);
+    console.error(`Failed to connect to ${dbType} database:`, error.message);
     throw error;
   }
 }
