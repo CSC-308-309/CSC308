@@ -2,7 +2,7 @@
 const { pool } = require('../db/index');
 
 const Profile = {
-  async findAll() {
+  async listUsers() {
     const query = `
       SELECT * FROM profiles
     `;
@@ -10,8 +10,18 @@ const Profile = {
     return rows;
   },
 
-  async create(profileData) {
+  async getUserById(id) {
+    const query = `
+      SELECT * FROM profiles WHERE id = $1';
+    `;
+    const values = [id];
+    const { rows } = await pool.query(query, values);
+    return rows[0];
+  },
+
+  async createUser(profileData) {
     const {
+      username,
       name,
       role,
       age,
@@ -26,27 +36,14 @@ const Profile = {
 
     const query = `
       INSERT INTO profiles (
-      name, role, age, gender, genre, 
+      username, name, role, age, gender, genre, 
       experience, main_image, concert_image, last_song, last_song_desc 
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
     `;
 
-    const values = [
-      name,
-      role,
-      age,
-      gender,
-      genre,
-      experience,
-      main_image,
-      concert_image,
-      last_song,
-      last_song_desc,
-    ];
-
     try {
-      const result = await pool.query(query, values);
+      const result = await pool.query(query, profileData);
       return result.rows[0];
     } catch (error) {
       console.error('Error in Profile.create:', error);
