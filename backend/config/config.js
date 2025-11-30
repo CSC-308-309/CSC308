@@ -16,27 +16,23 @@ function urlRequestsSsl(url) {
 
 const devNeedsSsl = urlRequestsSsl(devUrl) || process.env.DEV_SSL === 'true' || process.env.DEVELOPMENT_SSL === 'true';
 
-module.exports = {
-  development: Object.assign(
-    {
-      url: devUrl || null,
-      dialect: 'postgres'
-    },
-    devNeedsSsl
-      ? { dialectOptions: { ssl: { rejectUnauthorized: false } } }
-      : {}
-  ),
-
-  test: {
-    url: process.env.TEST_CONNECTION_STRING || process.env.TEST_DATABASE_URL || devUrl || null,
+export const development = Object.assign(
+  {
+    url: devUrl || null,
     dialect: 'postgres'
   },
-
-  production: Object.assign(
-    {
-      url: prodUrl || null,
-      dialect: 'postgres'
-    },
-    prodUrl ? { dialectOptions: { ssl: { rejectUnauthorized: false } } } : {}
-  )
+  devNeedsSsl
+    ? { dialectOptions: { ssl: { rejectUnauthorized: false } } }
+    : {}
+);
+export const test = {
+  url: process.env.TEST_CONNECTION_STRING || process.env.TEST_DATABASE_URL || devUrl || null,
+  dialect: 'postgres'
 };
+export const production = Object.assign(
+  {
+    url: prodUrl || null,
+    dialect: 'postgres'
+  },
+  prodUrl ? { dialectOptions: { ssl: { rejectUnauthorized: false } } } : {}
+);

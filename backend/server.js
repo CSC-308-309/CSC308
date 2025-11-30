@@ -4,6 +4,7 @@
 // const createApp = require('./app').createApp;
 import pool from './db/index.js';
 import { createApp } from './app.js';
+import { dbModels } from './models/index.js';
 
 const port = process.env.PORT || 3000;
 
@@ -13,7 +14,7 @@ async function startServer() {
     await pool.query('SELECT NOW()');
     console.log('Connected to PostgreSQL');
 
-    const app = createApp({ db: pool });
+    const app = createApp({ db: dbModels });
 
     app.listen(port, () => {
       console.log(`Server running at http://localhost:${port}`);

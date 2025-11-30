@@ -1,7 +1,7 @@
 // models/Interactions.js
-const { pool } = require('../db/index');
+import pool from '../db/index.js';
 
-const Interactions = {
+export const InteractionsModel = {
   async likeUser(username, targetUsername) {
     const query = `
       INSERT INTO interactions (username, target_username, interaction_type)
@@ -50,4 +50,3 @@ const Interactions = {
     }
   },
 };
-module.exports = Interactions;

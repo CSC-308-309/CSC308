@@ -1,7 +1,7 @@
 // models/Profile.js
-const { pool } = require('../db/index');
+import pool from '../db/index.js';
 
-const Profile = {
+export const ProfileModel = {
   async listUsers() {
     const query = `
       SELECT * FROM profiles
@@ -70,4 +70,3 @@ const Profile = {
     }
   },
 };
-module.exports = Profile;

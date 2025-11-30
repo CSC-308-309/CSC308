@@ -14,13 +14,13 @@ export function createApp({ db }) {
   //// USER ROUTES ////
   // Get all users
   app.get("/users", async (req, res) => {
-    const users = await db.listUsers();
+    const users = await db.Profile.listUsers();
     res.json(users);
   });
 
   // Get user by ID
   app.get("/users/:id", async (req, res) => {
-    const user = await db.getUserById(req.params.id);
+    const user = await db.Profile.getUserById(req.params.id);
     if (user) {
       res.json(user);
     } else {
@@ -30,13 +30,13 @@ export function createApp({ db }) {
 
   // Create new user
   app.post("/users", async (req, res) => {
-    const newUser = await db.createUser(req.body);
+    const newUser = await db.Profile.createUser(req.body);
     res.status(201).json(newUser);
   });
 
   // Update user by ID
   app.put("/users/:id", async (req, res) => {
-    const updatedUser = await db.updateUser(req.params.id, req.body);
+    const updatedUser = await db.Profile.updateUser(req.params.id, req.body);
     if (updatedUser) {
       res.json(updatedUser);
     } else {
@@ -46,7 +46,7 @@ export function createApp({ db }) {
 
   // Delete user by ID
   app.delete("/users/:id", async (req, res) => {
-    const success = await db.deleteUser(req.params.id);
+    const success = await db.Profile.deleteUser(req.params.id);
     if (success) {
       res.status(204).send();
     } else {
@@ -58,19 +58,19 @@ export function createApp({ db }) {
   //// INTERACTION ROUTES ////
   // Like another user
   app.post("/users:id/like", async (req, res) => {
-    const result = await db.likeUser(req.params.id, req.body.targetUserId);
+    const result = await db.Interactions.likeUser(req.params.id, req.body.targetUserId);
     res.json(result);
   });
 
   // Dislike another user
   app.post("/users:id/dislike", async (req, res) => {
-    const result = await db.dislikeUser(req.params.id, req.body.targetUserId);
+    const result = await db.Interactions.dislikeUser(req.params.id, req.body.targetUserId);
     res.json(result);
   });
 
   // Block another user
   app.post("/users:id/block", async (req, res) => {
-    const result = await db.blockUser(req.params.id, req.body.targetUserId);
+    const result = await db.Interactions.blockUser(req.params.id, req.body.targetUserId);
     res.json(result);
   });
 
@@ -78,13 +78,13 @@ export function createApp({ db }) {
   //// MESSAGE ROUTES ////
   // Fetch chat history
   app.get("messages/:conversationId", async (req, res) => {
-    const messages = await db.getMessages(req.params.conversationId);
+    const messages = await db.Messages.getMessages(req.params.conversationId);
     res.json(messages);
   });
 
   // Send a message
   app.post("messages", async (req, res) => {
-    const newMessage = await db.sendMessage(req.body); // body will have fromUserID, toUserID, text
+    const newMessage = await db.Messages.sendMessage(req.body); // body will have fromUserID, toUserID, text
     res.status(201).json(newMessage);
   });
 
@@ -92,19 +92,19 @@ export function createApp({ db }) {
   //// EVENT ROUTES ////
   // List all events
   app.get("/events", async (req, res) => {
-    const events = await db.listEvents();
+    const events = await db.Events.listEvents();
     res.json(events);
   });
 
   // Create new event
   app.post("/events", async (req, res) => {
-    const newEvent = await db.createEvent(req.body);
+    const newEvent = await db.Events.createEvent(req.body);
     res.status(201).json(newEvent);
   }); 
 
   // Attend an event
   app.post("/events/:id/join", async (req, res) => {
-    const result = await db.joinEvent(req.params.id, req.body.userId);
+    const result = await db.Events.joinEvent(req.params.id, req.body.userId);
     res.json(result);
   });
 
@@ -112,19 +112,19 @@ export function createApp({ db }) {
   //// BAND ROUTES ////
   // List all bands
   app.get("/bands", async (req, res) => {
-    const bands = await db.listBands();
+    const bands = await db.Bands.listBands();
     res.json(bands);
   });
 
   // Create new band
   app.post("/bands", async (req, res) => {
-    const newBand = await db.createBand(req.body);
+    const newBand = await db.BandscreateBand(req.body);
     res.status(201).json(newBand);
   });
 
   // Join a band
   app.post("/bands/:id/join", async (req, res) => {
-    const result = await db.joinBand(req.params.id, req.body.userId);
+    const result = await db.Bands.joinBand(req.params.id, req.body.userId);
     res.json(result);
   });
 
