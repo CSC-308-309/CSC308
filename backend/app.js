@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 
 export function createApp({ db }) {
-  if (!db) throw new Error("createApp requires a 'db' dependency");
 
   const app = express();
 
@@ -150,3 +149,4 @@ export function createApp({ db }) {
 
   return app;
 }
+

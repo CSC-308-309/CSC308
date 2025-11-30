@@ -1,46 +1,38 @@
-const { Pool } = require('pg');
-const dotenv = require('dotenv');
+import pkg from 'pg';
+import dotenv from 'dotenv';
+
 dotenv.config({ path: '../.env' });
+
+const { Pool } = pkg;
 
 // get DB_TYPE from environment
 const dbType = process.env.DB_TYPE || 'PRODUCTION';
 
-// construct the connection string var name: {DB_TYPE}_CONNECTION_STRING
 const connectionStringKey = `${dbType}_CONNECTION_STRING`;
 const connectionString = process.env[connectionStringKey];
 
 if (!connectionString) {
-  throw new Error(`Missing environment variable: ${connectionStringKey}. Please set DB_TYPE and ${connectionStringKey} in .env.`);
+  throw new Error(`Missing environment variable: ${connectionStringKey}`);
 }
 
 console.log(`Using ${dbType} database connection`);
 
-// configure pool based on DB_TYPE
-const poolConfig = {
-  connectionString: connectionString,
-};
+const poolConfig = { connectionString };
 
-// SSL for production databases 
 if (dbType === 'PRODUCTION') {
-  poolConfig.ssl = {
-    rejectUnauthorized: false
-  };
+  poolConfig.ssl = { rejectUnauthorized: false };
 }
 
-const pool = new Pool(poolConfig);
+export const pool = new pkg.Pool(poolConfig);
+export default pool;
 
-async function connectToDatabase() {
+export async function connectToDatabase() {
   try {
     const result = await pool.query('SELECT current_database(), current_user, version()');
     console.log(`Connected to ${dbType} database:`, result.rows[0].current_database);
     return pool;
-  } catch (error) {
-    console.error(`Failed to connect to ${dbType} database:`, error.message);
-    throw error;
+  } catch (err) {
+    console.error(`Failed to connect to ${dbType} database:`, err.message);
+    throw err;
   }
 }
-
-module.exports = {
-  pool,
-  connectToDatabase
-};
