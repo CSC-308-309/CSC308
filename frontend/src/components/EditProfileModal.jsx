@@ -58,6 +58,20 @@ export default function EditProfileModal({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
+                Age
+              </label>
+              <input
+                type="text"
+                name="age"
+                value={formData.age || ""}
+                onChange={handleChange}
+                placeholder="e.g., 24"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Pronouns
               </label>
               <input
@@ -112,6 +126,51 @@ export default function EditProfileModal({
                 />
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Role
+              </label>
+              <input
+                type="text"
+                name="role"
+                value={formData.role || ""}
+                onChange={handleChange}
+                placeholder="e.g., Drummer"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Artist Genre
+              </label>
+              <input
+                type="text"
+                name="artistgenre"
+                value={formData.artistgenre || ""}
+                onChange={handleChange}
+                placeholder="e.g., Rock, Country"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Years of Experience
+            </label>
+            <input
+              type="text"
+              name="yearsofexperience"
+              value={formData.yearsofexperience || ""}
+              onChange={handleChange}
+              placeholder="e.g., 3 years"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+            />
+          </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

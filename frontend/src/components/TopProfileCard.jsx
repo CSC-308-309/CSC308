@@ -5,7 +5,7 @@ export default function TopProfileCard({ children }) {
     <div
       className="
         bg-white rounded-[20px]
-        w-[1160px] h-[540px]
+        w-[1160px]
         flex-shrink-0 shadow-md
         relative pt-[0.5px]
       "
