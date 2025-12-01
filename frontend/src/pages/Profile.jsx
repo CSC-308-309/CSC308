@@ -13,7 +13,7 @@ import BioSection, {
 import EditBioButton from '../components/EditBioButton';
 import ConcertMemories from '../components/ConcertMemories';
 import AboutSection from '../components/AboutSection'; //
-// import YouMightKnowSection from '../components/YouMightKnowSection'; //
+import YouMightKnowSection from '../components/YouMightKnowSection'; //
 
 export default function Profile() {
   const [profileData, setProfileData] = useState(getInitialProfileData);
@@ -60,19 +60,19 @@ export default function Profile() {
               <ConcertMemories />
             </div>
 
-            <div className="col-span-12 lg:col-span-4 ml-auto">
+            <div className="col-span-12 lg:col-span-4 ml-auto space-y-5">
               <AboutCard>
                 <div className="p-4">
                   <AboutSection profileData={profileData} />
                 </div>
               </AboutCard>
-  
-            <YouMightKnowCard>
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-[#7E3AF2]">You Might Know</h3>
-              </div>
-            </YouMightKnowCard>
-          </div>
+
+              <YouMightKnowCard>
+                <div className="p-4">
+                  <YouMightKnowSection />
+                </div>
+              </YouMightKnowCard>
+            </div>
           </div>
         </div>
       </main>

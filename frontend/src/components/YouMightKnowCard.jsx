@@ -4,7 +4,7 @@ export default function YouMightKnowCard({ children }) {
     <div
       className="
         bg-white rounded-[20px]
-        w-[250px] h-[500px]
+        w-[250px]
         flex-shrink-0 shadow-md
         relative mx-auto pt-[0.5px]
       "

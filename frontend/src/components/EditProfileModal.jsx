@@ -1,5 +1,14 @@
 // src/components/EditProfileModal.jsx
+
 import { useState, useEffect } from "react";
+const isValidPlaylistLink = (link = "") => {
+  const trimmed = link.trim();
+  if (!trimmed) return true;
+  return (
+    trimmed.includes("music.apple.com") ||
+    trimmed.includes("open.spotify.com")
+  );
+};
 
 export default function EditProfileModal({
   isOpen,
@@ -30,8 +39,15 @@ export default function EditProfileModal({
     onClose && onClose();
   };
 
+  const playlistValid = isValidPlaylistLink(formData.playlistLink || "");
+  const isSaveDisabled = !playlistValid;
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // block save if playlist link invalid
+    if (!playlistValid) return;
+
     onSave && onSave(formData);
     onClose && onClose();
   };
@@ -128,49 +144,48 @@ export default function EditProfileModal({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role
+                </label>
+                <input
+                  type="text"
+                  name="role"
+                  value={formData.role || ""}
+                  onChange={handleChange}
+                  placeholder="e.g., Drummer"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Role
-              </label>
-              <input
-                type="text"
-                name="role"
-                value={formData.role || ""}
-                onChange={handleChange}
-                placeholder="e.g., Drummer"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Artist Genre
+                </label>
+                <input
+                  type="text"
+                  name="artistgenre"
+                  value={formData.artistgenre || ""}
+                  onChange={handleChange}
+                  placeholder="e.g., Rock, Country"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                />
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Artist Genre
+                Years of Experience
               </label>
               <input
                 type="text"
-                name="artistgenre"
-                value={formData.artistgenre || ""}
+                name="yearsofexperience"
+                value={formData.yearsofexperience || ""}
                 onChange={handleChange}
-                placeholder="e.g., Rock, Country"
+                placeholder="e.g., 3 years"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Years of Experience
-            </label>
-            <input
-              type="text"
-              name="yearsofexperience"
-              value={formData.yearsofexperience || ""}
-              onChange={handleChange}
-              placeholder="e.g., 3 years"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
-            />
-          </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -251,9 +266,16 @@ export default function EditProfileModal({
                 name="playlistLink"
                 value={formData.playlistLink || ""}
                 onChange={handleChange}
-                placeholder="https://open.spotify.com/..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                placeholder="https://open.spotify.com/"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none ${
+                  playlistValid ? "border-gray-300" : "border-red-400"
+                }`}
               />
+              {!playlistValid && (
+                <p className="text-xs text-red-500 mt-1">
+                  Enter a valid Spotify or Apple Music link.
+                </p>
+              )}
             </div>
 
             <div>
@@ -278,7 +300,7 @@ export default function EditProfileModal({
                 name="availability"
                 value={formData.availability || ""}
                 onChange={handleChange}
-                rows={6} // big text window
+                rows={6}
                 placeholder="e.g. Weeknights after 7pm, Saturday afternoons, etc."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent resize-none outline-none"
               />
@@ -295,7 +317,12 @@ export default function EditProfileModal({
             </button>
             <button
               type="submit"
-              className="px-6 py-2 rounded-lg bg-[#7E3AF2] text-white font-medium hover:bg-[#6c32d4] transition-colors"
+              disabled={isSaveDisabled}
+              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                isSaveDisabled
+                  ? "bg-gray-300 text-white cursor-not-allowed"
+                  : "bg-[#7E3AF2] text-white hover:bg-[#6c32d4]"
+              }`}
             >
               Save
             </button>
