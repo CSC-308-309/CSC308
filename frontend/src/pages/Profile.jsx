@@ -5,12 +5,15 @@ import CoverPhoto from '../components/CoverPhoto';
 import EditProfilePhoto from '../components/ProfilePhoto';
 import TopProfileCard from '../components/TopProfileCard';
 import AboutCard from '../components/AboutCard';
+import YouMightKnowCard from '../components/YouMightKnowCard';
 import BioSection, {
   DEFAULT_PROFILE,
   getInitialProfileData,
 } from '../components/BioSection';
 import EditBioButton from '../components/EditBioButton';
 import ConcertMemories from '../components/ConcertMemories';
+import AboutSection from '../components/AboutSection'; //
+// import YouMightKnowSection from '../components/YouMightKnowSection'; //
 
 export default function Profile() {
   const [profileData, setProfileData] = useState(getInitialProfileData);
@@ -52,21 +55,24 @@ export default function Profile() {
             </div>
           </TopProfileCard>
 
-          {/* Two column layout */}
           <div className="grid grid-cols-12 mt-5 w-[1160px]">
-            {/* Left column - Concert Memories */}
             <div className="col-span-12 lg:col-span-8 pr-5">
               <ConcertMemories />
             </div>
 
-            {/* Right column - About */}
             <div className="col-span-12 lg:col-span-4 ml-auto">
               <AboutCard>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-[#7E3AF2]">About</h3>
+                  <AboutSection profileData={profileData} />
                 </div>
               </AboutCard>
-            </div>
+  
+            <YouMightKnowCard>
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-[#7E3AF2]">You Might Know</h3>
+              </div>
+            </YouMightKnowCard>
+          </div>
           </div>
         </div>
       </main>
