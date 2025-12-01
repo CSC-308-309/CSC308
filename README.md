@@ -10,6 +10,9 @@ Code linter/style checker:
 - Open VScode, click the extensions tab on the left, search "Prettier" and install the "Prettier- Code Checker" option
 - Search "ESLint" and install 
 
+# Product Specification
+https://docs.google.com/document/d/1cBSxzDnsi8fmFt1OEzrzvhNNLxf60j3GwNR_LEQkPOk/edit?usp=sharing
+
 # Database Setup 
 This project uses **PostgreSQL** as the database with support for multiple environments (Production, Development). The database is hosted on [Neon](https://neon.tech/).
 
