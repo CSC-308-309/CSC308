@@ -5,11 +5,14 @@ import CoverPhoto from '../components/CoverPhoto';
 import EditProfilePhoto from '../components/ProfilePhoto';
 import TopProfileCard from '../components/TopProfileCard';
 import AboutCard from '../components/AboutCard';
+import YouMightKnowCard from '../components/YouMightKnowCard';
 import BioSection, {
   DEFAULT_PROFILE,
   getInitialProfileData,
 } from '../components/BioSection';
 import EditBioButton from '../components/EditBioButton';
+import AboutSection from '../components/AboutSection'; //
+// import YouMightKnowSection from '../components/YouMightKnowSection'; //
 
 export default function Profile() {
   const [profileData, setProfileData] = useState(getInitialProfileData);
@@ -51,12 +54,18 @@ export default function Profile() {
             </div>
           </TopProfileCard>
 
-          <div className="mt-5 ml-[calc(50%+277px)]">
+          <div className="mt-5 ml-[calc(50%+277px)] space-y-5">
             <AboutCard>
               <div className="p-4">
-                <h3 className="text-lg font-semibold text-[#7E3AF2]">About</h3>
+                <AboutSection profileData={profileData} />
               </div>
             </AboutCard>
+
+            <YouMightKnowCard>
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-[#7E3AF2]">You Might Know</h3>
+              </div>
+            </YouMightKnowCard>
           </div>
 
         </div>
