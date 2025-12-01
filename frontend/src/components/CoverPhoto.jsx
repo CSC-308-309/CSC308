@@ -1,8 +1,8 @@
 // src/components/CoverPhoto.jsx
 
-import { useEffect, useState } from "react";
-import EditCoverPhotoButton from "./EditCoverPhotoButton";
-import defaultCover from "../assets/DefaultBanner.jpg";
+import { useEffect, useState } from 'react';
+import EditCoverPhotoButton from './EditCoverPhotoButton';
+import defaultCover from '../assets/DefaultBanner.jpg';
 
 async function processImage(file, maxWidth) {
   const reader = new FileReader();
@@ -18,21 +18,21 @@ async function processImage(file, maxWidth) {
   if (img.width <= maxWidth) return fileData;
 
   const scale = maxWidth / img.width;
-  const canvas = document.createElement("canvas");
+  const canvas = document.createElement('canvas');
   canvas.width = img.width * scale;
   canvas.height = img.height * scale;
 
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-  return canvas.toDataURL("image/jpeg", 1);
+  return canvas.toDataURL('image/jpeg', 1);
 }
 
 export default function CoverPhoto({
-  storageKey = "coverPhoto",
+  storageKey = 'coverPhoto',
   fallbackSrc = defaultCover,
-  className = "mt-10",
-  objectPosition = "center",
+  className = 'mt-10',
+  objectPosition = 'center',
 }) {
   const [src, setSrc] = useState(fallbackSrc);
 
@@ -42,7 +42,7 @@ export default function CoverPhoto({
   }, [storageKey]);
 
   const handleFileSelect = async (file) => {
-    if (!file?.type?.startsWith("image/")) return;
+    if (!file?.type?.startsWith('image/')) return;
 
     const dataUrl = await processImage(file, 1100);
     setSrc(dataUrl);

@@ -1,7 +1,7 @@
 // src/components/ProfilePhoto.jsx
 
-import { useRef, useEffect, useState } from "react";
-import defaultPhoto from "../assets/DefaultProfilePhoto.png";
+import { useRef, useEffect, useState } from 'react';
+import defaultPhoto from '../assets/DefaultProfilePhoto.png';
 
 async function processImage(file, size) {
   const reader = new FileReader();
@@ -18,19 +18,19 @@ async function processImage(file, size) {
   const sx = (img.width - side) / 2;
   const sy = (img.height - side) / 2;
 
-  const canvas = document.createElement("canvas");
+  const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
 
-  const ctx = canvas.getContext("2d");
-  ctx.imageSmoothingQuality = "high";
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
 
-  return canvas.toDataURL("image/jpeg", 1);
+  return canvas.toDataURL('image/jpeg', 1);
 }
 
 export default function EditableProfilePhoto({
-  storageKey = "profilePhoto",
+  storageKey = 'profilePhoto',
   fallbackSrc = defaultPhoto,
   size = 136,
 }) {
@@ -44,12 +44,12 @@ export default function EditableProfilePhoto({
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
-    if (!file?.type?.startsWith("image/")) return;
+    if (!file?.type?.startsWith('image/')) return;
 
     const dataUrl = await processImage(file, size);
     setSrc(dataUrl);
     localStorage.setItem(storageKey, dataUrl);
-    e.target.value = "";
+    e.target.value = '';
   };
 
   return (

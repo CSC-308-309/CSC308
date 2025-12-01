@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { User } from "lucide-react";
+import React, { useState } from 'react';
+import { User } from 'lucide-react';
 
 export const NotificationItem = ({
   icon,
@@ -8,14 +8,13 @@ export const NotificationItem = ({
   initialButtonText,
   postText,
 }) => {
-  
   const [buttonText, setButtonText] = useState(initialButtonText);
 
   const handleClick = () => {
-    if (buttonText === "Sync Back") {
-      setButtonText("Synced");
-    } else if (buttonText === "Synced") {
-      setButtonText("Sync Back");
+    if (buttonText === 'Sync Back') {
+      setButtonText('Synced');
+    } else if (buttonText === 'Synced') {
+      setButtonText('Sync Back');
     }
   };
 
@@ -40,9 +39,9 @@ export const NotificationItem = ({
         <button
           onClick={handleClick}
           className={`px-3 py-1 rounded-md text-sm transition ${
-            buttonText === "Sync Back"
-              ? "bg-purple-300 hover:bg-purple-400"
-              : "bg-purple-200 text-purple-900 hover:bg-purple-300"
+            buttonText === 'Sync Back'
+              ? 'bg-purple-300 hover:bg-purple-400'
+              : 'bg-purple-200 text-purple-900 hover:bg-purple-300'
           }`}
         >
           {buttonText}
@@ -75,42 +74,42 @@ function groupNotifications(notifications) {
 const exampleNotifications = [
   {
     id: 1,
-    user: "Juice",
-    message: "started syncing you",
-    time: "3 hours ago",
-    button: "Sync Back",
+    user: 'Juice',
+    message: 'started syncing you',
+    time: '3 hours ago',
+    button: 'Sync Back',
     daysAgo: 0,
   },
   {
     id: 2,
-    user: "caprisuneli",
-    message: "liked your comment:",
-    postText: "yesss mammaaa",
-    time: "2 days ago",
-    button: "Synced",
+    user: 'caprisuneli',
+    message: 'liked your comment:',
+    postText: 'yesss mammaaa',
+    time: '2 days ago',
+    button: 'Synced',
     daysAgo: 2,
   },
   {
     id: 3,
-    user: "Stefanie",
-    message: "liked your profile",
-    time: "5 days ago",
+    user: 'Stefanie',
+    message: 'liked your profile',
+    time: '5 days ago',
     daysAgo: 5,
   },
   {
     id: 4,
-    user: "Talia",
-    message: "liked your comment:",
-    postText: "Barcelona Baddieeee",
-    time: "Oct 8",
-    button: "Sync Back",
+    user: 'Talia',
+    message: 'liked your comment:',
+    postText: 'Barcelona Baddieeee',
+    time: 'Oct 8',
+    button: 'Sync Back',
     daysAgo: 25,
   },
   {
     id: 5,
-    user: "Abeyah",
-    message: "liked your profile",
-    time: "Sept 15",
+    user: 'Abeyah',
+    message: 'liked your profile',
+    time: 'Sept 15',
     daysAgo: 60,
   },
 ];
@@ -119,38 +118,38 @@ export default function NotificationsPanel() {
   const grouped = groupNotifications(exampleNotifications);
 
   const renderSection = (title, items) => (
-  <section>
-    <h2 className="text-lg font-bold text-melodious-dark-purple">{title}</h2>
-    <hr className="border-gray-300 mb-4" />
-    <div className="space-y-4">
-      {items.map((notif) => {
-        const button = notif.button ?? "Sync Back"; //
+    <section>
+      <h2 className="text-lg font-bold text-melodious-dark-purple">{title}</h2>
+      <hr className="border-gray-300 mb-4" />
+      <div className="space-y-4">
+        {items.map((notif) => {
+          const button = notif.button ?? 'Sync Back'; //
 
-        return (
-          <NotificationItem
-            key={notif.id}
-            icon={<User />}
-            message={
-              <span>
-                <strong>{notif.user}</strong> {notif.message}
-              </span>
-            }
-            postText={notif.postText}
-            time={notif.time}
-            initialButtonText={button}
-          />
-        );
-      })}
-    </div>
-  </section>
-);
+          return (
+            <NotificationItem
+              key={notif.id}
+              icon={<User />}
+              message={
+                <span>
+                  <strong>{notif.user}</strong> {notif.message}
+                </span>
+              }
+              postText={notif.postText}
+              time={notif.time}
+              initialButtonText={button}
+            />
+          );
+        })}
+      </div>
+    </section>
+  );
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-md space-y-10">
-      {grouped.new.length > 0 && renderSection("New", grouped.new)}
-      {grouped.week.length > 0 && renderSection("This Week", grouped.week)}
-      {grouped.month.length > 0 && renderSection("This Month", grouped.month)}
-      {grouped.older.length > 0 && renderSection("Older", grouped.older)}
+      {grouped.new.length > 0 && renderSection('New', grouped.new)}
+      {grouped.week.length > 0 && renderSection('This Week', grouped.week)}
+      {grouped.month.length > 0 && renderSection('This Month', grouped.month)}
+      {grouped.older.length > 0 && renderSection('Older', grouped.older)}
     </div>
   );
 }
