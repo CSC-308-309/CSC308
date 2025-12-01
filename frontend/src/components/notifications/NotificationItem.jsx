@@ -1,5 +1,3 @@
-// src/components/notifications/NotificationItem.jsx
-
 import React, { useState } from "react";
 
 export default function NotificationItem({
