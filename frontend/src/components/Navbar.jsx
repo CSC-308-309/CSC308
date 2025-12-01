@@ -40,7 +40,9 @@ export default function Navbar() {
           <NavItem icon={<User />} label="Profile" />
         </Link>
 
-        <NavItem icon={<MessageSquare />} label="Messages" />
+        <Link to="/messages" className="block">
+          <NavItem icon={<MessageSquare />} label="Messages" />
+        </Link>
         
         <Link to="/notifications" className="block">
           <NavItem icon={<Bell />} label="Notifications" />

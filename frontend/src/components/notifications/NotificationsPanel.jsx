@@ -1,5 +1,3 @@
-// src/components/notifications/NotificationsPanel.jsx
-
 import groupNotifications from "./GroupNotifications";
 import NotificationSection from "./NotificationSection";
 

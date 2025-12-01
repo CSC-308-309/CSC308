@@ -1,5 +1,3 @@
-// src/components/notifications/groupNotifications.js
-
 export default function groupNotifications(notifications) {
   const groups = {
     new: [],

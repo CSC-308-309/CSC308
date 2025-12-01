@@ -1,5 +1,3 @@
-// src/components/notifications/NotificationSection.jsx
-
 import NotificationItem from "./NotificationItem";
 import { User } from "lucide-react";
 
