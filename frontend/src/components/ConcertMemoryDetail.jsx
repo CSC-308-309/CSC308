@@ -46,12 +46,20 @@ export default function ConcertMemoryDetail({ memory, isOpen, onClose, allMemori
       {!showComments ? (
         // Grid view of all memories
         <div className="bg-white rounded-xl p-6 w-[90%] max-w-5xl max-h-[80vh] overflow-y-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Concert Memories</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-              <X size={24} />
+            <div className="relative mb-6">
+            <button
+                onClick={onClose}
+                className="absolute top-0 right-0 text-gray-500 hover:text-gray-700"
+            >
+                <X size={24} />
             </button>
-          </div>
+
+            <h2 className="text-2xl font-bold text-gray-900 pr-10">Concert Memories</h2>
+            <p className="text-sm text-gray-500 mt-1">
+                Start adding your favorite concert moments!
+            </p>
+            </div>
+
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {allMemories.filter(m => !m.isPlaceholder).map((mem) => (
