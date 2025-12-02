@@ -14,6 +14,7 @@ import EditBioButton from '../components/EditBioButton';
 import ConcertMemories from '../components/ConcertMemories';
 import AboutSection from '../components/AboutSection'; //
 import YouMightKnowSection from '../components/YouMightKnowSection'; //
+import MusicClips from '../components/musicclips/MusicClips';
 
 export default function Profile() {
   const [profileData, setProfileData] = useState(getInitialProfileData);
@@ -56,9 +57,22 @@ export default function Profile() {
           </TopProfileCard>
 
           <div className="grid grid-cols-12 mt-5 w-[1160px]">
-            <div className="col-span-12 lg:col-span-8 pr-5">
-              <ConcertMemories />
+            <div className="col-span-12 lg:col-span-8 pr-5 space-y-10">
+  
+              {/* Concert Memories Section */}
+              <section>
+                <ConcertMemories />
+              </section>
+
+              {/* Divider for clarity */}
+              <div className="border-t border-gray-300 my-8"></div>
+
+              {/* Music Clips Section */}
+              <section>
+                <MusicClips />
+              </section>
             </div>
+
 
             <div className="col-span-12 lg:col-span-4 ml-auto space-y-5">
               <AboutCard>
