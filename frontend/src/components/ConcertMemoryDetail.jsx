@@ -32,7 +32,7 @@ export default function ConcertMemoryDetail({ memory, isOpen, onClose, allMemori
   const handleToggleStar = (memoryId, e) => {
     e.stopPropagation();
     onToggleStar(memoryId);
-    // Update selectedMemory if it's the one being starred
+    
     if (selectedMemory && selectedMemory.id === memoryId) {
       setSelectedMemory({
         ...selectedMemory,
@@ -45,23 +45,22 @@ export default function ConcertMemoryDetail({ memory, isOpen, onClose, allMemori
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       {!showComments ? (
         // Grid view of all memories
-        <div className="bg-white rounded-xl p-6 w-[90%] max-w-5xl max-h-[80vh] overflow-y-auto">
-            <div className="relative mb-6">
+        <div className="bg-white rounded-xl w-[90%] max-w-5xl h-[85vh] overflow-hidden flex flex-col p-6">
+          <div className="relative mb-6">
             <button
-                onClick={onClose}
-                className="absolute top-0 right-0 text-gray-500 hover:text-gray-700"
+              onClick={onClose}
+              className="absolute top-0 right-0 text-gray-500 hover:text-gray-700"
             >
-                <X size={24} />
+              <X size={24} />
             </button>
 
             <h2 className="text-2xl font-bold text-gray-900 pr-10">Concert Memories</h2>
             <p className="text-sm text-gray-500 mt-1">
-                Start adding your favorite concert moments!
+              Start adding your favorite concert moments!
             </p>
-            </div>
+          </div>
 
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto">
             {allMemories.filter(m => !m.isPlaceholder).map((mem) => (
               <div
                 key={mem.id}

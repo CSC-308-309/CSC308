@@ -79,7 +79,7 @@ export default function ConcertMemories() {
   const displayMemories = getDisplayMemories();
 
   return (
-    <div className="max-w-4xl mx-auto bg-gray-50 min-h-screen">
+    <div className="max-w-4xl mx-auto bg-gray-50">
       <h2 className="text-2xl font-bold mb-6">Concert Memories</h2>
       
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
