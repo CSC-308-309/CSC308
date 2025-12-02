@@ -46,7 +46,7 @@ export default function BioSection({ profileData = DEFAULT_PROFILE }) {
     <section aria-label="Profile bio">
       <header className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#7E3AF2] leading-tight">
+          <h1 className="text-2xl font-bold text-[#A41B67] leading-tight">
             {name}
             {age && ` (${age})`}
           </h1>

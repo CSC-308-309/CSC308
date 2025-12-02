@@ -38,10 +38,10 @@ export default function EditBioButton({
         onClick={handleOpen}
         className={`
           w-[170px] h-[40px] rounded-[10px]
-          bg-white/90 hover:bg-[#7E3AF2] hover:text-white
-          text-sm font-semibold text-[#7E3AF2]
-          shadow ring-1 ring-[#7E3AF2]
-          focus-visible:ring-2 focus-visible:ring-[#7E3AF2]
+          bg-white/90 hover:bg-[#A41B67] hover:text-white
+          text-sm font-semibold text-[#A41B67]
+          shadow ring-1 ring-[#A41B67]
+          focus-visible:ring-2 focus-visible:ring-[#A41B67]
           ${className}
         `}
       >

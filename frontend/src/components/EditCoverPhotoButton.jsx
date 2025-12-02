@@ -23,9 +23,9 @@ export default function EditCoverPhotoButton({
         className={`
           w-[170px] h-[40px] rounded-[10px]
           bg-white/90 hover:bg-white
-          text-sm font-semibold text-[#7E3AF2]
-          shadow ring-1 ring-[#7E3AF2]
-          focus-visible:ring-2 focus-visible:ring-[#7E3AF2]
+          text-sm font-semibold text-[#A41B67]
+          shadow ring-1 ring-[#A41B67]
+          focus-visible:ring-2 focus-visible:ring-[#A41B67]
           ${className}
         `}
       >

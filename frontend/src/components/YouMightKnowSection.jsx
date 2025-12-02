@@ -26,7 +26,7 @@ export default function YouMightKnowSection({
 }) {
   return (
     <section aria-label="People you might know">
-      <h3 className="text-lg font-semibold text-[#7E3AF2] mb-3">
+      <h3 className="text-lg font-semibold text-[#A41B67] mb-3">
         You might know
       </h3>
 

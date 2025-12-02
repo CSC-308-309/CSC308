@@ -43,7 +43,7 @@ export default function AboutSection({ profileData = {} }) {
         href={playlistLink}
         target="_blank"
         rel="noreferrer"
-        className="text-sm text-[#7E3AF2] underline break-all"
+        className="text-sm text-[#A41B67] underline break-all"
       >
         {label}
       </a>
@@ -56,7 +56,7 @@ export default function AboutSection({ profileData = {} }) {
         {chips.map((text) => (
           <span
             key={text}
-            className="px-3 py-1 rounded-full bg-[#7E3AF2]/10 text-[#7E3AF2] text-xs font-medium"
+            className="px-3 py-1 rounded-full bg-[#A41B67]/10 text-[#A41B67] text-xs font-medium"
           >
             {text}
           </span>
@@ -80,7 +80,7 @@ export default function AboutSection({ profileData = {} }) {
 
   return (
     <section aria-label="About information">
-      <h3 className="text-lg font-semibold text-[#7E3AF2] mb-1">About</h3>
+      <h3 className="text-lg font-semibold text-[#A41B67] mb-1">About</h3>
 
       <div className="divide-y divide-gray-100">
         <Row

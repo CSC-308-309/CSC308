@@ -45,7 +45,6 @@ export default function EditProfileModal({
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // block save if playlist link invalid
     if (!playlistValid) return;
 
     onSave && onSave(formData);
@@ -68,7 +67,7 @@ export default function EditProfileModal({
                 name="name"
                 value={formData.name || ""}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
               />
             </div>
 
@@ -82,7 +81,7 @@ export default function EditProfileModal({
                 value={formData.age || ""}
                 onChange={handleChange}
                 placeholder="e.g., 24"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
               />
             </div>
 
@@ -96,7 +95,7 @@ export default function EditProfileModal({
                 value={formData.pronouns || ""}
                 onChange={handleChange}
                 placeholder="e.g., she/her"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
               />
             </div>
 
@@ -104,7 +103,7 @@ export default function EditProfileModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Username
               </label>
-              <div className="flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-[#7E3AF2]">
+              <div className="flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-[#A41B67]">
                 <span className="text-gray-600 pl-3">@</span>
                 <input
                   type="text"
@@ -126,7 +125,7 @@ export default function EditProfileModal({
                   name="city"
                   value={formData.city || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
                 />
               </div>
               <div>
@@ -138,7 +137,7 @@ export default function EditProfileModal({
                   name="state"
                   value={formData.state || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
                 />
               </div>
             </div>
@@ -154,7 +153,7 @@ export default function EditProfileModal({
                   value={formData.role || ""}
                   onChange={handleChange}
                   placeholder="e.g., Drummer"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
                 />
               </div>
 
@@ -168,7 +167,7 @@ export default function EditProfileModal({
                   value={formData.artistgenre || ""}
                   onChange={handleChange}
                   placeholder="e.g., Rock, Country"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
                 />
               </div>
             </div>
@@ -183,7 +182,7 @@ export default function EditProfileModal({
                 value={formData.yearsofexperience || ""}
                 onChange={handleChange}
                 placeholder="e.g., 3 years"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
               />
             </div>
 
@@ -196,7 +195,7 @@ export default function EditProfileModal({
                 value={formData.bio || ""}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent resize-none outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent resize-none outline-none"
               />
             </div>
           </div>
@@ -216,7 +215,7 @@ export default function EditProfileModal({
                 value={formData.topInterests || ""}
                 onChange={handleChange}
                 placeholder="indie rock, vinyl collector, live shows"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
               />
               <p className="text-xs text-gray-400 mt-1">
                 Separate interests with commas.
@@ -233,7 +232,7 @@ export default function EditProfileModal({
                 value={formData.favoriteArtists || ""}
                 onChange={handleChange}
                 placeholder="Artist 1, Artist 2"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
               />
               <p className="text-xs text-gray-400 mt-1">
                 Separate artists with commas.
@@ -250,7 +249,7 @@ export default function EditProfileModal({
                 value={formData.favoriteGenres || ""}
                 onChange={handleChange}
                 placeholder="indie rock, pop, jazz"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none"
               />
               <p className="text-xs text-gray-400 mt-1">
                 Separate genres with commas.
@@ -267,7 +266,7 @@ export default function EditProfileModal({
                 value={formData.playlistLink || ""}
                 onChange={handleChange}
                 placeholder="https://open.spotify.com/"
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent outline-none ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent outline-none ${
                   playlistValid ? "border-gray-300" : "border-red-400"
                 }`}
               />
@@ -288,7 +287,7 @@ export default function EditProfileModal({
                 onChange={handleChange}
                 rows={3}
                 placeholder="Neighborhoods, venues, cities..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent resize-none outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent resize-none outline-none"
               />
             </div>
 
@@ -302,7 +301,7 @@ export default function EditProfileModal({
                 onChange={handleChange}
                 rows={6}
                 placeholder="e.g. Weeknights after 7pm, Saturday afternoons, etc."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E3AF2] focus:border-transparent resize-none outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A41B67] focus:border-transparent resize-none outline-none"
               />
             </div>
           </div>
@@ -321,7 +320,7 @@ export default function EditProfileModal({
               className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                 isSaveDisabled
                   ? "bg-gray-300 text-white cursor-not-allowed"
-                  : "bg-[#7E3AF2] text-white hover:bg-[#6c32d4]"
+                  : "bg-[#A41B67] text-white hover:bg-[#861552]"
               }`}
             >
               Save
