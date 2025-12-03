@@ -10,9 +10,9 @@ export const ProfileModel = {
     return rows;
   },
 
-  async getUserById(username) {
+  async getUserByUsername(username) {
     const query = `
-      SELECT * FROM profiles WHERE username = $1';
+      SELECT * FROM profiles WHERE username = $1
     `;
     const values = [username];
     const { rows } = await pool.query(query, values);

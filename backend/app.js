@@ -11,6 +11,22 @@ export function createApp({ db }) {
   // basic test
   app.get("/", (req, res) => res.send("Hello World!"));
 
+  //// AUTH ROUTES ////
+  // NOTE: THIS MAY NEED CHANGING BASED ON AUTH IMPLEMENTATION NEXT QUARTER
+    // User signup
+  app.post("/auth/signup", async (req, res) => {
+    const user = await db.Profile.createUser(req.body);
+    res.json({ username: user.username });
+  });
+
+  // User login
+  app.post("/auth/login", async (req, res) => {
+    const user = await db.Profile.validateUser(req.body);
+    if (!user) return res.status(401).send("Invalid credentials");
+    res.json(user);
+  });
+
+
   //// USER ROUTES ////
   // Get all users
   app.get("/users", async (req, res) => {
@@ -19,8 +35,8 @@ export function createApp({ db }) {
   });
 
   // Get user by ID
-  app.get("/users/:id", async (req, res) => {
-    const user = await db.Profile.getUserById(req.params.id);
+  app.get("/users/:username", async (req, res) => {
+    const user = await db.Profile.getUserByUsername(req.params.username);
     if (user) {
       res.json(user);
     } else {
@@ -28,15 +44,9 @@ export function createApp({ db }) {
     }
   });
 
-  // Create new user
-  app.post("/users", async (req, res) => {
-    const newUser = await db.Profile.createUser(req.body);
-    res.status(201).json(newUser);
-  });
-
-  // Update user by ID
-  app.put("/users/:id", async (req, res) => {
-    const updatedUser = await db.Profile.updateUser(req.params.id, req.body);
+  // Update user (profile info) by username
+  app.put("/users/:username", async (req, res) => {
+    const updatedUser = await db.Profile.updateUser(req.params.username, req.body);
     if (updatedUser) {
       res.json(updatedUser);
     } else {
@@ -45,8 +55,8 @@ export function createApp({ db }) {
   });
 
   // Delete user by ID
-  app.delete("/users/:id", async (req, res) => {
-    const success = await db.Profile.deleteUser(req.params.id);
+  app.delete("/users/:username", async (req, res) => {
+    const success = await db.Profile.deleteUser(req.params.username);
     if (success) {
       res.status(204).send();
     } else {
@@ -57,21 +67,54 @@ export function createApp({ db }) {
 
   //// INTERACTION ROUTES ////
   // Like another user
-  app.post("/users:id/like", async (req, res) => {
-    const result = await db.Interactions.likeUser(req.params.id, req.body.targetUserId);
-    res.json(result);
+  app.post("/users/:username/like", async (req, res) => {
+    try {
+      const actor = await db.Profile.getUserByUsername(req.params.username);
+      if (!actor) return res.status(404).json({ error: "User not found", username: req.params.username });
+
+      const target = await db.Profile.getUserByUsername(req.body.targetUsername);
+      if (!target) return res.status(400).json({ error: "Target user does not exist", targetUsername: req.body.targetUsername });
+
+      const result = await db.Interactions.likeUser(req.params.username, req.body.targetUsername);
+      res.json(result);
+    } catch (err) {
+      console.error("Error in like route:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
   // Dislike another user
-  app.post("/users:id/dislike", async (req, res) => {
-    const result = await db.Interactions.dislikeUser(req.params.id, req.body.targetUserId);
-    res.json(result);
+  app.post("/users/:username/dislike", async (req, res) => {
+    try {
+      const actor = await db.Profile.getUserByUsername(req.params.username);
+      if (!actor) return res.status(404).json({ error: "User not found", username: req.params.username });
+
+      const target = await db.Profile.getUserByUsername(req.body.targetUsername);
+      if (!target) return res.status(400).json({ error: "Target user does not exist", targetUsername: req.body.targetUsername });
+
+      const result = await db.Interactions.dislikeUser(req.params.username, req.body.targetUsername);
+      res.json(result);
+    } catch (err) {
+      console.error("Error in dislike route:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
   // Block another user
-  app.post("/users:id/block", async (req, res) => {
-    const result = await db.Interactions.blockUser(req.params.id, req.body.targetUserId);
-    res.json(result);
+  app.post("/users/:username/block", async (req, res) => {
+    try {
+      const actor = await db.Profile.getUserByUsername(req.params.username);
+      if (!actor) return res.status(404).json({ error: "User not found", username: req.params.username });
+
+      const target = await db.Profile.getUserByUsername(req.body.targetUsername);
+      if (!target) return res.status(400).json({ error: "Target user does not exist", targetUsername: req.body.targetUsername });
+
+      const result = await db.Interactions.blockUser(req.params.username, req.body.targetUsername);
+      res.json(result);
+    } catch (err) {
+      console.error("Error in block route:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
 
@@ -84,7 +127,7 @@ export function createApp({ db }) {
 
   // Send a message
   app.post("messages", async (req, res) => {
-    const newMessage = await db.Messages.sendMessage(req.body); // body will have fromUserID, toUserID, text
+    const newMessage = await db.Messages.sendMessage(req.body); // body will have fromUser, toUser, text
     res.status(201).json(newMessage);
   });
 
@@ -129,23 +172,6 @@ export function createApp({ db }) {
   });
 
 
-  //// AUTH ROUTES ////
-  // NOTE: THIS MAY NEED CHANGING BASED ON AUTH IMPLEMENTATION NEXT QUARTER
-  // User signup
-  app.post("/auth/signup", async (req, res) => {
-    const newUser = await db.createUser(req.body);
-    res.status(201).json(newUser);
-  });
-
-  // User login
-  app.post("/auth/login", async (req, res) => {
-    const user = await db.authenticateUser(req.body.email, req.body.password);
-    if (user) {
-      res.json(user);
-    } else {
-      res.status(401).send("Invalid credentials");
-    }
-  });
 
   return app;
 }

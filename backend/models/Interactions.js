@@ -11,7 +11,7 @@ export const InteractionsModel = {
     const values = [username, targetUsername];
     try {
         await pool.query(query, values);
-        return { message: `User ${username} liked User ${targetUsername}` };
+        return { message: `User ${username} liked user ${targetUsername}` };
     }catch (error) {
         console.error('Error in likeUser:', error);
         throw error;
@@ -27,7 +27,7 @@ export const InteractionsModel = {
     const values = [username, targetUsername];
     try {
         await pool.query(query, values);
-        return { message: `User ${username} liked User ${targetUsername}` };
+        return { message: `User ${username} disliked user ${targetUsername}` };
     }catch (error) {
         console.error('Error in likeUser:', error);
         throw error;
@@ -43,7 +43,7 @@ export const InteractionsModel = {
     const values = [username, targetUsername];
     try {
         await pool.query(query, values);
-        return { message: `User ${username} liked User ${targetUsername}` };
+        return { message: `User ${username} blocked user ${targetUsername}` };
     }catch (error) {
         console.error('Error in likeUser:', error);
         throw error;
