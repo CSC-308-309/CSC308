@@ -1,5 +1,6 @@
 // src/pages/Profile.jsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { api } from '../client.js';
 import Navbar from '../components/Navbar';
 import CoverPhoto from '../components/CoverPhoto';
 import EditProfilePhoto from '../components/ProfilePhoto';

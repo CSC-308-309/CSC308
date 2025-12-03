@@ -15,8 +15,13 @@ export function createApp({ db }) {
   // NOTE: THIS MAY NEED CHANGING BASED ON AUTH IMPLEMENTATION NEXT QUARTER
     // User signup
   app.post("/auth/signup", async (req, res) => {
-    const user = await db.Profile.createUser(req.body);
-    res.json({ username: user.username });
+    try {
+      const user = await db.Profile.createUser(req.body);
+      res.json(user);
+    } catch (error) {
+      console.error('Signup error:', error);
+      res.status(400).json({ error: error.message || 'Failed to create user' });
+    }
   });
 
   // User login

@@ -6,7 +6,7 @@ import pool from './db/index.js';
 import { createApp } from './app.js';
 import { dbModels } from './models/index.js';
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 
 async function startServer() {
   try {

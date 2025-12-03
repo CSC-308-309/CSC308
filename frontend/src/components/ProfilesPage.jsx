@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { api } from '../client.js';
 import ProfileCard from './ProfileCard';
 import SwipeButtons from './SwipeButtons';
 import concertImage from '../assets/concert_image.png';
@@ -8,15 +9,12 @@ export default function ProfilesPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null); // obtained from auth or local storage
 
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/profiles');
-        if (!response.ok) {
-          throw new Error('Failed to fetch profiles');
-        }
-        const data = await response.json();
+        const data = await api.listUsers();
         setProfiles(data);
       } catch (err) {
         console.error('Error fetching profiles:', err);
@@ -29,8 +27,23 @@ export default function ProfilesPage() {
     fetchProfiles();
   }, []);
 
-  const handleSwipe = (direction) => {
-    console.log(`Swiped ${direction} on ${profiles[currentIndex].name}`);
+  const handleSwipe = async (direction) => {
+    const targetProfile = profiles[currentIndex];
+    console.log(`Swiped ${direction} on ${targetProfile.name}`);
+    
+    // Send interaction to backend
+    try {
+      if (!currentUser) throw new Error('You must be logged in to interact');
+      if (direction === 'right') {
+        await api.like(currentUser, targetProfile.username);
+      } else if (direction === 'left') {
+        await api.dislike(currentUser, targetProfile.username);
+      }
+    } catch (err) {
+      console.error(`Failed to record ${direction} swipe:`, err);
+      // Continue anyway - don't block UX
+    }
+    
     setCurrentIndex((prev) => prev + 1);
   };
 
@@ -109,10 +122,10 @@ export default function ProfilesPage() {
       {/* Swipe Buttons below the card stack */}
       <div className="mt-8">
         <SwipeButtons
-          onUndo={() => console.log('Undo')}
+          onUndo={() => console.log('Undo')} // TODO: implement undo (no routes/backend support yet)
           onReject={() => handleButtonSwipe('left')}
           onAccept={() => handleButtonSwipe('right')}
-          onSuperLike={() => console.log('Super like')}
+          onSuperLike={() => console.log('Super like')} // TODO: Is this a thing we're doing? No backend support
         />
       </div>
     </div>
