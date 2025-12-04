@@ -16,6 +16,9 @@ https://docs.google.com/document/d/1cBSxzDnsi8fmFt1OEzrzvhNNLxf60j3GwNR_LEQkPOk/
 # Code Covergae Report
 <img width="727" height="360" alt="image" src="https://github.com/user-attachments/assets/7c41a39e-915f-4033-b2af-860cfab8469f" />
 
+# Final 308 Demo with Narration 
+https://youtu.be/d43Ztc0KPag
+
 # Database Setup 
 This project uses **PostgreSQL** as the database with support for multiple environments (Production, Development). The database is hosted on [Neon](https://neon.tech/).
 
