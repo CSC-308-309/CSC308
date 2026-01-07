@@ -41,6 +41,15 @@ export const api = {
     like: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/like`, { targetUsername }),
     dislike: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/dislike`, { targetUsername }),
     block: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/block`, { targetUsername }),
-}
+
+    // Message routes
+    listUserChats: (username) => requestTypes.get(`/messages/${encodeURIComponent(username)}/chats`),
+
+    // Notification routes
+
+    // Media routes
+
+  }
+
 
 export { BASE_URL };
