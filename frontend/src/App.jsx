@@ -4,6 +4,8 @@ import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
 import Events from './pages/Events';
 import Messages from './pages/Messages';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/events" element={<Events />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
         </Routes>
       </div>
     </>
