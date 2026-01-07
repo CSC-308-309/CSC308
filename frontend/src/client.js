@@ -53,6 +53,7 @@ export const api = {
     dislike: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/dislike`, { targetUsername }),
     block: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/block`, { targetUsername }),
 
+<<<<<<< HEAD
     // Messaging routes
     listChats: (params = {}) => requestTypes.get(withQuery('/chats', params)),
     createChat: (data) => requestTypes.post('/chats', data),
@@ -86,5 +87,16 @@ export const api = {
     getNotificationPreferences: (username) => requestTypes.get(`/notifications/preferences/${encodeURIComponent(username)}`),
     updateNotificationPreferences: (username, data) => requestTypes.patch(`/notifications/preferences/${encodeURIComponent(username)}`, data),
 }
+=======
+    // Message routes
+    listUserChats: (username) => requestTypes.get(`/messages/${encodeURIComponent(username)}/chats`),
+
+    // Notification routes
+
+    // Media routes
+
+  }
+
+>>>>>>> 12c7548 (added messagesPanel api calls)
 
 export { BASE_URL };
