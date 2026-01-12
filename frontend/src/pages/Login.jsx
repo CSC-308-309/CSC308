@@ -8,15 +8,29 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClose = () => {
     navigate(-1); // go back
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login({ email });
-    navigate("/profile");
+    setError("");
+    setIsLoading(true);
+
+    try {
+      // call api
+      const response = await api.login({email, password});
+
+      navigate("/profile");
+    } catch (err)
+    {
+      setError(err.response?.data?.message || "Login failed. Please try again.")
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
