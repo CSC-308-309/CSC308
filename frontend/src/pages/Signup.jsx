@@ -10,15 +10,34 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClose = () => {
     navigate(-1); // go back
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login({ email });
-    navigate("/profile");
+    setError("");
+    setIsLoading(true);
+
+    try {
+      // call api
+      const response = await api.signup({
+        email, 
+        password,
+        username,
+        phone
+      });
+
+      navigate("/profile");
+    } catch (err)
+    {
+      setError(err.response?.data?.message || "Signup failed. Please try again.")
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
