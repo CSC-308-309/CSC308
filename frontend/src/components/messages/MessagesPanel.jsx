@@ -24,7 +24,7 @@ export default function MessagesPanel() {
   //const [selectedChat, setSelectedChat] = useState(chats[1]);
   // TODO: figure out how this is used and how to properly set it
 
-  const [chatMessages, setChatMessages] = useState({});\
+  const [chatMessages, setChatMessages] = useState({});
 
   useEffect(() => {
     // Fetch initial chat messages for each chat
