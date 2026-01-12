@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ChatList from './ChatList';
 import ChatWindow from './ChatWindow';
 
-export default function MessagesPanel() {
+export default async function MessagesPanel() {
   // Placeholder for actual user retrieval
   currentUser = 'alice';
 
