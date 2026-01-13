@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import ChatList from './ChatList';
 import ChatWindow from './ChatWindow';
-import { api } from '../../client';
+import { api } from '../../../client';
 
 export default function MessagesPanel() {
     const [chats, setChats] = useState([]);
