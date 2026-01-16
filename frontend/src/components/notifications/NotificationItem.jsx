@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { api } from '../../client';
 
 export default function NotificationItem({
+  id,
   icon,
   message,
   time,
@@ -8,10 +10,32 @@ export default function NotificationItem({
   postText,
 }) {
   const [buttonText, setButtonText] = useState(initialButtonText);
+  const [loading, setLoading] = useState(false);
 
-  const handleClick = () => {
-    if (buttonText === "Sync Back") setButtonText("Synced");
-    else if (buttonText === "Synced") setButtonText("Sync Back");
+  const handleClick = async () => {
+    if (!id || !buttonText || loading) return;
+
+    setLoading(true);
+
+    try {
+      if (buttonText === "Sync Back") {
+        await api.markNotificationRead(id);
+        setButtonText("Synced");
+      } 
+      
+      else if (buttonText === "Synced") {
+        await api.markNotificationUnread(id);
+        setButtonText("Sync Back");
+      }
+    } 
+    
+    catch (err) {
+      console.error("Notification action failed:", err);
+    } 
+    
+    finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,13 +59,16 @@ export default function NotificationItem({
       {buttonText && (
         <button
           onClick={handleClick}
+          disabled={loading}
           className={`px-3 py-1 rounded-md text-sm transition ${
-            buttonText === "Sync Back"
+            loading
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : buttonText === "Sync Back"
               ? "bg-purple-300 hover:bg-purple-400"
               : "bg-purple-200 text-purple-900 hover:bg-purple-300"
           }`}
         >
-          {buttonText}
+          {loading ? "..." : buttonText}
         </button>
       )}
     </div>
