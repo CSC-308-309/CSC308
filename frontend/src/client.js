@@ -49,6 +49,7 @@ export const api = {
 
 
     // Media routes
+    
 
     // Event routes
     listEvents: () => requestTypes.get('/events'),
