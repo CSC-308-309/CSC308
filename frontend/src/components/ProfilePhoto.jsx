@@ -1,4 +1,4 @@
-// src/components/ProfilePhoto.jsx
+//src/components/ProfilePhoto.jsx
 
 import { useRef, useEffect, useState } from 'react';
 import defaultPhoto from '../assets/DefaultProfilePhoto.png';
@@ -51,6 +51,9 @@ export default function EditableProfilePhoto({
     localStorage.setItem(storageKey, dataUrl);
     e.target.value = '';
   };
+
+
+
 
   return (
     <>

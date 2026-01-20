@@ -34,7 +34,7 @@ export default function Profile() {
         <div className="mx-auto justify-center p-6 w-[1160px]">
           <TopProfileCard>
             <div className="relative">
-              <CoverPhoto />
+              <CoverPhoto username="testuser"/>
 
               <div className="absolute left-14 -bottom-[68px] z-20">
                 <EditProfilePhoto />

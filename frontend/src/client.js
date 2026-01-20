@@ -41,6 +41,9 @@ export const api = {
     like: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/like`, { targetUsername }),
     dislike: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/dislike`, { targetUsername }),
     block: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/block`, { targetUsername }),
+
+    //Photo Storage routes
+     presignUpload: (data) => requestTypes.post('/uploads/presign', data)
 }
 
 export { BASE_URL };

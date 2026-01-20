@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { presignUpload } from "./models/media.js";
 
 export function createApp({ db }) {
 
@@ -68,6 +69,9 @@ export function createApp({ db }) {
       res.status(404).send("User not found");
     }
   });
+
+    // Get presigned URL for S3 upload
+  app.post("/uploads/presign", presignUpload);
 
 
   //// INTERACTION ROUTES ////
