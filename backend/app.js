@@ -306,13 +306,13 @@ export function createApp({ db }) {
 
   // Get notification preferences
   app.get("/notifications/preferences/:username", async (req, res) => {
-    const preferences = await db.Notifications.getNotificationPreferences(req.params.username);
+    const preferences = await db.Profile.getNotificationPreferences(req.params.username);
     res.json(preferences);
   });
 
   // Update notification preferences
   app.patch("/notifications/preferences/:username", async (req, res) => {
-    const updatedPreferences = await db.Notifications.updateNotificationPreferences(req.params.username, req.body);
+    const updatedPreferences = await db.Profile.updateNotificationPreferences(req.params.username, req.body);
     res.json(updatedPreferences);
   });
 
