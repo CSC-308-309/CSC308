@@ -1,4 +1,4 @@
-// backend/routes/auth.js
+//backend/routes/auth.js
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -6,7 +6,7 @@ import { createUser, findUserByEmail } from "../models/User.js";
 
 const router = express.Router();
 
-// SIGN UP
+//sign up
 router.post("/signup", async (req, res) => {
   const { email, password } = req.body;
 
@@ -16,9 +16,10 @@ router.post("/signup", async (req, res) => {
 
   try {
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await createUser(email, passwordHash);
+    const username = email.split("@")[0];
+    const user = await createUser(email, passwordHash, username);
 
-    res.status(201).json({ message: "User created", userId: user.id });
+    res.status(201).json({ message: "User created", username: user.username });
   } catch (err) {
     if (err.code === "23505") {
       return res.status(400).json({ message: "User already exists" });
@@ -27,7 +28,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// LOGIN
+//login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -42,13 +43,17 @@ router.post("/login", async (req, res) => {
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { username: user.username },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      },
+    );
 
     res.json({
       token,
-      user: { id: user.id, email: user.email, username: user.username },
+      user: { email: user.email, username: user.username },
     });
   } catch (err) {
     console.error("Login error:", err);
