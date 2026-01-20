@@ -107,15 +107,117 @@ export function createApp({ db }) {
 
   //// MESSAGE ROUTES ////
   // Fetch chat history
-  app.get("messages/:conversationId", async (req, res) => {
-    const messages = await db.Messages.getMessages(req.params.conversationId);
+  // app.get("messages/:conversationId", async (req, res) => {
+  //   const messages = await db.Messages.getMessages(req.params.conversationId);
+  //   res.json(messages);
+  // });
+
+  // // Send a message
+  // app.post("messages", async (req, res) => {
+  //   const newMessage = await db.Messages.sendMessage(req.body); // body will have fromUser, toUser, text
+  //   res.status(201).json(newMessage);
+  // });
+  app.get("/chats", async (req, res) => {
+    const chats = await db.Messages.listChats(req.query);
+    res.json(chats);
+  });
+
+  app.post("/chats", async (req, res) => {
+    const newChat = await db.Messages.createChat(req.body);
+    res.status(201).json(newChat);
+  });
+
+  app.get("/chats/:chatId", async (req, res) => {
+    const chat = await db.Messages.getChat(req.params.chatId);
+    if (chat) {
+      res.json(chat);
+    } else {
+      res.status(404).send("Chat not found");
+    }
+  });
+  
+  app.patch("/chats/:chatId", async (req, res) => {
+    const updatedChat = await db.Messages.updateChat(req.params.chatId, req.body);
+    if (updatedChat) {
+      res.json(updatedChat);
+    } else {
+      res.status(404).send("Chat not found");
+    }
+  });
+  
+  app.delete("/chats/:chatId", async (req, res) => {
+    const success = await db.Messages.deleteChat(req.params.chatId);
+    if (success) {
+      res.status(204).send();
+    } else {
+      res.status(404).send("Chat not found");
+    }
+  });
+
+  app.get("/chats/:chatId/participants", async (req, res) => {
+    const participants = await db.Messages.listChatParticipants(req.params.chatId);
+    res.json(participants);
+  });
+
+  app.post("/chats/:chatId/participants", async (req, res) => {
+    const result = await db.Messages.addChatParticipants(req.params.chatId, req.body);
+    res.json(result);
+  });
+
+  app.delete("/chats/:chatId/participants/:username", async (req, res) => {
+    const success = await db.Messages.removeChatParticipant(req.params.chatId, req.params.username);
+    if (success) {
+      res.status(204).send();
+    } else {
+      res.status(404).send("Participant or chat not found");
+    }
+  });
+
+  app.get("/chats/:chatId/messages", async (req, res) => {
+    const messages = await db.Messages.listMessages(req.params.chatId, req.query);
     res.json(messages);
   });
 
-  // Send a message
-  app.post("messages", async (req, res) => {
-    const newMessage = await db.Messages.sendMessage(req.body); // body will have fromUser, toUser, text
+  app.get("/chats/:chatId/messages/:messageId", async (req, res) => {
+    const message = await db.Messages.getMessage(req.params.chatId, req.params.messageId);
+    if (message) {
+      res.json(message);
+    } else {
+      res.status(404).send("Message not found");
+    }
+  });
+  
+  app.post("/chats/:chatId/messages", async (req, res) => {
+    const newMessage = await db.Messages.sendMessage(req.params.chatId, req.body);
     res.status(201).json(newMessage);
+  });
+
+  app.patch("/chats/:chatId/messages/:messageId", async (req, res) => {
+    const updatedMessage = await db.Messages.updateMessage(req.params.chatId, req.params.messageId, req.body);
+    if (updatedMessage) {
+      res.json(updatedMessage);
+    } else {
+      res.status(404).send("Message not found");
+    }
+  });
+  
+  app.delete("/chats/:chatId/messages/:messageId", async (req, res) => {
+    const success = await db.Messages.deleteMessage(req.params.chatId, req.params.messageId);
+    if (success) {
+      res.status(204).send();
+    } else {
+      res.status(404).send("Message not found");
+    }
+  });
+
+  app.post("/chats/:chatId/read", async (req, res) => {
+    const result = await db.Messages.markChatRead(req.params.chatId, req.body);
+    res.json(result);
+  });
+
+  app.post("/chats/:chatId/typing", async (req, res) => {
+    const result = await db.Messages.setTyping(req.params.chatId, req.body);
+    res.json(result);
   });
 
 
