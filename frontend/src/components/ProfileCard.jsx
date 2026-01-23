@@ -3,13 +3,29 @@ import { useRef } from 'react';
 import SwipeDragController from './SwipeDragController';
 import concertImage from '../assets/concert_image.png';
 
-export default function ProfileCard({ profile, isActive = true, onSwipe }) {
+// Add this color theme object (same as in FriendsBar)
+const categoryThemes = {
+  'Concert Buddies': {
+    gradient: 'from-purple-200 to-purple-100',
+    border: 'border-purple-300',
+    labelText: 'text-purple-700'
+  },
+  'Musicians': {
+    gradient: 'from-blue-200 to-blue-100',
+    border: 'border-blue-300',
+    labelText: 'text-blue-700'
+  }
+};
+
+export default function ProfileCard({ profile, isActive = true, onSwipe, category = 'Concert Buddies' }) {
   const swipeControllerRef = useRef(null);
 
   const defaultProfile = {
     name: 'Taylor Swift',
+    category: 'Musicians', // Add category to default profile
     role: 'Vocalist',
     age: '35 y.o.',
+    isFavorite: false,
     gender: 'Woman (she/her)',
     genre: 'Pop/Country',
     experience: '12 years of experience',
@@ -29,19 +45,23 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
     }
   };
 
+  // Get current theme based on category
+  const theme = categoryThemes[profileData.category] || categoryThemes['Concert Buddies'];
+
   return (
     <SwipeDragController onSwipe={handleSwipe} isActive={isActive}>
       {({ isDragging, dragOffset, rotation, opacity }) => (
         <div className="w-full flex flex-col items-center justify-center">
-          {/* Card Container with swipe transforms */}
+          {/* Card Container with swipe transforms and dynamic gradient */}
           <div
-            className="w-full max-w-3xl bg-gradient-to-b from-purple-200 to-purple-100 rounded-3xl p-6 shadow-md cursor-grab active:cursor-grabbing select-none"
+            className={`w-full max-w-3xl bg-gradient-to-b ${theme.gradient} rounded-3xl p-6 shadow-md cursor-grab active:cursor-grabbing select-none`}
             style={{
               transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y}px) rotate(${rotation}deg)`,
               transition: isDragging ? 'none' : 'transform 0.3s ease-out',
               opacity: opacity,
             }}
           >
+
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               {/* Left Column - Info */}
