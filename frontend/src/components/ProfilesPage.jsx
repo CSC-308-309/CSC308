@@ -10,11 +10,121 @@ export default function ProfilesPage({ category }) {
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
+  // Toggle this to switch between mock data and real API
+  const USE_MOCK_DATA = false;
+
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const data = await api.listUsers();
-        setProfiles(data);
+        if (USE_MOCK_DATA) {
+          // Mock data for testing
+          const mockProfiles = [
+            {
+              id: 1,
+              name: 'Taylor Swift',
+              username: 'tswift',
+              category: 'Musicians',
+              isFavorite: false,
+              role: 'Vocalist',
+              age: '35 y.o.',
+              gender: 'Woman (she/her)',
+              genre: 'Pop/Country',
+              experience: '12 years of experience',
+              main_image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop',
+              concert_image: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=600&fit=crop',
+              last_song: 'Dracula by Tame Impala',
+              last_song_desc: 'The last song that gave me chills is...',
+            },
+            {
+              id: 2,
+              name: 'Marco Rodriguez',
+              username: 'marco_r',
+              category: 'Concert Buddies',
+              isFavorite: true,
+              role: 'Concert Enthusiast',
+              age: '28 y.o.',
+              gender: 'Man (he/him)',
+              genre: 'Rock/Metal',
+              experience: '5 years of concert-going',
+              main_image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop',
+              concert_image: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&h=600&fit=crop',
+              last_song: 'Master of Puppets by Metallica',
+              last_song_desc: 'My all-time favorite concert song...',
+            },
+            {
+              id: 3,
+              name: 'Sarah Chen',
+              username: 'sarah_c',
+              category: 'Musicians',
+              isFavorite: true,
+              role: 'Guitarist',
+              age: '26 y.o.',
+              gender: 'Woman (she/her)',
+              genre: 'Indie/Alternative',
+              experience: '8 years of experience',
+              main_image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop',
+              concert_image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop',
+              last_song: 'Mr. Brightside by The Killers',
+              last_song_desc: 'This song never gets old...',
+            },
+            {
+              id: 4,
+              name: 'Jake Morrison',
+              username: 'jake_m',
+              category: 'Concert Buddies',
+              isFavorite: false,
+              role: 'Festival Goer',
+              age: '24 y.o.',
+              gender: 'Man (he/him)',
+              genre: 'EDM/Electronic',
+              experience: '3 years of festivals',
+              main_image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=500&fit=crop',
+              concert_image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&h=600&fit=crop',
+              last_song: 'Levels by Avicii',
+              last_song_desc: 'Takes me back to my first festival...',
+            },
+            {
+              id: 5,
+              name: 'Emma Williams',
+              username: 'emma_w',
+              category: 'Musicians',
+              isFavorite: false,
+              role: 'Drummer',
+              age: '30 y.o.',
+              gender: 'Woman (she/her)',
+              genre: 'Jazz/Funk',
+              experience: '15 years of experience',
+              main_image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=500&fit=crop',
+              concert_image: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&h=600&fit=crop',
+              last_song: 'Superstition by Stevie Wonder',
+              last_song_desc: 'The groove on this is incredible...',
+            },
+            {
+              id: 6,
+              name: 'Alex Kim',
+              username: 'alex_k',
+              category: 'Concert Buddies',
+              isFavorite: true,
+              role: 'Live Music Lover',
+              age: '27 y.o.',
+              gender: 'Non-binary (they/them)',
+              genre: 'Hip-Hop/R&B',
+              experience: '6 years of concerts',
+              main_image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=500&fit=crop',
+              concert_image: 'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&h=600&fit=crop',
+              last_song: 'HUMBLE. by Kendrick Lamar',
+              last_song_desc: 'Live performance was insane...',
+            },
+          ];
+          
+          // Simulate API delay
+          await new Promise(resolve => setTimeout(resolve, 500));
+          setProfiles(mockProfiles);
+        } else {
+          // Real API call
+          const data = await api.listUsers();
+          setProfiles(data);
+        }
       } catch (err) {
         console.error('Error fetching profiles:', err);
         setError('Failed to load profiles. Please try again later.');

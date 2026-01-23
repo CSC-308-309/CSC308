@@ -18,23 +18,6 @@ export default function Home() {
     // Replace this with your actual API call
     const fetchProfiles = async () => {
       try {
-        // Example: const response = await fetch('/api/profiles');
-        // const data = await response.json();
-        
-        // Temporary mock data until you connect to database
-        const mockData = [
-          { id: 1, name: 'Marco', isFavorite: true, category: 'Concert Buddies' },
-          { id: 2, name: 'Jacob', isFavorite: false, category: 'Concert Buddies' },
-          { id: 3, name: 'Jennifer', isFavorite: false, category: 'Concert Buddies' },
-          { id: 4, name: 'Jazzy', isFavorite: true, category: 'Concert Buddies' },
-          { id: 5, name: 'Abeyah', isFavorite: false, category: 'Concert Buddies' },
-          { id: 6, name: 'Yaneli', isFavorite: false, category: 'Concert Buddies' },
-          { id: 7, name: 'Sarah', isFavorite: true, category: 'Musicians' },
-          { id: 8, name: 'Mike', isFavorite: true, category: 'Musicians' },
-          { id: 9, name: 'Emma', isFavorite: false, category: 'Musicians' },
-          { id: 10, name: 'Alex', isFavorite: true, category: 'Musicians' },
-        ];
-        
         setAllPeople(mockData);
         setLoading(false);
       } catch (error) {
