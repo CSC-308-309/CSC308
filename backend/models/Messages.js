@@ -1,0 +1,196 @@
+import pool from '../db/index.js';
+
+// NOTE: THIS IS A MOCK IMPLEMENTATION FOR TESTING
+// REPLACE ALL MOCK DATA USES WITH ACTUAL DATABASE QUERIES
+// Note: Used AI to generate mock data because that would be a pain to write myself
+
+const MessagesModel = {
+    // Mock data storage
+    mockChats: [
+        {
+            id: '1',
+            name: 'Alice Johnson',
+            lastMessage: 'Sounds great! See you at the concert.',
+            time: '2:30 PM',
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alice',
+            participants: ['currentUser', 'alice'],
+            createdAt: new Date('2026-01-15').toISOString(),
+        },
+        {
+            id: '2',
+            name: 'Bob Smith',
+            lastMessage: 'Did you get my message about the jam session?',
+            time: '1:15 PM',
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Bob',
+            participants: ['currentUser', 'bob'],
+            createdAt: new Date('2026-01-14').toISOString(),
+        },
+    ],
+    mockMessages: {
+        '1': [
+            {
+                id: 'msg1',
+                chatId: '1',
+                sender: 'Alice Johnson',
+                text: 'Hey! Did you want to meet up before the concert?',
+                isOwnMessage: false,
+                createdAt: new Date('2026-01-26T14:20:00').toISOString(),
+            },
+            {
+                id: 'msg2',
+                chatId: '1',
+                sender: 'You',
+                text: 'Yeah, that sounds good! What time works for you?',
+                isOwnMessage: true,
+                createdAt: new Date('2026-01-26T14:25:00').toISOString(),
+            },
+            {
+                id: 'msg3',
+                chatId: '1',
+                sender: 'Alice Johnson',
+                text: 'Sounds great! See you at the concert.',
+                isOwnMessage: false,
+                createdAt: new Date('2026-01-26T14:30:00').toISOString(),
+            },
+        ],
+        '2': [
+            {
+                id: 'msg4',
+                chatId: '2',
+                sender: 'Bob Smith',
+                text: 'Did you get my message about the jam session?',
+                isOwnMessage: false,
+                createdAt: new Date('2026-01-26T13:15:00').toISOString(),
+            },
+        ],
+    },
+
+    async listChats(queryParams) {
+        // Returns array of chat summaries with latest message info
+        return this.mockChats;
+    },
+
+    async createChat(chatData) {
+        // Expected input: { participants: [username1, username2], name?: string }
+        const newChat = {
+            id: `chat-${Date.now()}`,
+            name: chatData.name || chatData.participants?.[1] || 'New Chat',
+            lastMessage: '',
+            time: 'now',
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatData.participants?.[1]}`,
+            participants: chatData.participants || [],
+            createdAt: new Date().toISOString(),
+        };
+        this.mockChats.push(newChat);
+        this.mockMessages[newChat.id] = [];
+        return newChat;
+    },
+
+    async getChat(chatId) {
+        return this.mockChats.find(c => c.id === chatId) || null;
+    },
+
+    async updateChat(chatId, updateData) {
+        // Expected input: { name?, participants? }
+        const chat = this.mockChats.find(c => c.id === chatId);
+        if (!chat) return null;
+        Object.assign(chat, updateData);
+        return chat;
+    },
+
+    async deleteChat(chatId) {
+        const index = this.mockChats.findIndex(c => c.id === chatId);
+        if (index === -1) return false;
+        this.mockChats.splice(index, 1);
+        delete this.mockMessages[chatId];
+        return true;
+    },
+
+    async listChatParticipants(chatId) {
+        const chat = this.mockChats.find(c => c.id === chatId);
+        return chat?.participants || [];
+    },
+
+    async addChatParticipants(chatId, participantsData) {
+        // Expected input: { participants: [username1, username2] }
+        const chat = this.mockChats.find(c => c.id === chatId);
+        if (!chat) return null;
+        const newParticipants = participantsData.participants || participantsData.usernames || [];
+        chat.participants = [...new Set([...chat.participants, ...newParticipants])];
+        return { success: true, participants: chat.participants };
+    },
+
+    async removeChatParticipant(chatId, username) {
+        const chat = this.mockChats.find(c => c.id === chatId);
+        if (!chat) return false;
+        const index = chat.participants.indexOf(username);
+        if (index === -1) return false;
+        chat.participants.splice(index, 1);
+        return true;
+    },
+
+    async listMessages(chatId, queryParams) {
+        // Supports pagination: limit, offset
+        const messages = this.mockMessages[chatId] || [];
+        const limit = queryParams?.limit ? parseInt(queryParams.limit) : 50;
+        const offset = queryParams?.offset ? parseInt(queryParams.offset) : 0;
+        return messages.slice(offset, offset + limit);
+    },
+
+    async getMessage(chatId, messageId) {
+        const messages = this.mockMessages[chatId] || [];
+        return messages.find(m => m.id === messageId) || null;
+    },
+
+    async sendMessage(chatId, messageData) {
+        // Expected input: { text: string, sender?: string }
+        const messages = this.mockMessages[chatId] || [];
+        const newMessage = {
+            id: `msg-${Date.now()}`,
+            chatId,
+            sender: messageData.sender || 'You',
+            text: messageData.text,
+            isOwnMessage: true,
+            createdAt: new Date().toISOString(),
+        };
+        messages.push(newMessage);
+        
+        // Update chat's lastMessage
+        const chat = this.mockChats.find(c => c.id === chatId);
+        if (chat) {
+            chat.lastMessage = messageData.text;
+            chat.time = 'now';
+        }
+        
+        return { message: newMessage };
+    },
+
+    async updateMessage(chatId, messageId, updateData) {
+        // Expected input: { text: string }
+        const messages = this.mockMessages[chatId] || [];
+        const message = messages.find(m => m.id === messageId);
+        if (!message) return null;
+        Object.assign(message, updateData);
+        return message;
+    },
+    
+    async deleteMessage(chatId, messageId) {
+        const messages = this.mockMessages[chatId] || [];
+        const index = messages.findIndex(m => m.id === messageId);
+        if (index === -1) return false;
+        messages.splice(index, 1);
+        return true;
+    },
+
+    async markChatRead(chatId, readData) {
+        // Expected input: { username?: string, readUntilId?: string }
+        return { success: true, chatId, readUntilId: readData?.readUntilId };
+    },
+
+    async setTyping(chatId, typingData) {
+        // Expected input: { username: string, isTyping: boolean }
+        return { success: true, chatId, ...typingData };
+    },
+};
+
+export { MessagesModel };
