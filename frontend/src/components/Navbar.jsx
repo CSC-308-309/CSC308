@@ -9,12 +9,74 @@ import {
   LogIn,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import logoIcon from '../assets/logo.svg';
 import { isLoggedIn, logout } from '../utils/auth';
+import { api } from '../client';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const loggedIn = isLoggedIn();
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  function getUsername() {
+    try {
+      const candidates = ['user', 'currentUser', 'profile'];
+
+      for (const key of candidates) {
+        const raw = localStorage.getItem(key);
+
+        if (!raw) continue;
+        try {
+          const parsed = JSON.parse(raw);
+
+          if (parsed && parsed.username) return parsed.username;
+        } 
+        
+        catch {
+          if (typeof raw === 'string' && raw.length > 0) return raw;
+        }
+      }
+
+      // fallback to a global user object, not sure if one will be created
+      if (window && window.__CURRENT_USER__ && window.__CURRENT_USER__.username) {
+        return window.__CURRENT_USER__.username;
+      }
+
+    } catch (e) {
+    }
+
+    return null;
+  }
+
+  useEffect(() => {
+    if (!loggedIn) return;
+    const username = getUsername();
+    if (!username) return;
+
+    let mounted = true;
+
+    async function loadCount() {
+      try {
+        const res = await api.getUnreadNotificationsCount(username);
+        const count = (res && typeof res === 'object' && 'count' in res) ? res.count : Number(res) || 0;
+        if (mounted) setUnreadCount(count);
+      } 
+      
+      catch (err) {
+        console.error('Failed to load unread notification count', err);
+      }
+    }
+
+    loadCount();
+    const timer = setInterval(loadCount, 60_000);
+
+    return () => {
+      mounted = false;
+      clearInterval(timer);
+    };
+  }, [loggedIn]);
 
   const handleLogout = () => {
     logout();
@@ -54,7 +116,7 @@ export default function Navbar() {
             </Link>
 
             <Link to="/notifications">
-              <NavItem icon={<Bell />} label="Notifications" />
+              <NavItem icon={<Bell />} label="Notifications" badge={unreadCount} />
             </Link>
 
             <Link to="/events">
@@ -92,11 +154,26 @@ export default function Navbar() {
   );
 }
 
-function NavItem({ icon, label }) {
+function NavItem({ icon, label, badge }) {
   return (
-    <div className="flex items-center gap-4 w-full px-6 py-3 hover:bg-white hover:bg-opacity-10 transition-colors cursor-pointer">
+    <div className="relative flex items-center gap-4 w-full px-6 py-3 hover:bg-white hover:bg-opacity-10 transition-colors cursor-pointer">
       <div className="w-6 h-6">{icon}</div>
       <span className="text-base font-medium">{label}</span>
+
+      {/* badge */}
+      {badge > 0 && (
+        <div
+          className="absolute right-6 top-2 min-w-[20px] h-5 px-1.5 flex items-center justify-center text-xs font-semibold rounded-full"
+          style={{
+            background: '#F06FBF', 
+            color: 'white',
+            transform: 'translateY(-2px)',
+          }}
+          aria-live="polite"
+        >
+          {badge > 99 ? '99+' : badge}
+        </div>
+      )}
     </div>
   );
 }
