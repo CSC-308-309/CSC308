@@ -1,24 +1,16 @@
-<<<<<<< HEAD
 import { X } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import logoIcon from "../assets/logo.svg";
-=======
-import { useState } from "react";
->>>>>>> a809449 (Trying to update with messages)
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-<<<<<<< HEAD
   const handleClose = () => navigate(-1);
 
   const handleSubmit = async (e) => {
-=======
-  async function handleSubmit(e) {
->>>>>>> a809449 (Trying to update with messages)
     e.preventDefault();
 
     try {
@@ -31,7 +23,6 @@ export default function Login() {
       const data = await res.json();
 
       if (!res.ok) {
-<<<<<<< HEAD
         throw new Error(data.message || "Login failed");
       }
 
@@ -41,22 +32,10 @@ export default function Login() {
       setError(err.message);
     } finally {
       setIsLoading(false);
-=======
-        setError(data.message);
-        return;
-      }
-
-      localStorage.setItem("token", data.token);
-      console.log("Logged in!");
-    // eslint-disable-next-line no-unused-vars
-    } catch (err) {
-      setError("Network error");
->>>>>>> a809449 (Trying to update with messages)
     }
   }
 
   return (
-<<<<<<< HEAD
     <div className="min-h-screen flex items-center justify-center relative bg-[#7E5179]">
       <button
         onClick={handleClose}
@@ -119,23 +98,3 @@ export default function Login() {
     </div>
   );
 }
-=======
-    <form onSubmit={handleSubmit}>
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-      />
-      <button type="submit">Login</button>
-      {error && <p>{error}</p>}
-    </form>
-  );
-}
-
->>>>>>> a809449 (Trying to update with messages)
