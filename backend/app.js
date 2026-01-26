@@ -238,6 +238,84 @@ export function createApp({ db }) {
     res.json(result);
   });
 
+  
+  //// NOTIFICATION ROUTES ////
+  app.get("/notifications/:username", async (req, res) => {
+    const notifications = await db.Notifications.listNotifications(req.params.username);
+    res.json(notifications);
+  });
+
+  app.get("/notifications/:username/unreadCount", async (req, res) => {
+    const count = await db.Notifications.getUnreadNotificationsCount(req.params.username);
+    res.json({ unreadCount: count });
+  });
+
+  app.get("/notifications/:notificationId", async (req, res) => {
+    const notification = await db.Notifications.getNotification(req.params.notificationId);
+    if (notification) {
+      res.json(notification);
+    } else {
+      res.status(404).send("Notification not found");
+    }
+  });
+
+  app.post("/notifications", async (req, res) => {
+    const newNotification = await db.Notifications.createNotification(req.body);
+    res.status(201).json(newNotification);
+  });
+
+  // Mark notification as read
+  app.post("/notifications/:notificationId/read", async (req, res) => {
+    const result = await db.Notifications.markNotificationRead(req.params.notificationId);
+    res.json(result);
+  });
+
+  // Mark notification as unread
+  app.post("/notifications/:notificationId/unread", async (req, res) => {
+    const result = await db.Notifications.markNotificationUnread(req.params.notificationId);
+    res.json(result);
+  });
+  
+  // Mark all notifications as read
+  app.post("/notifications/readAll", async (req, res) => {
+    const result = await db.Notifications.markAllNotificationsRead(req.body);
+    res.json(result);
+  });
+
+  // Archive notification
+  app.post("/notifications/:notificationId/archive", async (req, res) => {
+    const result = await db.Notifications.archiveNotification(req.params.notificationId);
+    res.json(result);
+  });
+
+  // Unarchive notification
+  app.post("/notifications/:notificationId/unarchive", async (req, res) => {
+    const result = await db.Notifications.unarchiveNotification(req.params.notificationId);
+    res.json(result);
+  });
+
+  // Delete notification
+  app.delete("/notifications/:notificationId", async (req, res) => {
+    const success = await db.Notifications.deleteNotification(req.params.notificationId);
+    if (success) {
+      res.status(204).send();
+    } else {
+      res.status(404).send("Notification not found");
+    }
+  });
+
+  // Get notification preferences
+  app.get("/notifications/preferences/:username", async (req, res) => {
+    const preferences = await db.Profile.getNotificationPreferences(req.params.username);
+    res.json(preferences);
+  });
+
+  // Update notification preferences
+  app.patch("/notifications/preferences/:username", async (req, res) => {
+    const updatedPreferences = await db.Profile.updateNotificationPreferences(req.params.username, req.body);
+    res.json(updatedPreferences);
+  });
+
 
   //// EVENT ROUTES ////
   // List all events
