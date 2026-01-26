@@ -7,7 +7,7 @@ import { createApp } from "./app.js";
 import { dbModels } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
 
-app.use("/auth", authRoutes);
+
 
 const port = process.env.PORT || 8000;
 
@@ -18,6 +18,8 @@ async function startServer() {
     console.log("Connected to PostgreSQL");
 
     const app = createApp({ db: dbModels });
+
+    app.use("/auth", authRoutes);
 
     app.listen(port, () => {
       console.log(`Server running at http://localhost:${port}`);
