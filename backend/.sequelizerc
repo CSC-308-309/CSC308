@@ -3,13 +3,7 @@ const path = require("path");
 
 module.exports = {
   config: path.resolve("config", "config.cjs"),
-<<<<<<< HEAD
   "models-path": path.resolve("models"),
   "migrations-path": path.resolve("migrations"),
   "seeders-path": path.resolve("seeders"),
-=======
-  modelsPath: path.resolve("models"),
-  migrationsPath: path.resolve("migrations"),
-  seedersPath: path.resolve("seeders"),
->>>>>>> a809449 (Trying to update with messages)
 };
