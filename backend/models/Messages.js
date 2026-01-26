@@ -69,12 +69,14 @@ const MessagesModel = {
 
     async listChats(queryParams) {
         // Returns array of chat summaries with latest message info
+        console.log("~~~~~~~~~~~~listChats called~~~~~~~~~~~~~");
         return this.mockChats;
     },
 
     async createChat(chatData) {
         // Expected input: { participants: [username1, username2], ... }
         // Expected output: { id, name, participants, createdAt, ... }
+        console.log("~~~~~~~~~~~~createChat called~~~~~~~~~~~~~");
         const newChat = {
             id: `chat-${Date.now()}`,
             name: chatData.name || chatData.participants?.[1] || 'New Chat',
@@ -90,11 +92,13 @@ const MessagesModel = {
     },
 
     async getChat(chatId) {
+        console.log("~~~~~~~~~~~~getChat called~~~~~~~~~~~~~");
         // Expected output: single chat object with full details
         return this.mockChats.find(c => c.id === chatId) || null;
     },
 
     async updateChat(chatId, updateData) {
+        console.log("~~~~~~~~~~~~updateChat called~~~~~~~~~~~~~");
         // Expected input: { name?, participants? }
         // Expected output: updated chat object
         const chat = this.mockChats.find(c => c.id === chatId);
@@ -104,6 +108,7 @@ const MessagesModel = {
     },
 
     async deleteChat(chatId) {
+        console.log("~~~~~~~~~~~~deleteChat called~~~~~~~~~~~~~");
         // Expected output: true if successful, false otherwise
         const index = this.mockChats.findIndex(c => c.id === chatId);
         if (index === -1) return false;
@@ -113,12 +118,14 @@ const MessagesModel = {
     },
 
     async listChatParticipants(chatId) {
+        console.log("~~~~~~~~~~~~listChatParticipants called~~~~~~~~~~~~~");
         // Expected output: array of participant objects/usernames
         const chat = this.mockChats.find(c => c.id === chatId);
         return chat?.participants || [];
     },
 
     async addChatParticipants(chatId, participantsData) {
+        console.log("~~~~~~~~~~~~addChatParticipants called~~~~~~~~~~~~~");
         // Expected input: { participants: [username1, username2] } or { usernames: [...] }
         const chat = this.mockChats.find(c => c.id === chatId);
         if (!chat) return null;
@@ -128,6 +135,7 @@ const MessagesModel = {
     },
 
     async removeChatParticipant(chatId, username) {
+        console.log("~~~~~~~~~~~~removeChatParticipant called~~~~~~~~~~~~~");
         // Expected output: true if successful, false otherwise
         const chat = this.mockChats.find(c => c.id === chatId);
         if (!chat) return false;
@@ -138,6 +146,7 @@ const MessagesModel = {
     },
 
     async listMessages(chatId, queryParams) {
+        console.log("~~~~~~~~~~~~listMessages called~~~~~~~~~~~~~");
         // Expected output: array of messages or { messages: array }
         // Supports pagination: limit, offset
         const messages = this.mockMessages[chatId] || [];
@@ -147,12 +156,14 @@ const MessagesModel = {
     },
 
     async getMessage(chatId, messageId) {
+        console.log("~~~~~~~~~~~~getMessage called~~~~~~~~~~~~~");
         // Expected output: single message object or null
         const messages = this.mockMessages[chatId] || [];
         return messages.find(m => m.id === messageId) || null;
     },
 
     async sendMessage(chatId, messageData) {
+        console.log("~~~~~~~~~~~~sendMessage called~~~~~~~~~~~~~");
         // Expected input: { text: string, sender?: string }
         // Expected output: { message: {...} } or { id, text, sender, ... }
         const messages = this.mockMessages[chatId] || [];
@@ -175,6 +186,7 @@ const MessagesModel = {
     },
 
     async updateMessage(chatId, messageId, updateData) {
+        console.log("~~~~~~~~~~~~updateMessage called~~~~~~~~~~~~~");
         // Expected input: { text: string } or other editable fields
         // Expected output: updated message or null
         const messages = this.mockMessages[chatId] || [];
@@ -185,6 +197,7 @@ const MessagesModel = {
     },
     
     async deleteMessage(chatId, messageId) {
+        console.log("~~~~~~~~~~~~deleteMessage called~~~~~~~~~~~~~");
         // Expected output: true if successful, false otherwise
         const messages = this.mockMessages[chatId] || [];
         const index = messages.findIndex(m => m.id === messageId);
@@ -194,12 +207,14 @@ const MessagesModel = {
     },
 
     async markChatRead(chatId, readData) {
+        console.log("~~~~~~~~~~~~markChatRead called~~~~~~~~~~~~~");
         // Expected input: { username?: string, readUntilId?: string }
         // Expected output: { success: true, readUntilId: ... } or similar
         return { success: true, chatId, readUntilId: readData?.readUntilId };
     },
 
     async setTyping(chatId, typingData) {
+        console.log("~~~~~~~~~~~~setTyping called~~~~~~~~~~~~~");
         // Expected input: { username: string, isTyping: boolean }
         // Expected output: { success: true } or typing indicator data
         return { success: true, chatId, ...typingData };
