@@ -21,37 +21,24 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   function getUsername() {
-    try {
-      const candidates = ['user', 'currentUser', 'profile'];
-
-      for (const key of candidates) {
-        const raw = localStorage.getItem(key);
-
-        if (!raw) continue;
-        try {
-          const parsed = JSON.parse(raw);
-
-          if (parsed && parsed.username) return parsed.username;
-        } 
-        
-        catch {
-          if (typeof raw === 'string' && raw.length > 0) return raw;
-        }
-      }
-
-      // fallback to a global user object, not sure if one will be created
-      if (window && window.__CURRENT_USER__ && window.__CURRENT_USER__.username) {
-        return window.__CURRENT_USER__.username;
-      }
-
-    } catch (e) {
-    }
-
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return null;
+    const user = JSON.parse(raw);
+    return user?.username || null;
+  } 
+  
+  catch {
     return null;
   }
+}
 
   useEffect(() => {
-    if (!loggedIn) return;
+    if (!loggedIn) {
+      setUnreadCount(0);
+      return;
+    }
+
     const username = getUsername();
     if (!username) return;
 
@@ -157,23 +144,20 @@ export default function Navbar() {
 function NavItem({ icon, label, badge }) {
   return (
     <div className="relative flex items-center gap-4 w-full px-6 py-3 hover:bg-white hover:bg-opacity-10 transition-colors cursor-pointer">
-      <div className="w-6 h-6">{icon}</div>
-      <span className="text-base font-medium">{label}</span>
+      <div className="relative w-6 h-6">
+        {icon}
 
-      {/* badge */}
-      {badge > 0 && (
-        <div
-          className="absolute right-6 top-2 min-w-[20px] h-5 px-1.5 flex items-center justify-center text-xs font-semibold rounded-full"
-          style={{
-            background: '#F06FBF', 
-            color: 'white',
-            transform: 'translateY(-2px)',
-          }}
-          aria-live="polite"
-        >
-          {badge > 99 ? '99+' : badge}
-        </div>
-      )}
+        {badge > 0 && (
+          <span
+            className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[11px] font-bold rounded-full"
+            style={{ background: '#F06FBF', color: 'white' }}
+          >
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
+      </div>
+
+      <span className="text-base font-medium">{label}</span>
     </div>
   );
 }

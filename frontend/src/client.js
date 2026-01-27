@@ -6,10 +6,13 @@
 const BASE_URL = 'http://localhost:8000';
 
 async function request(path, options = {}) {
+  const token = localStorage.getItem('token');
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: {'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(options.headers || {})},
     ...options,
   });
+  
   const body = await res.json().catch(() => null);
   if (!res.ok) {
     const message = body && body.error ? body.error : res.statusText;

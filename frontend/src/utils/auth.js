@@ -8,4 +8,5 @@ export function login(user) {
 
 export function logout() {
   localStorage.removeItem("user");
+  localStorage.removeItem("token");
 }
