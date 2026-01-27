@@ -4,18 +4,14 @@ import { useState } from "react";
 import logoIcon from "../assets/logo.svg";
 
 export default function Login() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleClose = () => navigate(-1);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
 
     try {
       const res = await fetch("http://localhost:8000/auth/login", {
@@ -39,7 +35,7 @@ export default function Login() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center relative bg-[#7E5179]">
