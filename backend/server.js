@@ -1,7 +1,3 @@
-// const express = require('express');
-// const { pool } = require('./db/index');
-// const Profile = require('./models/Profile');
-// const createApp = require('./app').createApp;
 import pool from "./db/index.js";
 import { createApp } from "./app.js";
 import { dbModels } from "./models/index.js";

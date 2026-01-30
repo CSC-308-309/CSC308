@@ -12,25 +12,7 @@ export function createApp({ db }) {
   app.get("/", (req, res) => res.send("Hello World!"));
 
   //// AUTH ROUTES ////
-  // NOTE: THIS MAY NEED CHANGING BASED ON AUTH IMPLEMENTATION NEXT QUARTER
-    // User signup
-  app.post("/auth/signup", async (req, res) => {
-    try {
-      const user = await db.Profile.createUser(req.body);
-      res.json(user);
-    } catch (error) {
-      console.error('Signup error:', error);
-      res.status(400).json({ error: error.message || 'Failed to create user' });
-    }
-  });
-
-  // User login
-  app.post("/auth/login", async (req, res) => {
-    const user = await db.Profile.validateUser(req.body);
-    if (!user) return res.status(401).send("Invalid credentials");
-    res.json(user);
-  });
-
+  // NOTE: Auth routes are handled in routes/auth.js and mounted in server.js
 
   //// USER ROUTES ////
   // Get all users
