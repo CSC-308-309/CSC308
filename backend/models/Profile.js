@@ -83,4 +83,11 @@ export const ProfileModel = {
       throw error;
     }
   },
+
+  async updateCoverPhoto(username, coverPhotoData) {
+    // TODO: add photo url to database
+    // NOTE: For now, just printing the data
+    console.log(`Updating cover photo for ${username}:`, coverPhotoData);
+    return { username, coverPhotoUrl: coverPhotoData.url };
+  },
 };
