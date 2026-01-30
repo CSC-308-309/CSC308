@@ -1,9 +1,10 @@
+import "dotenv/config";
+console.log("JWT_SECRET?", process.env.JWT_SECRET);
+
 import pool from "./db/index.js";
 import { createApp } from "./app.js";
 import { dbModels } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
-
-
 
 const port = process.env.PORT || 8000;
 

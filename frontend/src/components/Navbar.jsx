@@ -47,7 +47,8 @@ export default function Navbar() {
     async function loadCount() {
       try {
         const res = await api.getUnreadNotificationsCount(username);
-        const count = (res && typeof res === 'object' && 'count' in res) ? res.count : Number(res) || 0;
+        const count = res && typeof res === 'object' && 'unreadCount' in res ? Number(res.unreadCount) || 0 : Number(res) || 0;
+
         if (mounted) setUnreadCount(count);
       } 
       
