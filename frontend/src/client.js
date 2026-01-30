@@ -43,7 +43,7 @@ export const api = {
     block: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/block`, { targetUsername }),
 
     //Photo Storage routes
-     presignUpload: (data) => requestTypes.post('/uploads/presign', data)
+    presignUpload: (username, coverPhoto) => requestTypes.put('/uploads/presign', coverPhoto)
 }
 
 export { BASE_URL };

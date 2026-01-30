@@ -5,7 +5,7 @@ import EditCoverPhotoButton from './EditCoverPhotoButton';
 import defaultCover from '../assets/DefaultBanner.jpg';
 import { api } from '../client';
 
-  //shrinks image size for starage
+// shrinks image size for storage
 async function processImageToBlob(file, maxWidth) {
   const reader = new FileReader();
   const fileData = await new Promise((resolve) => {
@@ -39,7 +39,7 @@ export default function CoverPhoto({
   fallbackSrc = defaultCover,
   className = 'mt-10',
   objectPosition = 'center',
-  username, 
+  username,
 }) {
   const [src, setSrc] = useState(fallbackSrc);
   const [isUploading, setIsUploading] = useState(false);
@@ -52,52 +52,77 @@ export default function CoverPhoto({
   const handleFileSelect = async (file) => {
     if (!file?.type?.startsWith('image/')) return;
 
+    let previewUrl = null;
+
     try {
+      if (!username) throw new Error("Missing username (used as userId)");
+
       setIsUploading(true);
 
       const blob = await processImageToBlob(file, 1100);
 
-      const previewUrl = URL.createObjectURL(blob);
+      // local preview
+      previewUrl = URL.createObjectURL(blob);
       setSrc(previewUrl);
 
-      //pre-signed upload URL from backend
+      // 1) Get presigned URL from backend
       const { uploadUrl, fileUrl } = await api.presignUpload({
-        kind: 'cover',
-        contentType: 'image/jpeg',
+        kind: "cover",
+        contentType: "image/jpeg",
         fileSize: blob.size,
         userId: username,
       });
 
-      //upload to S3
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'image/jpeg' },
-        body: blob,
-      });
-
-      if (!uploadResponse.ok) {
-        const errText = await uploadResponse.text();
-        console.error("S3 error:", uploadResponse.status, errText);
-        throw new Error(`S3 upload failed (${uploadResponse.status})`);
+      if (!uploadUrl) {
+        throw new Error("Backend did not return uploadUrl");
       }
 
-      if (!uploadResponse.ok) {
-        throw new Error(`S3 upload failed (${uploadResponse.status})`);
-      }
+      // 2) Upload directly to S3 using XMLHttpRequest for better control
+    await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      
+      // 1. Open the request
+      xhr.open('PUT', uploadUrl, true);
+      
+      // 2. CRITICAL: Match the backend signature EXACTLY
+      // The backend signed for 'image/jpeg', so we must send 'image/jpeg'
+      xhr.setRequestHeader('Content-Type', 'image/jpeg');
+      
+      // 3. IMPORTANT: Reset headers that some libraries/interceptors add automatically
+      // This ensures the browser only sends what S3 is expecting
+      xhr.withCredentials = false; 
 
+      xhr.onload = () => {
+        // S3 usually returns 200 for successful PUT
+        if (xhr.status === 200 || xhr.status === 204) {
+          resolve();
+        } else {
+          // If this triggers, check the response body for a new XML error
+          console.error('S3 response:', xhr.responseText);
+          reject(new Error(`S3 upload failed: ${xhr.status}`));
+        }
+      };
+      
+      xhr.onerror = () => reject(new Error('Network error during upload'));
+      
+      // 4. Send the raw blob
+      xhr.send(blob);
+    });
+
+      // 3) Save the final URL to database
       await api.update(username, { coverPhotoUrl: fileUrl });
 
+      // 4) Update UI
       setSrc(fileUrl);
       localStorage.setItem(storageKey, fileUrl);
 
-      URL.revokeObjectURL(previewUrl);
-
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Upload failed. Please try again.');
+      alert(`Upload failed: ${error.message}`);
       setSrc(localStorage.getItem(storageKey) || fallbackSrc);
     } finally {
       setIsUploading(false);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
     }
   };
 
