@@ -232,13 +232,10 @@ export function createApp({ db }) {
     res.json({ unreadCount: count });
   });
 
-  app.get("/notifications/:notificationId", async (req, res) => {
+  app.get("/notifications/id/:notificationId", async (req, res) => {
     const notification = await db.Notifications.getNotification(req.params.notificationId);
-    if (notification) {
-      res.json(notification);
-    } else {
-      res.status(404).send("Notification not found");
-    }
+    if (notification) res.json(notification);
+    else res.status(404).send("Notification not found");
   });
 
   app.post("/notifications", async (req, res) => {
