@@ -5,21 +5,54 @@
 // TODO: allow injection of env var
 const BASE_URL = 'http://localhost:8000';
 
+// async function request(path, options = {}) {
+//   const res = await fetch(`${BASE_URL}${path}`, {
+//     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+//     ...options,
+//   });
+//   const body = await res.json().catch(() => null);
+//   if (!res.ok) {
+//     const message = body && body.error ? body.error : res.statusText;
+//     const error = new Error(message || 'Request failed');
+//     error.status = res.status;
+//     error.body = body;
+//     throw error;
+//   }
+//   return body;
+// }
+
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     ...options,
   });
-  const body = await res.json().catch(() => null);
+
+  const contentType = res.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+
+  const body = isJson ? await res.json().catch(() => null)
+                      : await res.text().catch(() => "");
+
   if (!res.ok) {
-    const message = body && body.error ? body.error : res.statusText;
-    const error = new Error(message || 'Request failed');
+    // Prefer backend details, otherwise show raw text
+    const message =
+      (body && typeof body === "object" && body.details)
+        ? `${body.error}: ${body.details}`
+        : (body && typeof body === "object" && body.error)
+          ? body.error
+          : (typeof body === "string" && body.trim())
+            ? body
+            : res.statusText;
+
+    const error = new Error(message || "Request failed");
     error.status = res.status;
     error.body = body;
     throw error;
   }
+
   return body;
 }
+
 
 const requestTypes = {
     get: (path) => request(path, { method: 'GET' }),
@@ -43,7 +76,8 @@ export const api = {
     block: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/block`, { targetUsername }),
 
     //Photo Storage routes
-    presignUpload: (username, coverPhoto) => requestTypes.put('/uploads/presign', coverPhoto)
+    presignUpload: (uploadParams) => requestTypes.put("/media/presign", uploadParams)
+    //presignUpload: (username, uploadParams) => requestTypes.put(`/users/${encodeURIComponent(username)}/coverPhoto`, uploadParams)
 }
 
 export { BASE_URL };

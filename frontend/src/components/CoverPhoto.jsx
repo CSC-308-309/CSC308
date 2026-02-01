@@ -1,5 +1,4 @@
 // src/components/CoverPhoto.jsx
-
 import { useEffect, useState } from 'react';
 import EditCoverPhotoButton from './EditCoverPhotoButton';
 import defaultCover from '../assets/DefaultBanner.jpg';
@@ -30,7 +29,6 @@ async function processImageToBlob(file, maxWidth) {
   });
 
   if (!blob) throw new Error('Image processing failed');
-
   return blob;
 }
 
@@ -65,49 +63,42 @@ export default function CoverPhoto({
       previewUrl = URL.createObjectURL(blob);
       setSrc(previewUrl);
 
+      // IMPORTANT: keep a single source of truth for content type
+      const contentType = "image/jpeg";
+
       // 1) Get presigned URL from backend
       const { uploadUrl, fileUrl } = await api.presignUpload({
         kind: "cover",
-        contentType: "image/jpeg",
+        contentType,
         fileSize: blob.size,
         userId: username,
       });
 
-      if (!uploadUrl) {
-        throw new Error("Backend did not return uploadUrl");
-      }
+      if (!uploadUrl) throw new Error("Backend did not return uploadUrl");
 
-      // 2) Upload directly to S3 using XMLHttpRequest for better control
-    await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      
-      // 1. Open the request
-      xhr.open('PUT', uploadUrl, true);
-      
-      // 2. CRITICAL: Match the backend signature EXACTLY
-      // The backend signed for 'image/jpeg', so we must send 'image/jpeg'
-      xhr.setRequestHeader('Content-Type', 'image/jpeg');
-      
-      // 3. IMPORTANT: Reset headers that some libraries/interceptors add automatically
-      // This ensures the browser only sends what S3 is expecting
-      xhr.withCredentials = false; 
+      // 2) Upload directly to S3
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', uploadUrl, true);
 
-      xhr.onload = () => {
-        // S3 usually returns 200 for successful PUT
-        if (xhr.status === 200 || xhr.status === 204) {
-          resolve();
-        } else {
-          // If this triggers, check the response body for a new XML error
-          console.error('S3 response:', xhr.responseText);
-          reject(new Error(`S3 upload failed: ${xhr.status}`));
-        }
-      };
-      
-      xhr.onerror = () => reject(new Error('Network error during upload'));
-      
-      // 4. Send the raw blob
-      xhr.send(blob);
-    });
+        // Per the SO thread: if Content-Type is part of signature,
+        // the request must include EXACTLY the same Content-Type.
+        xhr.setRequestHeader('Content-Type', contentType);
+
+        xhr.withCredentials = false;
+
+        xhr.onload = () => {
+          if (xhr.status === 200 || xhr.status === 204) {
+            resolve();
+          } else {
+            console.error('S3 response:', xhr.responseText);
+            reject(new Error(`S3 upload failed: ${xhr.status}`));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Network error during upload'));
+        xhr.send(blob);
+      });
 
       // 3) Save the final URL to database
       await api.update(username, { coverPhotoUrl: fileUrl });

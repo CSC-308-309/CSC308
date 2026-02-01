@@ -79,6 +79,8 @@ export function createApp({ db }) {
       res.status(404).send("User not found");
     }
   });
+
+  app.put("/media/presign", presignUpload);
   // double checking commit
 
   //// INTERACTION ROUTES ////
