@@ -4,7 +4,6 @@ import EditCoverPhotoButton from './EditCoverPhotoButton';
 import defaultCover from '../assets/DefaultBanner.jpg';
 import { api } from '../client';
 
-// shrinks image size for storage
 async function processImageToBlob(file, maxWidth) {
   const reader = new FileReader();
   const fileData = await new Promise((resolve) => {
@@ -59,14 +58,11 @@ export default function CoverPhoto({
 
       const blob = await processImageToBlob(file, 1100);
 
-      // local preview
       previewUrl = URL.createObjectURL(blob);
       setSrc(previewUrl);
 
-      // IMPORTANT: keep a single source of truth for content type
       const contentType = "image/jpeg";
 
-      // 1) Get presigned URL from backend
       const { uploadUrl, fileUrl } = await api.presignUpload({
         kind: "cover",
         contentType,
@@ -76,13 +72,11 @@ export default function CoverPhoto({
 
       if (!uploadUrl) throw new Error("Backend did not return uploadUrl");
 
-      // 2) Upload directly to S3
       await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', uploadUrl, true);
 
-        // Per the SO thread: if Content-Type is part of signature,
-        // the request must include EXACTLY the same Content-Type.
+
         xhr.setRequestHeader('Content-Type', contentType);
 
         xhr.withCredentials = false;
@@ -100,10 +94,8 @@ export default function CoverPhoto({
         xhr.send(blob);
       });
 
-      // 3) Save the final URL to database
       await api.update(username, { coverPhotoUrl: fileUrl });
 
-      // 4) Update UI
       setSrc(fileUrl);
       localStorage.setItem(storageKey, fileUrl);
 

@@ -70,7 +70,7 @@ export function createApp({ db }) {
     }
   });
 
-    // Get presigned URL for S3 upload
+  // Push image URL to database
   app.put("/users/:username/coverPhoto", async (req, res) => {
     const updatedUser = await db.Profile.updateCoverPhoto(req.params.username, req.body);
     if (updatedUser) {
@@ -80,8 +80,8 @@ export function createApp({ db }) {
     }
   });
 
+  // Get presigned URL for S3 upload
   app.put("/media/presign", presignUpload);
-  // double checking commit
 
   //// INTERACTION ROUTES ////
   // Like another user

@@ -34,7 +34,6 @@ async function request(path, options = {}) {
                       : await res.text().catch(() => "");
 
   if (!res.ok) {
-    // Prefer backend details, otherwise show raw text
     const message =
       (body && typeof body === "object" && body.details)
         ? `${body.error}: ${body.details}`
@@ -77,7 +76,6 @@ export const api = {
 
     //Photo Storage routes
     presignUpload: (uploadParams) => requestTypes.put("/media/presign", uploadParams)
-    //presignUpload: (username, uploadParams) => requestTypes.put(`/users/${encodeURIComponent(username)}/coverPhoto`, uploadParams)
 }
 
 export { BASE_URL };

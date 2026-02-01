@@ -3,7 +3,6 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from "uuid";
 
-// ---------- helpers ----------
 function env(name) {
   const v = process.env[name];
   if (!v || !String(v).trim()) throw new Error(`Missing environment variable: ${name}`);
@@ -28,7 +27,6 @@ function makeS3Client() {
   return new S3Client({ region, credentials });
 }
 
-// ---------- config ----------
 const ALLOWED = {
   cover: {
     prefix: "public/cover-photos",
@@ -60,7 +58,6 @@ function extFromType(contentType) {
   return map[contentType] || "bin";
 }
 
-// ---------- route handler ----------
 export async function presignUpload(req, res) {
   try {
     const { kind, contentType, fileSize, userId } = req.body;
@@ -81,7 +78,6 @@ export async function presignUpload(req, res) {
     const command = new PutObjectCommand({
       Bucket: bucket,
       Key: key,
-      // From the SO idea: if you sign ContentType, the PUT must send that exact header.
       ContentType: contentType,
     });
 
