@@ -1,21 +1,16 @@
 import { X } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../utils/auth";
 import { useState } from "react";
-import logoIcon from '../assets/logo.svg';
+import logoIcon from "../assets/logo.svg";
 
 export default function Signup() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
-  const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleClose = () => {
-    navigate(-1); // go back
-  };
+  const handleClose = () => navigate(-1);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,18 +18,18 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      // call api
-      const response = await api.signup({
-        email, 
-        password,
-        username,
-        phone
+      const res = await fetch("http://localhost:8000/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Signup failed");
+
       navigate("/profile");
-    } catch (err)
-    {
-      setError(err.response?.data?.message || "Signup failed. Please try again.")
+    } catch (err) {
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +37,6 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative bg-[#7E5179]">
-      {/* Close Button */}
       <button
         onClick={handleClose}
         className="absolute top-6 left-6 text-white hover:text-black transition"
@@ -51,8 +45,6 @@ export default function Signup() {
         <X size={35} />
       </button>
 
-      
-      {/* Logo */}
       <div className="absolute top-12 left-1/2 transform -translate-x-1/2 flex items-center gap-3">
         <img src={logoIcon} alt="Mic" className="w-16 h-16" />
         <h1 className="text-[57px] font-semibold font-nunito text-white">
@@ -60,13 +52,14 @@ export default function Signup() {
         </h1>
       </div>
 
-        {/* Create an Account Card */}
       <div className="min-h-screen flex items-center justify-center">
         <form
           onSubmit={handleSubmit}
           className="bg-[#7E5179] p-2 rounded w-[320px]"
         >
-          <h2 className="text-2xl font-semibold mb-4 text-white">Create an account</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-white">
+            Create an account
+          </h2>
 
           <input
             type="email"
@@ -74,22 +67,6 @@ export default function Signup() {
             className="w-full border p-2 mb-3"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-          />
-          
-          <input 
-            type="text"
-            placeholder="Username"
-            className="w-full border p-2 mb-3"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-
-          <input 
-            type="text"
-            placeholder="Phone Number"
-            className="w-full border p-2 mb-3"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
           />
 
           <input
@@ -100,13 +77,18 @@ export default function Signup() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <button className="w-full bg-purple-600 text-white py-2 rounded">
-            Create account
+          <button
+            className="w-full bg-purple-600 text-white py-2 rounded"
+            disabled={isLoading}
+          >
+            {isLoading ? "Creating..." : "Create account"}
           </button>
+
+          {error && <p className="text-red-500 mt-2 text-center">{error}</p>}
 
           <p className="text-sm mt-4 text-center text-white">
             Already have an account?{" "}
-            <Link to="/signup" className="text-orange-600 underline">
+            <Link to="/login" className="text-orange-600 underline">
               Log in
             </Link>
           </p>

@@ -28,8 +28,7 @@ This project uses **PostgreSQL** as the database with support for multiple envir
 2. Create a `.env` file in the **root directory** of your project:
 
 ```env
-DB_TYPE=PRODUCTION/DEVELOPMENT
-PRODUCTION_CONNECTION_STRING=
-TEST_CONNECTION_STRING= (Optional for local testing)
 DEVELOPMENT_CONNECTION_STRING=
 PORT=8000
+DB_TYPE=DEVELOPMENT
+JWT_SECRET=
