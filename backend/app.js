@@ -274,7 +274,7 @@ export function createApp({ db }) {
   });
 
   // Delete notification
-  app.delete("/notifications/:notificationId", async (req, res) => {
+  app.delete("/notifications/id/:notificationId", async (req, res) => {
     const success = await db.Notifications.deleteNotification(req.params.notificationId);
     if (success) {
       res.status(204).send();

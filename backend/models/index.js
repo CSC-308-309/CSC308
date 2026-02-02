@@ -8,6 +8,6 @@ export const dbModels = {
   Profile: ProfileModel,
   Interactions: InteractionsModel,
   Messages: MessagesModel,
-   Notifications: NotificationsModel,
+  Notifications: NotificationsModel,
   // add them here as well
 };

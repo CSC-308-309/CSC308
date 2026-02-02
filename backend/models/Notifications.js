@@ -156,7 +156,7 @@ const NotificationsModel = {
   mockNotifications: [
     {
       id: '1',
-      username: 'currentUser',
+      username: 'yanelicruz092',
       type: 'match',
       message: 'You matched with Alice Johnson!',
       link: '/messages/1',
@@ -166,7 +166,7 @@ const NotificationsModel = {
     },
     {
       id: '2',
-      username: 'currentUser',
+      username: 'yanelicruz092',
       type: 'message',
       message: 'Bob Smith sent you a message',
       link: '/messages/2',
@@ -176,7 +176,7 @@ const NotificationsModel = {
     },
     {
       id: '3',
-      username: 'currentUser',
+      username: 'yanelicruz092',
       type: 'event',
       message: 'Concert at The Fillmore starts in 2 hours!',
       link: '/events/123',
@@ -186,7 +186,7 @@ const NotificationsModel = {
     },
     {
       id: '4',
-      username: 'currentUser',
+      username: 'yanelicruz092',
       type: 'like',
       message: 'Someone liked your profile!',
       link: '/profile',
@@ -196,7 +196,7 @@ const NotificationsModel = {
     },
     {
       id: '5',
-      username: 'otherUser',
+      username: 'yanelicruz092',
       type: 'message',
       message: 'You have a new message',
       link: '/messages/3',

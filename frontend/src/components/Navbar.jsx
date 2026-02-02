@@ -7,31 +7,32 @@ import {
   Settings,
   LogOut,
   LogIn,
-} from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import logoIcon from '../assets/logo.svg';
-import { isLoggedIn, logout } from '../utils/auth';
-import { api } from '../client';
+} from "lucide-react";
+
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import logoIcon from "../assets/logo.svg";
+import { isLoggedIn, logout } from "../utils/auth";
+import { useNotifications } from "../components/notifications/NotificationsContext";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const loggedIn = isLoggedIn();
 
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { unreadCount, refreshUnreadCount, setUnreadCount } = useNotifications();
 
   function getUsername() {
-  try {
-    const raw = localStorage.getItem('user');
-    if (!raw) return null;
-    const user = JSON.parse(raw);
-    return user?.username || null;
-  } 
-  
-  catch {
-    return null;
+    try {
+      const raw = localStorage.getItem("user");
+      if (!raw) return null;
+      const user = JSON.parse(raw);
+      return user?.username || null;
+    } 
+    
+    catch {
+      return null;
+    }
   }
-}
 
   useEffect(() => {
     if (!loggedIn) {
@@ -42,33 +43,21 @@ export default function Navbar() {
     const username = getUsername();
     if (!username) return;
 
-    let mounted = true;
+    refreshUnreadCount();
 
-    async function loadCount() {
-      try {
-        const res = await api.getUnreadNotificationsCount(username);
-        const count = res && typeof res === 'object' && 'unreadCount' in res ? Number(res.unreadCount) || 0 : Number(res) || 0;
-
-        if (mounted) setUnreadCount(count);
-      } 
-      
-      catch (err) {
-        console.error('Failed to load unread notification count', err);
-      }
-    }
-
-    loadCount();
-    const timer = setInterval(loadCount, 60_000);
+    const timer = setInterval(() => {
+      refreshUnreadCount();
+    }, 60_000);
 
     return () => {
-      mounted = false;
       clearInterval(timer);
     };
-  }, [loggedIn]);
+  }, [loggedIn, refreshUnreadCount, setUnreadCount]);
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    setUnreadCount(0);
+    navigate("/login");
   };
 
   return (
@@ -76,15 +65,13 @@ export default function Navbar() {
       className="flex flex-col w-[215px] text-white"
       style={{
         background:
-          'linear-gradient(180deg, #A376A2 0%, #8D5F8C 50%, #7E5179 100%)',
+          "linear-gradient(180deg, #A376A2 0%, #8D5F8C 50%, #7E5179 100%)",
       }}
     >
       {/* Header */}
       <div className="flex items-center gap-3 p-6 border-b border-gray-200">
         <img src={logoIcon} alt="Mic" className="w-8 h-8" />
-        <h1 className="text-2xl font-semibold font-nunito">
-          Melodious
-        </h1>
+        <h1 className="text-2xl font-semibold font-nunito">Melodious</h1>
       </div>
 
       {/* Main Nav */}
@@ -151,9 +138,9 @@ function NavItem({ icon, label, badge }) {
         {badge > 0 && (
           <span
             className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[11px] font-bold rounded-full"
-            style={{ background: '#F06FBF', color: 'white' }}
+            style={{ background: "#F06FBF", color: "white" }}
           >
-            {badge > 99 ? '99+' : badge}
+            {badge > 99 ? "99+" : badge}
           </span>
         )}
       </div>
