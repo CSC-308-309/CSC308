@@ -1,13 +1,19 @@
+<<<<<<< HEAD
 import React, { useState } from "react";
 import { api } from '../../client';
+=======
+import React, { useMemo, useState } from "react";
+import { api } from "../../client";
+import { useNotifications } from "./NotificationsContext";
+>>>>>>> notifsAPI
 
 export default function NotificationItem({
   id,
   icon,
   message,
   time,
-  initialButtonText,
   postText,
+<<<<<<< HEAD
 }) {
   const [buttonText, setButtonText] = useState(initialButtonText);
   const [loading, setLoading] = useState(false);
@@ -30,6 +36,66 @@ export default function NotificationItem({
     } 
     
     catch (err) {
+=======
+  actionVariant = "read", 
+  initialIsRead = false,
+}) 
+
+{
+  const [isRead, setIsRead] = useState(Boolean(initialIsRead));
+  const [isSyncedBack, setIsSyncedBack] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const { refreshUnreadCount, setUnreadCount, unreadCount } = useNotifications();
+
+  const buttonText = useMemo(() => {
+    if (actionVariant === "sync") return isSyncedBack ? "Synced" : "Sync Back";
+    return isRead ? "Mark as unread" : "Mark as read";
+  }, [actionVariant, isSyncedBack, isRead]);
+
+  const handleClick = async () => {
+    if (!id || loading) return;
+
+    setLoading(true);
+    try {
+      const wasUnread = !isRead;
+
+      if (actionVariant === "sync") {
+        
+        // will give sync a different function once username is fixed in api route
+        if (!isSyncedBack) {
+          await api.markNotificationRead(id);
+          setIsSyncedBack(true);
+          setIsRead(true);
+        } 
+        
+        else {
+          await api.markNotificationUnread(id);
+          setIsSyncedBack(false);
+          setIsRead(false);
+        }
+      } 
+      
+      else {
+        if (!isRead) {
+          await api.markNotificationRead(id);
+          setIsRead(true);
+        } 
+        
+        else {
+          await api.markNotificationUnread(id);
+          setIsRead(false);
+        }
+      }
+
+      const nowUnread = actionVariant === "sync"
+        ? (isSyncedBack ? true : false) 
+        : isRead; 
+
+      await refreshUnreadCount();
+
+    } catch (err) {
+>>>>>>> notifsAPI
       console.error("Notification action failed:", err);
     } 
     
@@ -56,6 +122,7 @@ export default function NotificationItem({
         </div>
       </div>
 
+<<<<<<< HEAD
       {buttonText && (
         <button
           onClick={handleClick}
@@ -71,6 +138,25 @@ export default function NotificationItem({
           {loading ? "..." : buttonText}
         </button>
       )}
+=======
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        className={`px-3 py-1 rounded-md text-sm transition ${
+          loading
+            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+            : actionVariant === "sync"
+            ? isSyncedBack
+              ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
+              : "bg-purple-300 hover:bg-purple-400"
+            : isRead
+            ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
+            : "bg-purple-300 hover:bg-purple-400"
+        }`}
+      >
+        {loading ? "..." : buttonText}
+      </button>
+>>>>>>> notifsAPI
     </div>
   );
 }

@@ -4,8 +4,10 @@ import pool from '../db/index.js';
 // REPLACE ALL MOCK DATA USES WITH ACTUAL DATABASE QUERIES
 // Note: Used AI to generate mock data because that would be a pain to write myself
 
+
+
 const MessagesModel = {
-    // Mock data storage
+    // Mock data for testing
     mockChats: [
         {
             id: '1',
@@ -14,7 +16,7 @@ const MessagesModel = {
             time: '2:30 PM',
             avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alice',
             participants: ['currentUser', 'alice'],
-            createdAt: new Date('2026-01-15').toISOString(),
+            createdAt: new Date('2025-01-15').toISOString(),
         },
         {
             id: '2',
@@ -23,7 +25,7 @@ const MessagesModel = {
             time: '1:15 PM',
             avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Bob',
             participants: ['currentUser', 'bob'],
-            createdAt: new Date('2026-01-14').toISOString(),
+            createdAt: new Date('2025-01-14').toISOString(),
         },
     ],
     mockMessages: {
@@ -34,7 +36,7 @@ const MessagesModel = {
                 sender: 'Alice Johnson',
                 text: 'Hey! Did you want to meet up before the concert?',
                 isOwnMessage: false,
-                createdAt: new Date('2026-01-26T14:20:00').toISOString(),
+                createdAt: new Date('2025-01-19T14:20:00').toISOString(),
             },
             {
                 id: 'msg2',
@@ -42,7 +44,7 @@ const MessagesModel = {
                 sender: 'You',
                 text: 'Yeah, that sounds good! What time works for you?',
                 isOwnMessage: true,
-                createdAt: new Date('2026-01-26T14:25:00').toISOString(),
+                createdAt: new Date('2025-01-19T14:25:00').toISOString(),
             },
             {
                 id: 'msg3',
@@ -50,7 +52,7 @@ const MessagesModel = {
                 sender: 'Alice Johnson',
                 text: 'Sounds great! See you at the concert.',
                 isOwnMessage: false,
-                createdAt: new Date('2026-01-26T14:30:00').toISOString(),
+                createdAt: new Date('2025-01-19T14:30:00').toISOString(),
             },
         ],
         '2': [
@@ -60,7 +62,7 @@ const MessagesModel = {
                 sender: 'Bob Smith',
                 text: 'Did you get my message about the jam session?',
                 isOwnMessage: false,
-                createdAt: new Date('2026-01-26T13:15:00').toISOString(),
+                createdAt: new Date('2025-01-19T13:15:00').toISOString(),
             },
         ],
     },
@@ -179,7 +181,6 @@ const MessagesModel = {
             chat.lastMessage = messageData.text;
             chat.time = 'now';
         }
-        
         return { message: newMessage };
     },
 
