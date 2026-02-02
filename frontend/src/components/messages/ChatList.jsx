@@ -15,7 +15,7 @@ export default function ChatList({ chats, selectedChat, setSelectedChat }) {
           <ChatItem
             key={chat.id}
             chat={chat}
-            isSelected={chat.id === selectedChat.id}
+            isSelected={chat.id === selectedChat?.id}
             onClick={() => setSelectedChat(chat)}
           />
         ))}
