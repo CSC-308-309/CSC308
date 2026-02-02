@@ -1,5 +1,25 @@
 {
-  "dependencies": {
-    "dotenv": "^17.2.3"
+  "name": "melodious",
+  "version": "1.0.0",
+  "description": "Melodious - Music Social Platform",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "start:backend": "npm start --workspace=backend",
+    "start:frontend": "npm start --workspace=frontend",
+    "install:all": "npm install",
+    "test:backend": "npm test --workspace=backend",
+    "test:frontend": "npm test --workspace=frontend",
+    "audit:all": "npm audit --workspaces",
+    "audit:fix": "npm audit fix --workspaces"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/melodious"
   }
 }

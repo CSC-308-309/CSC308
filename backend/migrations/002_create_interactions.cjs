@@ -17,6 +17,6 @@ module.exports = {
   },
 
   async down(queryInterface) {
-  await queryInterface.sequelize.query('DROP TABLE IF EXISTS interactions;');
+    await queryInterface.sequelize.query("DROP TABLE IF EXISTS interactions;");
   },
 };
