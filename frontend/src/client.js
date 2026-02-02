@@ -6,10 +6,13 @@
 const BASE_URL = 'http://localhost:8000';
 
 async function request(path, options = {}) {
+  const token = localStorage.getItem('token');
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: {'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(options.headers || {})},
     ...options,
   });
+  
   const body = await res.json().catch(() => null);
   if (!res.ok) {
     const message = body && body.error ? body.error : res.statusText;
@@ -69,6 +72,29 @@ export const api = {
     deleteMessage: (chatId, messageId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
     markChatRead: (chatId, data = {}) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/read`, data),
     setTyping: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/typing`, data),
-}
+
+    // Notification routes
+    // NOTE: these two are not valid routes, we don't want to list all notifs in the database
+    //        fix their usage in the frontend to use listNotifications with username input
+    //listMyNotifications: (params = {}) => requestTypes.get(withQuery('/notifications/me', params)),
+    //getMyUnreadNotificationsCount: () => requestTypes.get('/notifications/me/unread-count'),
+    listNotifications: (username) => requestTypes.get(withQuery(`/notifications/${encodeURIComponent(username)}`)),
+    getUnreadNotificationsCount: (username) => requestTypes.get(`/notifications/${encodeURIComponent(username)}/unreadCount`),
+    getNotification: (notificationId) => requestTypes.get(`/notifications/id/${encodeURIComponent(notificationId)}`),
+    createNotification: (data) => requestTypes.post('/notifications', data),
+    markNotificationRead: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/read`, {}),
+    markNotificationUnread: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unread`, {}),
+    markAllNotificationsRead: (data = {}) => requestTypes.post('/notifications/readAll', data),
+    archiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/archive`, {}),
+    unarchiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unarchive`, {}),
+    deleteNotification: (notificationId) => requestTypes.delete(`/notifications/${encodeURIComponent(notificationId)}`),
+    //getUnreadNotificationsCount: (params = {}) => requestTypes.get(withQuery('/notifications/unread-count', params)),
+    getNotificationPreferences: (username) => requestTypes.get(`/notifications/preferences/${encodeURIComponent(username)}`),
+    updateNotificationPreferences: (username, data) => requestTypes.patch(`/notifications/preferences/${encodeURIComponent(username)}`, data),
+
+    // Event routes
+    listEvents: () => requestTypes.get('/events'),
+
+  }
 
 export { BASE_URL };
