@@ -50,6 +50,7 @@ export default function EditableProfilePhoto({
   storageKey = "profilePhotoUrl",
   fallbackSrc = defaultPhoto,
   size = 136,
+  username
 })
 
 
