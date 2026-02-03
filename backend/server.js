@@ -4,6 +4,8 @@ import { dbModels } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
 
 
+import dotenv from 'dotenv';
+dotenv.config()
 
 const port = process.env.PORT || 8000;
 
