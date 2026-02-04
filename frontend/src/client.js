@@ -70,6 +70,23 @@ export const api = {
     markChatRead: (chatId, data = {}) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/read`, data),
     setTyping: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/typing`, data),
 
+    // Messaging routes
+    listChats: (params = {}) => requestTypes.get(withQuery('/chats', params)),
+    createChat: (data) => requestTypes.post('/chats', data),
+    getChat: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}`),
+    updateChat: (chatId, data) => requestTypes.patch(`/chats/${encodeURIComponent(chatId)}`, data),
+    deleteChat: (chatId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}`),
+    listChatParticipants: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/participants`),
+    addChatParticipants: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/participants`, data),
+    removeChatParticipant: (chatId, username) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/participants/${encodeURIComponent(username)}`),
+    listMessages: (chatId, params = {}) => requestTypes.get(withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params)),
+    getMessage: (chatId, messageId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
+    sendMessage: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/messages`, data),
+    updateMessage: (chatId, messageId, data) => requestTypes.patch(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`, data),
+    deleteMessage: (chatId, messageId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
+    markChatRead: (chatId, data = {}) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/read`, data),
+    setTyping: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/typing`, data),
+
     // Notification routes
     // NOTE: these two are not valid routes, we don't want to list all notifs in the database
     //        fix their usage in the frontend to use listNotifications with username input
