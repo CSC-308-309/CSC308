@@ -37,6 +37,32 @@ const sampleChats = [
       { sender: 'john_mayer', content: 'We should do a blues cover together sometime' },
       { sender: 'adele_official', content: 'I would love that! Let me know when you\'re free' }
     ]
+  },
+  {
+    name: 'Yani & Taylor - Fan Chat',
+    is_group: false,
+    created_by: 'yanitsaiv',
+    participants: ['yanitsaiv', 'taylor_swift'],
+    messages: [
+      { sender: 'yanitsaiv', content: 'Taylor! Your music helped me through tough times 🎵' },
+      { sender: 'taylor_swift', content: 'That means so much to hear! Thank you for sharing 💖' },
+      { sender: 'yanitsaiv', content: 'Will you ever come to my city for a concert?' },
+      { sender: 'taylor_swift', content: 'I\'d love to! We\'re planning new tour dates soon' },
+      { sender: 'yanitsaiv', content: 'OMG that would be amazing! Can\'t wait!' }
+    ]
+  },
+  {
+    name: 'Producer Network',
+    is_group: true,
+    created_by: 'yanitsaiv',
+    participants: ['yanitsaiv', 'bruno_mars', 'john_mayer', 'ed_sheeran'],
+    messages: [
+      { sender: 'yanitsaiv', content: 'Hey producers! Who wants to collaborate on a new track?' },
+      { sender: 'bruno_mars', content: 'I\'m always down for new projects! What style?' },
+      { sender: 'john_mayer', content: 'I can add some guitar layers if needed' },
+      { sender: 'ed_sheeran', content: 'I have some lyrics that might work well' },
+      { sender: 'yanitsaiv', content: 'Perfect! Let\'s create something amazing together 🎸' }
+    ]
   }
 ];
 

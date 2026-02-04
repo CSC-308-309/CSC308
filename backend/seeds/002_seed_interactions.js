@@ -13,7 +13,7 @@ const sampleInteractions = [
 
 async function seedInteractions() {
   try {
-    console.log('🌱 Seeding interactions table...');
+    console.log('Seeding interactions table...');
 
     await pool.query('TRUNCATE TABLE interactions RESTART IDENTITY CASCADE');
     console.log('  Cleared existing interactions');
