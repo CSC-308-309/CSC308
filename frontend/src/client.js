@@ -6,10 +6,13 @@
 const BASE_URL = 'http://localhost:8000';
 
 async function request(path, options = {}) {
+  const token = localStorage.getItem('token');
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: {'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(options.headers || {})},
     ...options,
   });
+  
   const body = await res.json().catch(() => null);
   if (!res.ok) {
     const message = body && body.error ? body.error : res.statusText;
@@ -94,7 +97,7 @@ export const api = {
     //getMyUnreadNotificationsCount: () => requestTypes.get('/notifications/me/unread-count'),
     listNotifications: (username) => requestTypes.get(withQuery(`/notifications/${encodeURIComponent(username)}`)),
     getUnreadNotificationsCount: (username) => requestTypes.get(`/notifications/${encodeURIComponent(username)}/unreadCount`),
-    getNotification: (notificationId) => requestTypes.get(`/notifications/${encodeURIComponent(notificationId)}`),
+    getNotification: (notificationId) => requestTypes.get(`/notifications/id/${encodeURIComponent(notificationId)}`),
     createNotification: (data) => requestTypes.post('/notifications', data),
     markNotificationRead: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/read`, {}),
     markNotificationUnread: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unread`, {}),

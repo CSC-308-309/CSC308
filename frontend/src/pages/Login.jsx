@@ -4,14 +4,17 @@ import { useState } from "react";
 import logoIcon from "../assets/logo.svg";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClose = () => navigate(-1);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
       const res = await fetch("http://localhost:8000/auth/login", {
@@ -27,6 +30,8 @@ export default function Login() {
       }
 
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
       navigate("/profile");
     } catch (err) {
       setError(err.message);

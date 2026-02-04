@@ -3,7 +3,7 @@ import groupNotifications from "./GroupNotifications";
 import NotificationSection from "./NotificationSection";
 import { api } from '../../client';
 
-export default function NotificationsPanel() {
+export default function NotificationsPanel({ username }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -12,21 +12,22 @@ export default function NotificationsPanel() {
     let cancelled = false;
 
     async function load() {
+      if (!username) {
+        setError("No username provided. Provide a `username` prop or enable a backend /client API wrapper for the current user.");
+        return;
+      }
+
       setLoading(true);
       setError("");
 
       try {
-        const res = await api.listMyNotifications();
+        const res = await api.listNotifications(username);
         const items = Array.isArray(res) ? res : res?.items ?? [];
 
         if (!cancelled) setNotifications(items);
-      } 
-      
-      catch (e) {
+      } catch (e) {
         if (!cancelled) setError(e?.message || "Failed to load notifications");
-      } 
-      
-      finally {
+      } finally {
         if (!cancelled) setLoading(false);
       }
     }
@@ -35,7 +36,7 @@ export default function NotificationsPanel() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [username]);
 
   const grouped = useMemo(() => groupNotifications(notifications), [notifications]);
 

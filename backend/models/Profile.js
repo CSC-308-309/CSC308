@@ -83,4 +83,33 @@ export const ProfileModel = {
       throw error;
     }
   },
+
+  // Mock notification preferences methods
+  async getNotificationPreferences(username) {
+    console.log(`[PROFILE] getNotificationPreferences called for username: ${username}`);
+    // Mock preferences - in a real implementation, these would be stored in the database
+    const mockPreferences = {
+      username,
+      emailNotifications: true,
+      pushNotifications: true,
+      matchNotifications: true,
+      messageNotifications: true,
+      eventNotifications: true,
+      likeNotifications: false,
+    };
+    console.log(`   → Returning preferences:`, mockPreferences);
+    return mockPreferences;
+  },
+
+  async updateNotificationPreferences(username, preferences) {
+    console.log(`[PROFILE] updateNotificationPreferences called for username: ${username}`);
+    console.log(`   → New preferences:`, preferences);
+    // Mock update - in a real implementation, this would update the database
+    const updatedPreferences = {
+      username,
+      ...preferences,
+    };
+    console.log(`   → Updated successfully`);
+    return updatedPreferences;
+  },
 };
