@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Search, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState } from "react";
+import { Search, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 
 // EventCard Component
-const EventCard = ({ image, date, title, location }) => {
-    return (
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-        <div className="bg-gray-400 aspect-[6/3] w-full rounded-t-lg"></div>
-        <div className="p-2">
+const EventCard = ({ date, title, location }) => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+      <div className="bg-gray-400 aspect-[6/3] w-full rounded-t-lg"></div>
+      <div className="p-2">
         <p className="text-xs text-gray-600 mb-1">{date}</p>
         <h3 className="text-sm font-semibold text-gray-900 mb-1">{title}</h3>
         <div className="flex items-center text-gray-600 text-xs">
@@ -14,9 +14,9 @@ const EventCard = ({ image, date, title, location }) => {
           <span>{location}</span>
         </div>
       </div>
-      </div>
-    );
-  };
+    </div>
+  );
+};
 
 // Pagination Component
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
@@ -29,7 +29,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
-      
+
       {/* Show first page */}
       {currentPage > 3 && (
         <>
@@ -42,7 +42,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           <span className="text-gray-500 px-2">...</span>
         </>
       )}
-      
+
       {/* Show previous page if exists */}
       {currentPage > 1 && (
         <button
@@ -52,14 +52,12 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           {currentPage - 1}
         </button>
       )}
-      
+
       {/* Current page */}
-      <button
-        className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-purple-400 text-white"
-      >
+      <button className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-purple-400 text-white">
         {currentPage}
       </button>
-      
+
       {/* Show next page if exists */}
       {currentPage < totalPages && (
         <button
@@ -69,7 +67,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           {currentPage + 1}
         </button>
       )}
-      
+
       {/* Show last page */}
       {currentPage < totalPages - 2 && (
         <>
@@ -82,7 +80,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           </button>
         </>
       )}
-      
+
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
@@ -105,33 +103,33 @@ export default async function EventsPage() {
   /* const events = [
     {
       id: 1,
-      date: 'October 29, 2025 - 8:00 PM',
-      title: 'Taylor Swift Concert',
-      location: 'Sunset Park, Los Angeles, CA'
+      date: "October 29, 2025 - 8:00 PM",
+      title: "Taylor Swift Concert",
+      location: "Sunset Park, Los Angeles, CA",
     },
     {
       id: 2,
-      date: 'October 29, 2025 - 8:00 PM',
-      title: 'Taylor Swift Concert',
-      location: 'Sunset Park, Los Angeles, CA'
+      date: "October 29, 2025 - 8:00 PM",
+      title: "Taylor Swift Concert",
+      location: "Sunset Park, Los Angeles, CA",
     },
     {
       id: 3,
-      date: 'October 29, 2025 - 8:00 PM',
-      title: 'Taylor Swift Concert',
-      location: 'Sunset Park, Los Angeles, CA'
+      date: "October 29, 2025 - 8:00 PM",
+      title: "Taylor Swift Concert",
+      location: "Sunset Park, Los Angeles, CA",
     },
     {
       id: 4,
-      date: 'October 29, 2025 - 8:00 PM',
-      title: 'Taylor Swift Concert',
-      location: 'Sunset Park, Los Angeles, CA'
+      date: "October 29, 2025 - 8:00 PM",
+      title: "Taylor Swift Concert",
+      location: "Sunset Park, Los Angeles, CA",
     },
     {
       id: 5,
-      date: 'October 29, 2025 - 8:00 PM',
-      title: 'Taylor Swift Concert',
-      location: 'Sunset Park, Los Angeles, CA'
+      date: "October 29, 2025 - 8:00 PM",
+      title: "Taylor Swift Concert",
+      location: "Sunset Park, Los Angeles, CA",
     },
     {
       id: 6,
@@ -148,21 +146,21 @@ export default async function EventsPage() {
         <div className="flex flex-col md:flex-row items-center md:justify-between gap-4 mb-4">
           <div className="flex gap-4">
             <button
-              onClick={() => setActiveTab('active')}
+              onClick={() => setActiveTab("active")}
               className={`px-3 py-1.5 rounded-full font-medium transition-colors ${
-                activeTab === 'active'
-                  ? 'bg-purple-400 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                activeTab === "active"
+                  ? "bg-purple-400 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
               Active (6)
             </button>
             <button
-              onClick={() => setActiveTab('past')}
+              onClick={() => setActiveTab("past")}
               className={`px-3 py-1.5 rounded-full font-medium transition-colors ${
-                activeTab === 'past'
-                  ? 'bg-purple-400 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                activeTab === "past"
+                  ? "bg-purple-400 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
               Past (30)

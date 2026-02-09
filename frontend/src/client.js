@@ -3,24 +3,55 @@
 
 // For now, just localhost URL
 // TODO: allow injection of env var
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = "http://localhost:8000";
+
+// async function request(path, options = {}) {
+//   const res = await fetch(`${BASE_URL}${path}`, {
+//     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+//     ...options,
+//   });
+//   const body = await res.json().catch(() => null);
+//   if (!res.ok) {
+//     const message = body && body.error ? body.error : res.statusText;
+//     const error = new Error(message || 'Request failed');
+//     error.status = res.status;
+//     error.body = body;
+//     throw error;
+//   }
+//   return body;
+// }
 
 async function request(path, options = {}) {
   const token = localStorage.getItem('token');
 
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: {'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(options.headers || {})},
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     ...options,
   });
-  
-  const body = await res.json().catch(() => null);
+
+  const contentType = res.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+
+  const body = isJson
+    ? await res.json().catch(() => null)
+    : await res.text().catch(() => "");
+
   if (!res.ok) {
-    const message = body && body.error ? body.error : res.statusText;
-    const error = new Error(message || 'Request failed');
+    const message =
+      body && typeof body === "object" && body.details
+        ? `${body.error}: ${body.details}`
+        : body && typeof body === "object" && body.error
+          ? body.error
+          : typeof body === "string" && body.trim()
+            ? body
+            : res.statusText;
+
+    const error = new Error(message || "Request failed");
     error.status = res.status;
     error.body = body;
     throw error;
   }
+
   return body;
 }
 
@@ -95,6 +126,25 @@ export const api = {
     // Event routes
     listEvents: () => requestTypes.get('/events'),
 
-  }
+  
+
+  // Interaction routes
+  like: (username, targetUsername) =>
+    requestTypes.post(`/users/${encodeURIComponent(username)}/like`, {
+      targetUsername,
+    }),
+  dislike: (username, targetUsername) =>
+    requestTypes.post(`/users/${encodeURIComponent(username)}/dislike`, {
+      targetUsername,
+    }),
+  block: (username, targetUsername) =>
+    requestTypes.post(`/users/${encodeURIComponent(username)}/block`, {
+      targetUsername,
+    }),
+
+  //Photo Storage routes
+  presignUpload: (uploadParams) =>
+    requestTypes.put("/media/presign", uploadParams),
+};
 
 export { BASE_URL };

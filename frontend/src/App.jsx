@@ -20,6 +20,7 @@ function getUsernameFromStorage() {
     return null;
   }
 }
+import ProfileSetup from "./pages/ProfileSetup";
 
 function App() {
   const username = getUsernameFromStorage();
@@ -35,6 +36,7 @@ function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/profilesetup" element={<ProfileSetup />} />
         </Routes>
       </NotificationsProvider>
     </div>

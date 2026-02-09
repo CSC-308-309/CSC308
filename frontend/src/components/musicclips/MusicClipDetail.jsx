@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
-import { X, ArrowLeft, Star } from 'lucide-react';
+import React, { useState } from "react";
+import { X, ArrowLeft, Star } from "lucide-react";
 
-export default function MusicClipDetail({ clip, isOpen, onClose, allClips, onToggleStar }) {
+export default function MusicClipDetail({
+  clip,
+  isOpen,
+  onClose,
+  allClips,
+  onToggleStar,
+}) {
   const [selectedClip, setSelectedClip] = useState(clip);
   const [showDetail, setShowDetail] = useState(false);
 
@@ -19,7 +25,7 @@ export default function MusicClipDetail({ clip, isOpen, onClose, allClips, onTog
     if (selectedClip && selectedClip.id === clipId) {
       setSelectedClip({
         ...selectedClip,
-        starred: !selectedClip.starred
+        starred: !selectedClip.starred,
       });
     }
   };
@@ -37,51 +43,57 @@ export default function MusicClipDetail({ clip, isOpen, onClose, allClips, onTog
               <X size={24} />
             </button>
 
-            <h2 className="text-2xl font-bold text-gray-900 pr-10">Music Clips</h2>
+            <h2 className="text-2xl font-bold text-gray-900 pr-10">
+              Music Clips
+            </h2>
             <p className="text-sm text-gray-500 mt-1">
               Add or explore your favorite music clips!
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto">
-            {allClips.filter(c => !c.isPlaceholder).map((clipItem) => (
-              <div
-                key={clipItem.id}
-                className="cursor-pointer transition-all hover:brightness-75"
-                onClick={() => handleClipClick(clipItem)}
-              >
-                <div className="bg-purple-100 rounded-xl w-full aspect-square overflow-hidden relative">
-                  {/* Star Button */}
-                  <button
-                    onClick={(e) => handleToggleStar(clipItem.id, e)}
-                    className="absolute top-3 right-3 z-10"
-                  >
-                    <Star
-                      size={20}
-                      className={`${
-                        clipItem.starred
-                          ? 'fill-yellow-500 text-yellow-500'
-                          : 'text-gray-400'
-                      } hover:text-yellow-500 transition-colors`}
-                    />
-                  </button>
-                  
-                  {clipItem.type === 'audio' ? (
-                    <div className="w-full h-full flex items-center justify-center text-gray-700 font-semibold">
-                      🎵 Audio
-                    </div>
-                  ) : (
-                    <img
-                      src={clipItem.thumbnail}
-                      alt={clipItem.title}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
+            {allClips
+              .filter((c) => !c.isPlaceholder)
+              .map((clipItem) => (
+                <div
+                  key={clipItem.id}
+                  className="cursor-pointer transition-all hover:brightness-75"
+                  onClick={() => handleClipClick(clipItem)}
+                >
+                  <div className="bg-purple-100 rounded-xl w-full aspect-square overflow-hidden relative">
+                    {/* Star Button */}
+                    <button
+                      onClick={(e) => handleToggleStar(clipItem.id, e)}
+                      className="absolute top-3 right-3 z-10"
+                    >
+                      <Star
+                        size={20}
+                        className={`${
+                          clipItem.starred
+                            ? "fill-yellow-500 text-yellow-500"
+                            : "text-gray-400"
+                        } hover:text-yellow-500 transition-colors`}
+                      />
+                    </button>
+
+                    {clipItem.type === "audio" ? (
+                      <div className="w-full h-full flex items-center justify-center text-gray-700 font-semibold">
+                        🎵 Audio
+                      </div>
+                    ) : (
+                      <img
+                        src={clipItem.thumbnail}
+                        alt={clipItem.title}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <h3 className="font-semibold text-gray-800 text-sm mt-2">
+                    {clipItem.title}
+                  </h3>
+                  <p className="text-xs text-gray-500">Updated today</p>
                 </div>
-                <h3 className="font-semibold text-gray-800 text-sm mt-2">{clipItem.title}</h3>
-                <p className="text-xs text-gray-500">Updated today</p>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       ) : (
@@ -105,12 +117,15 @@ export default function MusicClipDetail({ clip, isOpen, onClose, allClips, onTog
                   size={24}
                   className={`${
                     selectedClip.starred
-                      ? 'fill-yellow-500 text-yellow-500'
-                      : 'text-gray-400'
+                      ? "fill-yellow-500 text-yellow-500"
+                      : "text-gray-400"
                   } transition-colors`}
                 />
               </button>
-              <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <button
+                onClick={onClose}
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <X size={24} />
               </button>
             </div>
@@ -133,9 +148,13 @@ export default function MusicClipDetail({ clip, isOpen, onClose, allClips, onTog
                   <div className="bg-gray-900 rounded-lg p-8 mb-6">
                     <div className="text-center mb-6">
                       <div className="text-6xl mb-4">🎵</div>
-                      <h3 className="text-white text-xl font-semibold">{selectedClip.title}</h3>
+                      <h3 className="text-white text-xl font-semibold">
+                        {selectedClip.title}
+                      </h3>
                       {selectedClip.description && (
-                        <p className="text-gray-400 text-sm mt-2">{selectedClip.description}</p>
+                        <p className="text-gray-400 text-sm mt-2">
+                          {selectedClip.description}
+                        </p>
                       )}
                     </div>
                   </div>

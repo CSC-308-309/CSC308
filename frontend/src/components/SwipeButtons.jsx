@@ -1,5 +1,5 @@
-import { X, Check, Heart } from 'lucide-react';
-import undo from '../assets/undo.svg';
+import { X, Check, Heart } from "lucide-react";
+import undo from "../assets/undo.svg";
 
 export default function SwipeButtons({
   onUndo,
@@ -41,8 +41,8 @@ export default function SwipeButtons({
   );
 }
 
-function ActionButton({ icon, bgColor, hoverColor, size = 'normal', onClick }) {
-  const sizeClasses = size === 'large' ? 'w-16 h-16' : 'w-14 h-14';
+function ActionButton({ icon, bgColor, hoverColor, size = "normal", onClick }) {
+  const sizeClasses = size === "large" ? "w-16 h-16" : "w-14 h-14";
 
   return (
     <button

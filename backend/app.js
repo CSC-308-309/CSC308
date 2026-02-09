@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { presignUpload } from "./models/media.js";
 
 export function createApp({ db }) {
 
@@ -51,6 +52,18 @@ export function createApp({ db }) {
     }
   });
 
+  // Push image URL to database
+  app.put("/users/:username/coverPhoto", async (req, res) => {
+    const updatedUser = await db.Profile.updateCoverPhoto(req.params.username, req.body);
+    if (updatedUser) {
+      res.json(updatedUser);
+    } else {
+      res.status(404).send("User not found");
+    }
+  });
+
+  // Get presigned URL for S3 upload
+  app.put("/media/presign", presignUpload);
 
   //// INTERACTION ROUTES ////
   // Like another user

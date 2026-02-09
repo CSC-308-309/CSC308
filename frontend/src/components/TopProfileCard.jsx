@@ -10,7 +10,7 @@ export default function TopProfileCard({ children }) {
         relative pt-[0.5px]
       "
       style={{
-        background: 'linear-gradient(0deg, #FFF 0%, #FFF 100%), #C4C4C4',
+        background: "linear-gradient(0deg, #FFF 0%, #FFF 100%), #C4C4C4",
       }}
     >
       {children}
