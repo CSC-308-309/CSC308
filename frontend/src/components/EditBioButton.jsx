@@ -25,7 +25,7 @@ export default function EditBioButton({
 
     try {
       localStorage.setItem(storageKey, JSON.stringify(merged));
-    } catch {}
+    } catch { /* empty */ }
 
     onSave?.(merged);
     setOpen(false);

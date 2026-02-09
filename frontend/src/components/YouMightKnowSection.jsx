@@ -1,4 +1,5 @@
 // src/components/YouMightKnowSection.jsx
+// eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_SUGGESTED_PROFILES = [
   {
     id: "1",

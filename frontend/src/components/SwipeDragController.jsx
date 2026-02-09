@@ -62,7 +62,7 @@ const SwipeDragController = forwardRef(
 
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isActive, isDragging]);
+    }, [isActive, isDragging, programmaticSwipe]);
 
     // Expose swipe() to parent components
     useImperativeHandle(ref, () => ({

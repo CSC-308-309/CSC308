@@ -1,10 +1,8 @@
 import { Mic, Cake, User, Music, FileText } from 'lucide-react';
-import { useRef } from 'react';
 import SwipeDragController from './SwipeDragController';
 import concertImage from '../assets/concert_image.png';
 
 export default function ProfileCard({ profile, isActive = true, onSwipe }) {
-  const swipeControllerRef = useRef(null);
 
   const defaultProfile = {
     name: 'Taylor Swift',

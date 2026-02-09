@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { api } from '../client.js';
 import ProfileCard from './ProfileCard';
 import SwipeButtons from './SwipeButtons';
-import concertImage from '../assets/concert_image.png';
 
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null); // obtained from auth or local storage
+  const [currentUser] = useState(null); // obtained from auth or local storage
 
   useEffect(() => {
     const fetchProfiles = async () => {
