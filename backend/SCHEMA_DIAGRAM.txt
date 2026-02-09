@@ -1,0 +1,82 @@
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           MUSIC DATING APP DATABASE SCHEMA                        │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────┐    ┌─────────────┐    ┌─────────────────┐    ┌──────────────┐
+│    users    │    │   profiles  │    │  interactions   │    │   chats      │
+├─────────────┤    ├─────────────┤    ├─────────────────┤    ├──────────────┤
+│ username PK │◄──►│ username PK │◄──►│ id PK           │    │ id PK        │
+│ email UK    │    │ name        │    │ username FK     │    │ type         │
+│ password    │    │ role        │    │ target_username │    │ name         │
+│ phone       │    │ age         │    │ interaction_type│    │ avatar_url   │
+│ created_at  │    │ gender      │    │ created_at      │    │ created_by FK│
+│ updated_at  │    │ genre       │    │ updated_at      │    │ created_at   │
+└─────────────┘    │ experience  │    └─────────────────┘    │ updated_at   │
+                   │ main_image  │                          └───────┬──────┘
+                   │ concert_img│                                  │
+                   │ last_song   │                    ┌──────────────▼──────────┐
+                   │ last_desc   │                    │   chat_participants    │
+                   │ created_at  │                    ├────────────────────────┤
+                   │ updated_at  │                    │ id PK                 │
+                   └───────┬─────┘                    │ chat_id FK            │
+                           │                          │ username FK           │
+                           │                          │ joined_at             │
+                           │                          └──────────┬───────────┘
+                           │                                     │
+┌─────────────┐    ┌───────▼─────┐                ┌──────────────▼──────────┐
+│ notifications│    │  messages  │                │       users             │
+├─────────────┤    ├─────────────┤                ├────────────────────────┤
+│ id PK       │    │ id PK      │                │ username PK             │
+│ username FK │    │ chat_id FK │                │ email UK                │
+│ type        │    │ sender FK  │                │ password                │
+│ title       │    │ text       │                │ phone                   │
+│ content     │    │ client_msg │                │ created_at              │
+│ data JSONB  │    │ created_at │                │ updated_at              │
+│ is_read     │    │ edited_at  │                └────────────────────────┘
+│ is_archived │    └──────┬────┘
+│ created_at  │           │
+│ updated_at  │           │
+└─────────────┘           │
+                           │
+                    ┌──────▼─────┐
+                    │   users    │
+                    ├─────────────┤
+                    │ username PK│
+                    │ email UK   │
+                    │ password   │
+                    │ phone      │
+                    │ created_at │
+                    │ updated_at │
+                    └────────────┘
+
+RELATIONSHIPS:
+─────────────────────────────────────────────────────────────────────────────────
+users 1:1 profiles           (every user has one profile)
+users 1:N interactions        (as actor and as target)
+users 1:N chat_participants   (user participates in many chats)
+users 1:N messages            (user sends many messages)
+users 1:N notifications       (user receives many notifications)
+users 1:N chats               (user creates many chats)
+
+chats 1:N chat_participants   (chat has many participants)
+chats 1:N messages            (chat contains many messages)
+
+chat_participants N:1 chats   (participant belongs to one chat)
+chat_participants N:1 users   (participant is one user)
+
+messages N:1 chats            (message belongs to one chat)
+messages N:1 users            (message sent by one user)
+
+notifications N:1 users        (notification belongs to one user)
+
+interactions N:1 users         (actor)
+interactions N:1 users         (target)
+
+CONSTRAINTS:
+─────────────────────────────────────────────────────────────────────────────────
+• Username: 3-30 chars, alphanumeric + underscores only
+• Email: Unique across users table
+• Chat participants: Unique (chat_id, username) combination
+• Foreign keys: All relationships properly constrained
+• Cascading deletes: messages, chat_participants on chat deletion
+• Timestamps: Automatic created_at/updated_at on all tables

@@ -18,13 +18,13 @@ export function createApp({ db }) {
   //// USER ROUTES ////
   // Get all users
   app.get("/users", async (req, res) => {
-    const users = await db.Profile.listUsers();
+    const users = await db.User.listUsers();
     res.json(users);
   });
 
   // Get user by ID
   app.get("/users/:username", async (req, res) => {
-    const user = await db.Profile.getUserByUsername(req.params.username);
+    const user = await db.User.getUserByUsername(req.params.username);
     if (user) {
       res.json(user);
     } else {
@@ -34,7 +34,7 @@ export function createApp({ db }) {
 
   // Update user (profile info) by username
   app.put("/users/:username", async (req, res) => {
-    const updatedUser = await db.Profile.updateUser(req.params.username, req.body);
+    const updatedUser = await db.User.updateUser(req.params.username, req.body);
     if (updatedUser) {
       res.json(updatedUser);
     } else {
@@ -44,7 +44,7 @@ export function createApp({ db }) {
 
   // Delete user by ID
   app.delete("/users/:username", async (req, res) => {
-    const success = await db.Profile.deleteUser(req.params.username);
+    const success = await db.User.deleteUser(req.params.username);
     if (success) {
       res.status(204).send();
     } else {
@@ -69,10 +69,10 @@ export function createApp({ db }) {
   // Like another user
   app.post("/users/:username/like", async (req, res) => {
     try {
-      const actor = await db.Profile.getUserByUsername(req.params.username);
+      const actor = await db.User.getUserByUsername(req.params.username);
       if (!actor) return res.status(404).json({ error: "User not found", username: req.params.username });
 
-      const target = await db.Profile.getUserByUsername(req.body.targetUsername);
+      const target = await db.User.getUserByUsername(req.body.targetUsername);
       if (!target) return res.status(400).json({ error: "Target user does not exist", targetUsername: req.body.targetUsername });
 
       const result = await db.Interactions.likeUser(req.params.username, req.body.targetUsername);
@@ -86,10 +86,10 @@ export function createApp({ db }) {
   // Dislike another user
   app.post("/users/:username/dislike", async (req, res) => {
     try {
-      const actor = await db.Profile.getUserByUsername(req.params.username);
+      const actor = await db.User.getUserByUsername(req.params.username);
       if (!actor) return res.status(404).json({ error: "User not found", username: req.params.username });
 
-      const target = await db.Profile.getUserByUsername(req.body.targetUsername);
+      const target = await db.User.getUserByUsername(req.body.targetUsername);
       if (!target) return res.status(400).json({ error: "Target user does not exist", targetUsername: req.body.targetUsername });
 
       const result = await db.Interactions.dislikeUser(req.params.username, req.body.targetUsername);
@@ -103,10 +103,10 @@ export function createApp({ db }) {
   // Block another user
   app.post("/users/:username/block", async (req, res) => {
     try {
-      const actor = await db.Profile.getUserByUsername(req.params.username);
+      const actor = await db.User.getUserByUsername(req.params.username);
       if (!actor) return res.status(404).json({ error: "User not found", username: req.params.username });
 
-      const target = await db.Profile.getUserByUsername(req.body.targetUsername);
+      const target = await db.User.getUserByUsername(req.body.targetUsername);
       if (!target) return res.status(400).json({ error: "Target user does not exist", targetUsername: req.body.targetUsername });
 
       const result = await db.Interactions.blockUser(req.params.username, req.body.targetUsername);
@@ -298,13 +298,13 @@ export function createApp({ db }) {
 
   // Get notification preferences
   app.get("/notifications/preferences/:username", async (req, res) => {
-    const preferences = await db.Profile.getNotificationPreferences(req.params.username);
+    const preferences = await db.User.getNotificationPreferences(req.params.username);
     res.json(preferences);
   });
 
   // Update notification preferences
   app.patch("/notifications/preferences/:username", async (req, res) => {
-    const updatedPreferences = await db.Profile.updateNotificationPreferences(req.params.username, req.body);
+    const updatedPreferences = await db.User.updateNotificationPreferences(req.params.username, req.body);
     res.json(updatedPreferences);
   });
 

@@ -2,7 +2,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { createUser, findUserByEmail } from "../models/User.js";
+import { UsersModel } from "../models/User.js";
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ router.post("/signup", async (req, res) => {
   try {
     const passwordHash = await bcrypt.hash(password, 10);
     const username = email.split("@")[0];
-    const user = await createUser(email, passwordHash, username);
+    const user = await UsersModel.createUser(email, passwordHash, username);
 
     res.status(201).json({ message: "User created", username: user.username });
   } catch (err) {
@@ -37,7 +37,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Email and password required" });
     }
 
-    const user = await findUserByEmail(email);
+    const user = await UsersModel.findUserByEmail(email);
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const valid = await bcrypt.compare(password, user.password_hash);
