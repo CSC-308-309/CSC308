@@ -7,6 +7,7 @@ import Messages from "./pages/Messages";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { NotificationsProvider } from "./components/notifications/NotificationsContext";
+import ProfileSetup from './pages/ProfileSetup';
 
 function getUsernameFromStorage() {
   try {
@@ -35,6 +36,7 @@ function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/profilesetup" element={<ProfileSetup />} />
         </Routes>
       </NotificationsProvider>
     </div>
