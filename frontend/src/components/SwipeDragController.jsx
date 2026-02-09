@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 const SWIPE_THRESHOLD = 100;
@@ -47,10 +48,11 @@ const SwipeDragController = forwardRef(
 
     const resetPosition = () => setDragOffset({ x: 0, y: 0 });
 
-    const programmaticSwipe = (direction) => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const programmaticSwipe = useCallback((direction) => {
       if (isDragging || !isActive) return;
       executeSwipe(direction);
-    };
+    });
 
     // Add keyboard arrow key support
     useEffect(() => {

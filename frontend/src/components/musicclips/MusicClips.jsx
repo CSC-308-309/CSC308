@@ -46,7 +46,6 @@ export default function MusicClips() {
 
     // Prioritize starred clips
     const starred = clips.filter(c => c.starred);
-    const unstarred = clips.filter(c => !c.starred);
 
     if (starred.length > 0) {
       return starred.slice(0, 3);
