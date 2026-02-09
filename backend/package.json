@@ -19,6 +19,9 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "@aws-sdk/client-s3": "^3.971.0",
+    "@aws-sdk/s3-presigned-post": "^3.971.0",
+    "@aws-sdk/s3-request-presigner": "^3.971.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
@@ -26,7 +29,8 @@
     "nodemon": "^3.1.10",
     "pg": "^8.16.3",
     "sequelize": "^6.37.7",
-    "sequelize-cli": "^6.6.3"
+    "sequelize-cli": "^6.6.3",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.28.5",
