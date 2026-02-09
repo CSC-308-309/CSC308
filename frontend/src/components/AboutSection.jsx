@@ -6,6 +6,7 @@ import PlaylistIcon from "../assets/PlaylistLinkIcon.png";
 import LocationIcon from "../assets/MeetupLocationsIcon.png";
 import ClockIcon from "../assets/AvailabilityIcon.png";
 
+//fixed import
 export default function AboutSection({ profileData = {} }) {
   const {
     topInterests = "",
