@@ -1,18 +1,18 @@
 // src/components/EditCoverPhotoButton.jsx
 
-import { useRef } from 'react';
+import { useRef } from "react";
 
 export default function EditCoverPhotoButton({
   onSelect,
-  label = 'Edit Cover Photo',
-  className = '',
+  label = "Edit Cover Photo",
+  className = "",
 }) {
   const inputRef = useRef(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file && onSelect) onSelect(file);
-    e.target.value = '';
+    e.target.value = "";
   };
 
   return (

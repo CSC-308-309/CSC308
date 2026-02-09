@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ConcertIcon from '../../assets/concert.svg'
+import ConcertIcon from "../../assets/concert.svg";
 
 export default function NewMusicClip({ isOpen, onClose, onSave }) {
   const [title, setTitle] = useState("");
@@ -8,52 +8,53 @@ export default function NewMusicClip({ isOpen, onClose, onSave }) {
   if (!isOpen) return null;
 
   const generateVideoThumbnail = (videoFile) => {
-  return new Promise((resolve) => {
-    const video = document.createElement("video");
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
+    return new Promise((resolve) => {
+      const video = document.createElement("video");
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
-    video.src = URL.createObjectURL(videoFile);
-    video.muted = true;
+      video.src = URL.createObjectURL(videoFile);
+      video.muted = true;
 
-    video.onloadedmetadata = () => {
-      video.currentTime = Math.min(1, video.duration / 2);
-    };
+      video.onloadedmetadata = () => {
+        video.currentTime = Math.min(1, video.duration / 2);
+      };
 
-    video.onseeked = () => {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      video.onseeked = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        resolve(url);
-        URL.revokeObjectURL(video.src);
-      }, "image/jpeg", 0.8);
-    };
-  });
-};
-
+        canvas.toBlob(
+          (blob) => {
+            const url = URL.createObjectURL(blob);
+            resolve(url);
+            URL.revokeObjectURL(video.src);
+          },
+          "image/jpeg",
+          0.8,
+        );
+      };
+    });
+  };
 
   const handleSubmit = async () => {
-  if (!title.trim() || !file) return;
+    if (!title.trim() || !file) return;
 
-  let fileThumbnail = null;
+    let fileThumbnail = null;
 
-  if (file.type.includes("video")) {
-    fileThumbnail = await generateVideoThumbnail(file);
-  } 
-  else if (file.type.includes("audio")) {
-    fileThumbnail = ConcertIcon;
-  }
+    if (file.type.includes("video")) {
+      fileThumbnail = await generateVideoThumbnail(file);
+    } else if (file.type.includes("audio")) {
+      fileThumbnail = ConcertIcon;
+    }
 
-  onSave({ title, file, fileThumbnail });
+    onSave({ title, file, fileThumbnail });
 
-  setTitle("");
-  setFile(null);
-  onClose();
-};
-
+    setTitle("");
+    setFile(null);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">

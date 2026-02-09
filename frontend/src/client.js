@@ -3,7 +3,7 @@
 
 // For now, just localhost URL
 // TODO: allow injection of env var
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = "http://localhost:8000";
 
 // async function request(path, options = {}) {
 //   const res = await fetch(`${BASE_URL}${path}`, {
@@ -23,23 +23,24 @@ const BASE_URL = 'http://localhost:8000';
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     ...options,
   });
 
   const contentType = res.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
 
-  const body = isJson ? await res.json().catch(() => null)
-                      : await res.text().catch(() => "");
+  const body = isJson
+    ? await res.json().catch(() => null)
+    : await res.text().catch(() => "");
 
   if (!res.ok) {
     const message =
-      (body && typeof body === "object" && body.details)
+      body && typeof body === "object" && body.details
         ? `${body.error}: ${body.details}`
-        : (body && typeof body === "object" && body.error)
+        : body && typeof body === "object" && body.error
           ? body.error
-          : (typeof body === "string" && body.trim())
+          : typeof body === "string" && body.trim()
             ? body
             : res.statusText;
 
@@ -52,30 +53,44 @@ async function request(path, options = {}) {
   return body;
 }
 
-
 const requestTypes = {
-    get: (path) => request(path, { method: 'GET' }),
-    post: (path, data) => request(path, { method: 'POST', body: JSON.stringify(data) }),
-    put: (path, data) => request(path, { method: 'PUT', body: JSON.stringify(data) }),
-    delete: (path) => request(path, { method: 'DELETE' }),
-}
+  get: (path) => request(path, { method: "GET" }),
+  post: (path, data) =>
+    request(path, { method: "POST", body: JSON.stringify(data) }),
+  put: (path, data) =>
+    request(path, { method: "PUT", body: JSON.stringify(data) }),
+  delete: (path) => request(path, { method: "DELETE" }),
+};
 
 export const api = {
-    // User/Profile routes
-    listUsers: () => requestTypes.get('/users'),
-    getByUsername: (username) => requestTypes.get(`/users/${encodeURIComponent(username)}`),
-    update: (username, data) => requestTypes.put(`/users/${encodeURIComponent(username)}`, data),
-    deleteUser: (username) => requestTypes.delete(`/users/${encodeURIComponent(username)}`),
-    signup: (profile) => requestTypes.post('/auth/signup', profile),
-    login: (credentials) => requestTypes.post('/auth/login', credentials),
-    
-    // Interaction routes
-    like: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/like`, { targetUsername }),
-    dislike: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/dislike`, { targetUsername }),
-    block: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/block`, { targetUsername }),
+  // User/Profile routes
+  listUsers: () => requestTypes.get("/users"),
+  getByUsername: (username) =>
+    requestTypes.get(`/users/${encodeURIComponent(username)}`),
+  update: (username, data) =>
+    requestTypes.put(`/users/${encodeURIComponent(username)}`, data),
+  deleteUser: (username) =>
+    requestTypes.delete(`/users/${encodeURIComponent(username)}`),
+  signup: (profile) => requestTypes.post("/auth/signup", profile),
+  login: (credentials) => requestTypes.post("/auth/login", credentials),
 
-    //Photo Storage routes
-    presignUpload: (uploadParams) => requestTypes.put("/media/presign", uploadParams)
-}
+  // Interaction routes
+  like: (username, targetUsername) =>
+    requestTypes.post(`/users/${encodeURIComponent(username)}/like`, {
+      targetUsername,
+    }),
+  dislike: (username, targetUsername) =>
+    requestTypes.post(`/users/${encodeURIComponent(username)}/dislike`, {
+      targetUsername,
+    }),
+  block: (username, targetUsername) =>
+    requestTypes.post(`/users/${encodeURIComponent(username)}/block`, {
+      targetUsername,
+    }),
+
+  //Photo Storage routes
+  presignUpload: (uploadParams) =>
+    requestTypes.put("/media/presign", uploadParams),
+};
 
 export { BASE_URL };
