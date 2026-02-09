@@ -8,6 +8,10 @@
     "frontend"
   ],
   "scripts": {
+
+    "lint": "npx eslint . && npx prettier --check .",
+    "test": "npm test --workspace=backend",
+
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
     "start:backend": "npm start --workspace=backend",
