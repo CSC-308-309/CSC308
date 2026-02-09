@@ -69,15 +69,9 @@ export default function NotificationSection({ title, items = [] }) {
 
           return (
             <NotificationItem
-<<<<<<< HEAD
-              key={notif.id}
-              id={notif.id}
-              icon={<User />}
-=======
               key={id}
               id={id}
               icon={iconForType(type)}
->>>>>>> notifsAPI
               message={
                 <span>
                   <strong>{username}</strong> {message}

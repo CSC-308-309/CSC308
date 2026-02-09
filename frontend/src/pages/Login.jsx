@@ -12,10 +12,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-<<<<<<< HEAD
-=======
     setIsLoading(true);
->>>>>>> notifsAPI
 
     try {
       const res = await fetch("http://localhost:8000/auth/login", {

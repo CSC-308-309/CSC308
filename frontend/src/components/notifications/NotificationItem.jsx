@@ -1,11 +1,6 @@
-<<<<<<< HEAD
-import React, { useState } from "react";
-import { api } from '../../client';
-=======
 import React, { useMemo, useState } from "react";
 import { api } from "../../client";
 import { useNotifications } from "./NotificationsContext";
->>>>>>> notifsAPI
 
 export default function NotificationItem({
   id,
@@ -13,30 +8,6 @@ export default function NotificationItem({
   message,
   time,
   postText,
-<<<<<<< HEAD
-}) {
-  const [buttonText, setButtonText] = useState(initialButtonText);
-  const [loading, setLoading] = useState(false);
-
-  const handleClick = async () => {
-    if (!id || !buttonText || loading) return;
-
-    setLoading(true);
-
-    try {
-      if (buttonText === "Sync Back") {
-        await api.markNotificationRead(id);
-        setButtonText("Synced");
-      } 
-      
-      else if (buttonText === "Synced") {
-        await api.markNotificationUnread(id);
-        setButtonText("Sync Back");
-      }
-    } 
-    
-    catch (err) {
-=======
   actionVariant = "read", 
   initialIsRead = false,
 }) 
@@ -95,7 +66,6 @@ export default function NotificationItem({
       await refreshUnreadCount();
 
     } catch (err) {
->>>>>>> notifsAPI
       console.error("Notification action failed:", err);
     } 
     
@@ -122,23 +92,6 @@ export default function NotificationItem({
         </div>
       </div>
 
-<<<<<<< HEAD
-      {buttonText && (
-        <button
-          onClick={handleClick}
-          disabled={loading}
-          className={`px-3 py-1 rounded-md text-sm transition ${
-            loading
-              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-              : buttonText === "Sync Back"
-              ? "bg-purple-300 hover:bg-purple-400"
-              : "bg-purple-200 text-purple-900 hover:bg-purple-300"
-          }`}
-        >
-          {loading ? "..." : buttonText}
-        </button>
-      )}
-=======
       <button
         onClick={handleClick}
         disabled={loading}
@@ -156,7 +109,6 @@ export default function NotificationItem({
       >
         {loading ? "..." : buttonText}
       </button>
->>>>>>> notifsAPI
     </div>
   );
 }
