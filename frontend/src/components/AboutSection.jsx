@@ -1,7 +1,7 @@
 // src/components/AboutSection.jsx
 import StarIcon from "../assets/TopInterestsIcon.png";
 import UserMusicIcon from "../assets/TopArtistIcon.png";
-import MusicNoteIcon from "../assets/favoriteGenresIcon.png";
+import MusicNoteIcon from "../assets/FavoriteGenresIcon.png";
 import PlaylistIcon from "../assets/PlaylistLinkIcon.png";
 import LocationIcon from "../assets/MeetupLocationsIcon.png";
 import ClockIcon from "../assets/AvailabilityIcon.png";
