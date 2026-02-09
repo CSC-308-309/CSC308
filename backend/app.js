@@ -201,6 +201,7 @@ export function createApp({ db }) {
   });
   
   app.post("/chats/:chatId/messages", async (req, res) => {
+    console.log("++++++++++++++++++ message sent?", req.body);
     const newMessage = await db.Messages.sendMessage(req.params.chatId, req.body);
     res.status(201).json(newMessage);
   });

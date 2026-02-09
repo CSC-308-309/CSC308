@@ -253,6 +253,7 @@ export const MessagesModel = {
     },
 
     async sendMessage(chatId, messageData) {
+        console.log("~~~~~~~~~~~~~~~~ sendMessage called with:", { chatId, messageData });
         const { sender_username, content } = messageData;
         
         try {
