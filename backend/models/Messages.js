@@ -46,12 +46,12 @@ export const MessagesModel = {
             
             // Add participants
             const participantQuery = `
-                INSERT INTO chat_members (chat_id, username)
-                VALUES ($1, $2)
-                ON CONFLICT (chat_id, username) DO NOTHING
-                RETURNING id, username
+                INSERT INTO chat_members (chat_id, user_id)
+                VALUES ($1, (SELECT id FROM users WHERE username = $2))
+                ON CONFLICT (chat_id, user_id) DO NOTHING
+                RETURNING user_id
             `;
-            
+
             for (const participant of participants) {
                 await pool.query(participantQuery, [chat.id, participant]);
             }
@@ -136,10 +136,13 @@ export const MessagesModel = {
 
     async listChatParticipants(chatId) {
         const query = `
-            SELECT cm.username, cm.joined_at,
-                   u.name, u.main_image as avatar
+            SELECT
+            u.username,
+            u.name,
+            u.main_image AS avatar,
+            cm.joined_at
             FROM chat_members cm
-            LEFT JOIN users u ON cm.username = u.username
+            JOIN users u ON cm.user_id = u.id
             WHERE cm.chat_id = $1
             ORDER BY cm.joined_at ASC
         `;
@@ -285,7 +288,7 @@ export const MessagesModel = {
         `;
         
         try {
-            const { rows } = await pool.query(query, [text, chatId, messageId]);
+            const { rows } = await pool.query(query, [content, chatId, messageId]);
             return rows[0] || null;
         } catch (error) {
             console.error('Error in updateMessage:', error);

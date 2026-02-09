@@ -88,34 +88,17 @@ export const api = {
     block: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/block`, { targetUsername }),
 
     // Messaging routes
-    listChats: (params = {}) => requestTypes.get(withQuery('/chats', params)),
-    createChat: (data) => requestTypes.post('/chats', data),
-    getChat: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}`),
+     listChats: (params = {}) => requestTypes.get(withQuery('/chats', params)),
+     createChat: (data) => requestTypes.post('/chats', data),
+     getChat: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}`),
     updateChat: (chatId, data) => requestTypes.patch(`/chats/${encodeURIComponent(chatId)}`, data),
     deleteChat: (chatId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}`),
-    listChatParticipants: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/participants`),
+     listChatParticipants: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/participants`),
     addChatParticipants: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/participants`, data),
     removeChatParticipant: (chatId, username) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/participants/${encodeURIComponent(username)}`),
-    listMessages: (chatId, params = {}) => requestTypes.get(withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params)),
+     listMessages: (chatId, params = {}) => requestTypes.get(withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params)),
     getMessage: (chatId, messageId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
-    sendMessage: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/messages`, data),
-    updateMessage: (chatId, messageId, data) => requestTypes.patch(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`, data),
-    deleteMessage: (chatId, messageId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
-    markChatRead: (chatId, data = {}) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/read`, data),
-    setTyping: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/typing`, data),
-
-    // Messaging routes
-    listChats: (params = {}) => requestTypes.get(withQuery('/chats', params)),
-    createChat: (data) => requestTypes.post('/chats', data),
-    getChat: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}`),
-    updateChat: (chatId, data) => requestTypes.patch(`/chats/${encodeURIComponent(chatId)}`, data),
-    deleteChat: (chatId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}`),
-    listChatParticipants: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/participants`),
-    addChatParticipants: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/participants`, data),
-    removeChatParticipant: (chatId, username) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/participants/${encodeURIComponent(username)}`),
-    listMessages: (chatId, params = {}) => requestTypes.get(withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params)),
-    getMessage: (chatId, messageId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
-    sendMessage: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/messages`, data),
+     sendMessage: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/messages`, data),
     updateMessage: (chatId, messageId, data) => requestTypes.patch(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`, data),
     deleteMessage: (chatId, messageId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
     markChatRead: (chatId, data = {}) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/read`, data),
@@ -123,15 +106,16 @@ export const api = {
 
     // Notification routes
     // NOTE: these two are not valid routes, we don't want to list all notifs in the database
-    //        fix their usage in the frontend to use listNotifications with username input
+    // fix their usage in the frontend to use listNotifications with username input
     //listMyNotifications: (params = {}) => requestTypes.get(withQuery('/notifications/me', params)),
     //getMyUnreadNotificationsCount: () => requestTypes.get('/notifications/me/unread-count'),
-    listNotifications: (username) => requestTypes.get(withQuery(`/notifications/${encodeURIComponent(username)}`)),
+    listNotifications: (username, params = {}) => requestTypes.get(withQuery(`/notifications/${encodeURIComponent(username)}`, params)),
     getUnreadNotificationsCount: (username) => requestTypes.get(`/notifications/${encodeURIComponent(username)}/unreadCount`),
     getNotification: (notificationId) => requestTypes.get(`/notifications/id/${encodeURIComponent(notificationId)}`),
     createNotification: (data) => requestTypes.post('/notifications', data),
     markNotificationRead: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/read`, {}),
     markNotificationUnread: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unread`, {}),
+    
     markAllNotificationsRead: (data = {}) => requestTypes.post('/notifications/readAll', data),
     archiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/archive`, {}),
     unarchiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unarchive`, {}),
@@ -143,8 +127,8 @@ export const api = {
     // Event routes
     listEvents: () => requestTypes.get('/events'),
 
-  }
     //Photo Storage routes
     presignUpload: (uploadParams) => requestTypes.put("/media/presign", uploadParams)
+  }
 
 export { BASE_URL };
