@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // EventCard Component
-const EventCard = ({ image, date, title, location }) => {
+const EventCard = ({ date, title, location }) => {
     return (
       <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
         <div className="bg-gray-400 aspect-[6/3] w-full rounded-t-lg"></div>

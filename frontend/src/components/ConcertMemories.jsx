@@ -65,7 +65,6 @@ export default function ConcertMemories() {
 
   // If real memories exist -> prioritize starred
   const starred = realMemories.filter(m => m.starred);
-  const unstarred = realMemories.filter(m => !m.starred);
 
   if (starred.length > 0) {
     return starred.slice(0, 3);
