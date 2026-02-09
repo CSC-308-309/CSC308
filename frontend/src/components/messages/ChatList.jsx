@@ -1,4 +1,4 @@
-import ChatItem from './ChatItem';
+import ChatItem from "./ChatItem";
 
 export default function ChatList({ chats, selectedChat, setSelectedChat }) {
   return (
@@ -11,7 +11,7 @@ export default function ChatList({ chats, selectedChat, setSelectedChat }) {
       </div>
 
       <div className="overflow-y-auto">
-        {chats.map(chat => (
+        {chats.map((chat) => (
           <ChatItem
             key={chat.id}
             chat={chat}

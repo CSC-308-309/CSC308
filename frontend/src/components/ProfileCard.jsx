@@ -1,21 +1,20 @@
-import { Mic, Cake, User, Music, FileText } from 'lucide-react';
-import SwipeDragController from './SwipeDragController';
-import concertImage from '../assets/concert_image.png';
+import { Mic, Cake, User, Music, FileText } from "lucide-react";
+import SwipeDragController from "./SwipeDragController";
+import concertImage from "../assets/concert_image.png";
 
 export default function ProfileCard({ profile, isActive = true, onSwipe }) {
-
   const defaultProfile = {
-    name: 'Taylor Swift',
-    role: 'Vocalist',
-    age: '35 y.o.',
-    gender: 'Woman (she/her)',
-    genre: 'Pop/Country',
-    experience: '12 years of experience',
+    name: "Taylor Swift",
+    role: "Vocalist",
+    age: "35 y.o.",
+    gender: "Woman (she/her)",
+    genre: "Pop/Country",
+    experience: "12 years of experience",
     main_image:
-      'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop',
+      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop",
     concert_image: concertImage,
-    last_song: 'Dracula by Tame Impala',
-    last_song_desc: 'The last song that gave me chills is...',
+    last_song: "Dracula by Tame Impala",
+    last_song_desc: "The last song that gave me chills is...",
   };
 
   const profileData = profile || defaultProfile;
@@ -36,7 +35,7 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
             className="w-full max-w-3xl bg-gradient-to-b from-purple-200 to-purple-100 rounded-3xl p-6 shadow-md cursor-grab active:cursor-grabbing select-none"
             style={{
               transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y}px) rotate(${rotation}deg)`,
-              transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+              transition: isDragging ? "none" : "transform 0.3s ease-out",
               opacity: opacity,
             }}
           >
@@ -82,7 +81,7 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src =
-                      'https://via.placeholder.com/400x500?text=No+Image';
+                      "https://via.placeholder.com/400x500?text=No+Image";
                   }}
                 />
               </div>
@@ -100,7 +99,7 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src =
-                      'https://via.placeholder.com/800x600?text=No+Concert+Image';
+                      "https://via.placeholder.com/800x600?text=No+Concert+Image";
                   }}
                 />
               </div>

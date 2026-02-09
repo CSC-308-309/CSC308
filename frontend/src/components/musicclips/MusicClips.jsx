@@ -12,8 +12,8 @@ export default function MusicClips() {
   const toggleStar = (id) => {
     setClips(
       clips.map((clip) =>
-        clip.id === id ? { ...clip, starred: !clip.starred } : clip
-      )
+        clip.id === id ? { ...clip, starred: !clip.starred } : clip,
+      ),
     );
   };
 
@@ -45,7 +45,7 @@ export default function MusicClips() {
     }
 
     // Prioritize starred clips
-    const starred = clips.filter(c => c.starred);
+    const starred = clips.filter((c) => c.starred);
 
     if (starred.length > 0) {
       return starred.slice(0, 3);
@@ -62,7 +62,6 @@ export default function MusicClips() {
       <h2 className="text-2xl font-bold mb-6">Music Clips</h2>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-
         {/* Display Clips */}
         {displayClips.map((clip) => (
           <div key={clip.id} className="flex flex-col items-start">
@@ -102,9 +101,7 @@ export default function MusicClips() {
             <h3 className="font-semibold text-gray-800 text-sm mt-2">
               {clip.title}
             </h3>
-            <p className="text-xs text-gray-500 mt-1">
-              Updated today
-            </p>
+            <p className="text-xs text-gray-500 mt-1">Updated today</p>
           </div>
         ))}
 

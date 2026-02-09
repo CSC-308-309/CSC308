@@ -7,10 +7,10 @@ import {
   Settings,
   LogOut,
   LogIn,
-} from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import logoIcon from '../assets/logo.svg';
-import { isLoggedIn, logout } from '../utils/auth';
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import logoIcon from "../assets/logo.svg";
+import { isLoggedIn, logout } from "../utils/auth";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
@@ -26,15 +26,13 @@ export default function Navbar() {
       className="flex flex-col w-[215px] text-white"
       style={{
         background:
-          'linear-gradient(180deg, #A376A2 0%, #8D5F8C 50%, #7E5179 100%)',
+          "linear-gradient(180deg, #A376A2 0%, #8D5F8C 50%, #7E5179 100%)",
       }}
     >
       {/* Header */}
       <div className="flex items-center gap-3 p-6 border-b border-gray-200">
         <img src={logoIcon} alt="Mic" className="w-8 h-8" />
-        <h1 className="text-2xl font-semibold font-nunito">
-          Melodious
-        </h1>
+        <h1 className="text-2xl font-semibold font-nunito">Melodious</h1>
       </div>
 
       {/* Main Nav */}

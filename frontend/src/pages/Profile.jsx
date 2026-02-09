@@ -1,20 +1,20 @@
 // src/pages/Profile.jsx
-import { useState } from 'react';
-import Navbar from '../components/Navbar';
-import CoverPhoto from '../components/CoverPhoto';
-import EditProfilePhoto from '../components/ProfilePhoto';
-import TopProfileCard from '../components/TopProfileCard';
-import AboutCard from '../components/AboutCard';
-import YouMightKnowCard from '../components/YouMightKnowCard';
+import { useState } from "react";
+import Navbar from "../components/Navbar";
+import CoverPhoto from "../components/CoverPhoto";
+import EditProfilePhoto from "../components/ProfilePhoto";
+import TopProfileCard from "../components/TopProfileCard";
+import AboutCard from "../components/AboutCard";
+import YouMightKnowCard from "../components/YouMightKnowCard";
 import BioSection, {
   DEFAULT_PROFILE,
   getInitialProfileData,
-} from '../components/BioSection';
-import EditBioButton from '../components/EditBioButton';
-import ConcertMemories from '../components/ConcertMemories';
-import AboutSection from '../components/AboutSection'; //
-import YouMightKnowSection from '../components/YouMightKnowSection'; //
-import MusicClips from '../components/musicclips/MusicClips';
+} from "../components/BioSection";
+import EditBioButton from "../components/EditBioButton";
+import ConcertMemories from "../components/ConcertMemories";
+import AboutSection from "../components/AboutSection"; //
+import YouMightKnowSection from "../components/YouMightKnowSection"; //
+import MusicClips from "../components/musicclips/MusicClips";
 
 export default function Profile() {
   const [profileData, setProfileData] = useState(getInitialProfileData);
@@ -33,10 +33,10 @@ export default function Profile() {
         <div className="mx-auto justify-center p-6 w-[1160px]">
           <TopProfileCard>
             <div className="relative">
-              <CoverPhoto username="testuser"/>
+              <CoverPhoto username="testuser" />
 
               <div className="absolute left-14 -bottom-[68px] z-20">
-                <EditProfilePhoto username="testuser"/>
+                <EditProfilePhoto username="testuser" />
               </div>
 
               <div className="absolute right-12 top-[260px] z-30">
@@ -58,7 +58,6 @@ export default function Profile() {
 
           <div className="grid grid-cols-12 mt-5 w-[1160px]">
             <div className="col-span-12 lg:col-span-8 pr-5 space-y-10">
-  
               {/* Concert Memories Section */}
               <section>
                 <ConcertMemories />
@@ -72,7 +71,6 @@ export default function Profile() {
                 <MusicClips />
               </section>
             </div>
-
 
             <div className="col-span-12 lg:col-span-4 ml-auto space-y-5">
               <AboutCard>

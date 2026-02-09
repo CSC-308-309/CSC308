@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 
 const SWIPE_THRESHOLD = 100;
 const ROTATION_FACTOR = 20;
@@ -30,7 +30,7 @@ const SwipeDragController = forwardRef(
       setIsDragging(false);
 
       if (Math.abs(dragOffset.x) > SWIPE_THRESHOLD) {
-        const direction = dragOffset.x > 0 ? 'right' : 'left';
+        const direction = dragOffset.x > 0 ? "right" : "left";
         executeSwipe(direction);
       } else {
         resetPosition();
@@ -38,7 +38,7 @@ const SwipeDragController = forwardRef(
     };
 
     const executeSwipe = (direction) => {
-      const exitX = direction === 'right' ? EXIT_VELOCITY : -EXIT_VELOCITY;
+      const exitX = direction === "right" ? EXIT_VELOCITY : -EXIT_VELOCITY;
       setDragOffset({ x: exitX, y: 0 });
       setTimeout(() => {
         onSwipe?.(direction);
@@ -58,12 +58,12 @@ const SwipeDragController = forwardRef(
     useEffect(() => {
       const handleKeyDown = (e) => {
         if (!isActive) return;
-        if (e.key === 'ArrowLeft') programmaticSwipe('left');
-        if (e.key === 'ArrowRight') programmaticSwipe('right');
+        if (e.key === "ArrowLeft") programmaticSwipe("left");
+        if (e.key === "ArrowRight") programmaticSwipe("right");
       };
 
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isActive, isDragging, programmaticSwipe]);
 
     // Expose swipe() to parent components
@@ -100,7 +100,7 @@ const SwipeDragController = forwardRef(
         })}
       </div>
     );
-  }
+  },
 );
 
 export default SwipeDragController;

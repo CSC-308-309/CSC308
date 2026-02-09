@@ -111,26 +111,20 @@ export default function ProfileSetup() {
               <Input
                 placeholder="Add a profile photo (image URL)"
                 value={profile.profileImage}
-                onChange={(e) =>
-                  updateField("profileImage", e.target.value)
-                }
+                onChange={(e) => updateField("profileImage", e.target.value)}
               />
 
               <Input
                 placeholder="What's the last song you loved?"
                 value={profile.favoriteSong}
-                onChange={(e) =>
-                  updateField("favoriteSong", e.target.value)
-                }
+                onChange={(e) => updateField("favoriteSong", e.target.value)}
               />
 
               <textarea
                 placeholder="Describe what you like about this song"
                 className="w-full p-2 rounded border h-24"
                 value={profile.songDescription}
-                onChange={(e) =>
-                  updateField("songDescription", e.target.value)
-                }
+                onChange={(e) => updateField("songDescription", e.target.value)}
               />
 
               {error && (
