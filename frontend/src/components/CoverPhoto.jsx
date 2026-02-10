@@ -37,6 +37,7 @@ export default function CoverPhoto({
   className = "mt-10",
   objectPosition = "center",
   username,
+  initialSrc = "",
 }) {
   const [src, setSrc] = useState(fallbackSrc);
   const [isUploading, setIsUploading] = useState(false);
@@ -45,6 +46,10 @@ export default function CoverPhoto({
     const saved = localStorage.getItem(storageKey);
     if (saved) setSrc(saved);
   }, [storageKey]);
+
+  useEffect(() => {
+    if (initialSrc) setSrc(initialSrc);
+  }, [initialSrc]);
 
   const handleFileSelect = async (file) => {
     if (!file?.type?.startsWith("image/")) return;
