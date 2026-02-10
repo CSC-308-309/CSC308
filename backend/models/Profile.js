@@ -1,10 +1,14 @@
 // models/Profile.js
 import pool from '../db/index.js';
 
+// Columns returned for profile/list — exclude password_hash
+const USER_COLUMNS =
+  'id, username, email, name, role, age, gender, genre, experience, main_image, concert_image, last_song, last_song_desc, created_at, updated_at';
+
 export const ProfileModel = {
   async listUsers() {
     const query = `
-      SELECT * FROM profiles
+      SELECT ${USER_COLUMNS} FROM users
     `;
     const { rows } = await pool.query(query);
     return rows;
@@ -12,44 +16,11 @@ export const ProfileModel = {
 
   async getUserByUsername(username) {
     const query = `
-      SELECT * FROM profiles WHERE username = $1
+      SELECT ${USER_COLUMNS} FROM users WHERE username = $1
     `;
     const values = [username];
     const { rows } = await pool.query(query, values);
     return rows[0];
-  },
-
-  async createUser(profileData) {
-    // Accept a JSON object and map to the correct column order
-    const query = `
-      INSERT INTO profiles (
-        username, name, role, age, gender, genre,
-        experience, main_image, concert_image, last_song, last_song_desc
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-      RETURNING *
-    `;
-
-    const values = [
-      profileData.username,
-      profileData.name,
-      profileData.role,
-      profileData.age,
-      profileData.gender,
-      profileData.genre,
-      profileData.experience,
-      profileData.main_image,
-      profileData.concert_image,
-      profileData.last_song,
-      profileData.last_song_desc,
-    ];
-
-    try {
-      const result = await pool.query(query, values);
-      return result.rows[0];
-    } catch (error) {
-      console.error('Error in Profile.createUser:', error);
-      throw error;
-    }
   },
 
   async updateUser(username, updateData) {
@@ -58,13 +29,13 @@ export const ProfileModel = {
     const setClause = fields.map((field, idx) => `${field} = $${idx + 2}`).join(', ');
     const values = [username, ...fields.map(f => updateData[f])];
     const query = `
-      UPDATE profiles SET ${setClause}
+      UPDATE users SET ${setClause}
       WHERE username = $1
-      RETURNING username
+      RETURNING ${USER_COLUMNS}
     `;
     try {
       const result = await pool.query(query, values);
-      return result.rows[0]?.username;
+      return result.rows[0];
     } catch (error) {
       console.error('Error in Profile.updateUser:', error);
       throw error;
@@ -73,11 +44,11 @@ export const ProfileModel = {
 
   async deleteUser(username) {
     const query = `
-      DELETE FROM profiles WHERE username = $1 RETURNING *
+      DELETE FROM users WHERE username = $1 RETURNING ${USER_COLUMNS}
     `;
     try {
       const result = await pool.query(query, [username]);
-      return result.rows[0];
+      return result.rows[0] ?? null;
     } catch (error) {
       console.error('Error in Profile.deleteUser:', error);
       throw error;

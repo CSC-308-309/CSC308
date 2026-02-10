@@ -27,6 +27,9 @@ export default function Signup() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Signup failed");
 
+      if (data.username) {
+        localStorage.setItem("user", JSON.stringify({ username: data.username }));
+      }
       navigate("/profilesetup");
     } catch (err) {
       setError(err.message);
