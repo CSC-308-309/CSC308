@@ -1,7 +1,7 @@
+import { useEffect, useState } from "react";
 import { Mic, Cake, User, Music, FileText } from "lucide-react";
 import SwipeDragController from "./SwipeDragController";
 import concertImage from "../assets/concert_image.png";
-import defaultProfilePhoto from "../assets/DefaultProfilePhoto.png";
 
 export default function ProfileCard({ profile, isActive = true, onSwipe }) {
   const defaultProfile = {
@@ -18,6 +18,33 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
   };
 
   const profileData = profile || defaultProfile;
+  const [mainImageSrc, setMainImageSrc] = useState(profileData.main_image);
+  const [concertImageSrc, setConcertImageSrc] = useState(
+    profileData.concert_image,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveImage = async (rawUrl, setter) => {
+      if (!rawUrl) return;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: rawUrl });
+        if (!cancelled && viewUrl) setter(viewUrl);
+      } catch {
+        if (!cancelled) setter(rawUrl);
+      }
+    };
+
+    setMainImageSrc(profileData.main_image);
+    setConcertImageSrc(profileData.concert_image);
+    resolveImage(profileData.main_image, setMainImageSrc);
+    resolveImage(profileData.concert_image, setConcertImageSrc);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [profileData.main_image, profileData.concert_image]);
 
   const handleSwipe = (direction) => {
     console.log(`Swiped ${direction} on ${profileData.name}`);
@@ -74,7 +101,7 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               {/* Right Column - Main Image */}
               <div className="bg-gray-400 rounded-2xl overflow-hidden">
                 <img
-                  src={profileData.main_image || defaultProfile.main_image}
+                  src={profileData.main_image}
                   alt={profileData.name}
                   className="w-full h-full object-cover"
                   draggable={false}
@@ -91,7 +118,7 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               {/* Concert Image */}
               <div className="bg-gray-400 rounded-2xl overflow-hidden h-48">
                 <img
-                  src={profileData.concert_image || defaultProfile.concert_image}
+                  src={profileData.concert_image}
                   alt="Concert"
                   className="w-full h-full object-cover"
                   draggable={false}

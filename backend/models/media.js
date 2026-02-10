@@ -65,6 +65,20 @@ function extFromType(contentType) {
   return map[contentType] || "bin";
 }
 
+function toS3Key(input = "") {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+  if (!raw.startsWith("http://") && !raw.startsWith("https://")) return raw;
+
+  try {
+    const parsed = new URL(raw);
+    const pathname = parsed.pathname || "";
+    return decodeURIComponent(pathname.replace(/^\/+/, ""));
+  } catch {
+    return "";
+  }
+}
+
 
 export async function presignUpload(req, res) {
   try {
@@ -111,34 +125,25 @@ export async function presignUpload(req, res) {
   }
 }
 
-export async function presignViewUrl(req, res) {
+export async function presignView(req, res) {
   try {
-    const { fileUrl } = req.body;
-    if (!fileUrl) return res.status(400).json({ error: "fileUrl required" });
+    const { fileUrl, key, expiresIn } = req.body || {};
+    const objectKey = toS3Key(key || fileUrl);
+    if (!objectKey) return res.status(400).json({ error: "fileUrl or key required" });
 
     const bucket = env("S3_BUCKET");
-    const region = env("AWS_REGION");
-    const url = new URL(fileUrl);
-    const host = url.host.toLowerCase();
-    const validHosts = new Set([
-      `${bucket}.s3.${region}.amazonaws.com`.toLowerCase(),
-      `${bucket}.s3.amazonaws.com`.toLowerCase(),
-    ]);
-
-    if (!validHosts.has(host)) {
-      return res.json({ viewUrl: fileUrl });
-    }
-
-    const key = decodeURIComponent(url.pathname.replace(/^\/+/, ""));
-    if (!key) return res.status(400).json({ error: "Invalid S3 object URL" });
-
     const s3 = makeS3Client();
     const command = new GetObjectCommand({
       Bucket: bucket,
-      Key: key,
+      Key: objectKey,
     });
-    const viewUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-    return res.json({ viewUrl });
+
+    const ttl = Number.isInteger(expiresIn) ? expiresIn : 3600;
+    const viewUrl = await getSignedUrl(s3, command, {
+      expiresIn: Math.max(60, Math.min(ttl, 7 * 24 * 3600)),
+    });
+
+    return res.json({ viewUrl, key: objectKey });
   } catch (e) {
     console.error("Presign GET error:", e);
     return res.status(500).json({

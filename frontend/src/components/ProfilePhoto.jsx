@@ -61,38 +61,34 @@ export default function EditableProfilePhoto({
   };
 
   useEffect(() => {
-    let cancelled = false;
-
-    const hydratePhoto = async () => {
-      const savedRaw = localStorage.getItem(storageKey);
-      if (savedRaw) {
-        const savedView = await resolveViewUrl(savedRaw);
-        if (!cancelled) setSrc(savedView || fallbackSrc);
-      }
-
-      if (!username) return;
-
+    const hydrateSignedSrc = async () => {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return;
       try {
-        const user = await api.getByUsername(username);
-        const dbPhotoRaw = (user?.main_image || "").trim();
-        if (dbPhotoRaw && !cancelled) {
-          const dbPhotoView = await resolveViewUrl(dbPhotoRaw);
-          if (!cancelled) setSrc(dbPhotoView || fallbackSrc);
-          localStorage.setItem(storageKey, dbPhotoRaw);
-        }
-      } catch (err) {
-        console.error("Failed to load profile photo:", err);
+        const { viewUrl } = await api.presignView({ fileUrl: saved });
+        if (viewUrl) setSrc(viewUrl);
+      } catch {
+        setSrc(saved);
       }
     };
-
-    hydratePhoto();
-    return () => {
-      cancelled = true;
-    };
-  }, [storageKey, username]);
+    hydrateSignedSrc();
+  }, [storageKey]);
 
   useEffect(() => {
-    if (initialSrc) setSrc(initialSrc);
+    const hydrateInitialSrc = async () => {
+      if (!initialSrc) return;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: initialSrc });
+        if (viewUrl) {
+          setSrc(viewUrl);
+          return;
+        }
+      } catch {
+        // Fallback to raw URL below.
+      }
+      setSrc(initialSrc);
+    };
+    hydrateInitialSrc();
   }, [initialSrc]);
 
   const handleFileSelect = async (e) => {
@@ -142,8 +138,15 @@ export default function EditableProfilePhoto({
 
       await api.update(username, { main_image: fileUrl });
 
-      const viewUrl = await resolveViewUrl(fileUrl);
-      setSrc(viewUrl || fileUrl);
+      let renderedUrl = fileUrl;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl });
+        if (viewUrl) renderedUrl = viewUrl;
+      } catch {
+        // Keep raw URL fallback.
+      }
+
+      setSrc(renderedUrl);
       localStorage.setItem(storageKey, fileUrl);
     } catch (err) {
       console.error("Upload failed:", err);
