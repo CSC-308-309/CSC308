@@ -21,7 +21,8 @@ export default function ProfileSetup() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploadingProfile, setUploadingProfile] = useState(false);
+  const [uploadingConcert, setUploadingConcert] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
@@ -33,6 +34,7 @@ export default function ProfileSetup() {
     genre: "",
     experience: "",
     profileImage: "",
+    concertImage: "",
     favoriteSong: "",
     songDescription: "",
   });
@@ -64,16 +66,23 @@ export default function ProfileSetup() {
   function validateStep2() {
     const err = {};
     if (!(profile.profileImage || "").trim()) err.profileImage = "Please upload a profile photo.";
+    if (!(profile.concertImage || "").trim()) err.concertImage = "Please upload a concert image.";
     if (!(profile.favoriteSong || "").trim()) err.favoriteSong = "Favorite song is required.";
     if (!(profile.songDescription || "").trim()) err.songDescription = "Song description is required.";
     setFieldErrors((prev) => ({ ...prev, ...err }));
     return Object.keys(err).length === 0;
   }
 
-  const handleFileChange = async (e) => {
-    const file = e.target?.files?.[0];
+  const handleFileChange = async ({
+    event,
+    fieldName,
+    kind,
+    maxBytes,
+    errorField,
+  }) => {
+    const file = event.target?.files?.[0];
     if (!file) return;
-    setFieldErrors((prev) => ({ ...prev, profileImage: "" }));
+    setFieldErrors((prev) => ({ ...prev, [errorField]: "" }));
     setError("");
 
     const userJson = localStorage.getItem("user");
@@ -86,22 +95,32 @@ export default function ProfileSetup() {
 
     const allowed = ["image/jpeg", "image/png", "image/webp"];
     if (!allowed.includes(file.type)) {
-      setFieldErrors((prev) => ({ ...prev, profileImage: "Please choose a JPEG, PNG, or WebP image." }));
+      setFieldErrors((prev) => ({
+        ...prev,
+        [errorField]: "Please choose a JPEG, PNG, or WebP image.",
+      }));
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setFieldErrors((prev) => ({ ...prev, profileImage: "Image must be under 5MB." }));
+    if (file.size > maxBytes) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [errorField]:
+          kind === "cover"
+            ? "Image must be under 8MB."
+            : "Image must be under 5MB.",
+      }));
       return;
     }
 
-    setUploading(true);
+    if (fieldName === "concertImage") setUploadingConcert(true);
+    else setUploadingProfile(true);
     try {
       const presignRes = await fetch(`${API_BASE}/media/presign`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          kind: "profile",
+          kind,
           contentType: file.type,
           fileSize: file.size,
           userId: username,
@@ -121,12 +140,16 @@ export default function ProfileSetup() {
         body: file,
       });
       if (!putRes.ok) throw new Error("Upload failed");
-      updateField("profileImage", fileUrl);
+      updateField(fieldName, fileUrl);
     } catch (err) {
-      setFieldErrors((prev) => ({ ...prev, profileImage: err.message || "Upload failed. Try again." }));
+      setFieldErrors((prev) => ({
+        ...prev,
+        [errorField]: err.message || "Upload failed. Try again.",
+      }));
     } finally {
-      setUploading(false);
-      e.target.value = "";
+      if (fieldName === "concertImage") setUploadingConcert(false);
+      else setUploadingProfile(false);
+      event.target.value = "";
     }
   };
 
@@ -161,6 +184,7 @@ export default function ProfileSetup() {
         genre: profile.genre,
         experience: experience != null && !Number.isNaN(experience) ? experience : null,
         profileImage: (profile.profileImage || "").trim(),
+        concert_image: (profile.concertImage || "").trim(),
         favoriteSong: (profile.favoriteSong || "").trim(),
         songDescription: (profile.songDescription || "").trim(),
       };
@@ -287,18 +311,50 @@ export default function ProfileSetup() {
             <>
               <div>
                 <label className="block text-white text-sm mb-1">Profile photo *</label>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleFileChange}
-                  disabled={uploading}
-                  className="w-full p-2 rounded border bg-white text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-purple-100 file:text-purple-700"
-                />
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(event) =>
+                      handleFileChange({
+                        event,
+                        fieldName: "profileImage",
+                        kind: "profile",
+                        maxBytes: 5 * 1024 * 1024,
+                        errorField: "profileImage",
+                      })
+                    }
+                    disabled={uploadingProfile}
+                    className="w-full p-2 rounded border bg-white text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-purple-100 file:text-purple-700"
+                  />
                 {profile.profileImage && (
                   <p className="text-green-200 text-sm mt-1">Photo added.</p>
                 )}
                 {fieldErrors.profileImage && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.profileImage}</p>}
-                {uploading && <p className="text-white/80 text-sm">Uploading…</p>}
+                {uploadingProfile && <p className="text-white/80 text-sm">Uploading…</p>}
+              </div>
+
+              <div>
+                <label className="block text-white text-sm mb-1">Concert image *</label>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(event) =>
+                      handleFileChange({
+                        event,
+                        fieldName: "concertImage",
+                        kind: "cover",
+                        maxBytes: 8 * 1024 * 1024,
+                        errorField: "concertImage",
+                      })
+                    }
+                    disabled={uploadingConcert}
+                    className="w-full p-2 rounded border bg-white text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-purple-100 file:text-purple-700"
+                  />
+                {profile.concertImage && (
+                  <p className="text-green-200 text-sm mt-1">Photo added.</p>
+                )}
+                {fieldErrors.concertImage && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.concertImage}</p>}
+                {uploadingConcert && <p className="text-white/80 text-sm">Uploading…</p>}
               </div>
 
               <div>
