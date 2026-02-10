@@ -66,7 +66,7 @@ export function createApp({ db }) {
         genre,
         experience,
         main_image: mainImage,
-        concert_image: body.concert_image ?? "",
+        concert_image: body.concert_image ?? mainImage,
         last_song: lastSong,
         last_song_desc: lastSongDesc,
       };
@@ -240,4 +240,3 @@ export function createApp({ db }) {
 
   return app;
 }
-

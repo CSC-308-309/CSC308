@@ -43,6 +43,7 @@ export default function EditableProfilePhoto({
   fallbackSrc = defaultPhoto,
   size = 136,
   username,
+  initialSrc = "",
 }) {
   const inputRef = useRef(null);
   const [src, setSrc] = useState(fallbackSrc);
@@ -52,6 +53,10 @@ export default function EditableProfilePhoto({
     const saved = localStorage.getItem(storageKey);
     if (saved) setSrc(saved);
   }, [storageKey]);
+
+  useEffect(() => {
+    if (initialSrc) setSrc(initialSrc);
+  }, [initialSrc]);
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
