@@ -91,6 +91,8 @@ export const api = {
   //Photo Storage routes
   presignUpload: (uploadParams) =>
     requestTypes.put("/media/presign", uploadParams),
+  presignView: (viewParams) =>
+    requestTypes.put("/media/presign-view", viewParams),
 };
 
 export { BASE_URL };

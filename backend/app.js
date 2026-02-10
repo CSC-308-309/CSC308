@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { presignUpload } from "./models/media.js";
+import { presignUpload, presignView } from "./models/media.js";
 
 export function createApp({ db }) {
 
@@ -129,6 +129,7 @@ export function createApp({ db }) {
 
   // Get presigned URL for S3 upload
   app.put("/media/presign", presignUpload);
+  app.put("/media/presign-view", presignView);
 
   //// INTERACTION ROUTES ////
   // Like another user

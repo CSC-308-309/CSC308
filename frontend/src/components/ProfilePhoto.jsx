@@ -50,12 +50,34 @@ export default function EditableProfilePhoto({
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    if (saved) setSrc(saved);
+    const hydrateSignedSrc = async () => {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: saved });
+        if (viewUrl) setSrc(viewUrl);
+      } catch {
+        setSrc(saved);
+      }
+    };
+    hydrateSignedSrc();
   }, [storageKey]);
 
   useEffect(() => {
-    if (initialSrc) setSrc(initialSrc);
+    const hydrateInitialSrc = async () => {
+      if (!initialSrc) return;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: initialSrc });
+        if (viewUrl) {
+          setSrc(viewUrl);
+          return;
+        }
+      } catch {
+        // Fallback to raw URL below.
+      }
+      setSrc(initialSrc);
+    };
+    hydrateInitialSrc();
   }, [initialSrc]);
 
   const handleFileSelect = async (e) => {
@@ -105,7 +127,15 @@ export default function EditableProfilePhoto({
 
       await api.update(username, { profilePhotoUrl: fileUrl });
 
-      setSrc(fileUrl);
+      let renderedUrl = fileUrl;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl });
+        if (viewUrl) renderedUrl = viewUrl;
+      } catch {
+        // Keep raw URL fallback.
+      }
+
+      setSrc(renderedUrl);
       localStorage.setItem(storageKey, fileUrl);
     } catch (err) {
       console.error("Upload failed:", err);
