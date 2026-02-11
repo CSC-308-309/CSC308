@@ -99,11 +99,11 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               </div>
 
               {/* Right Column - Main Image */}
-              <div className="bg-gray-400 rounded-2xl overflow-hidden">
+              <div className="bg-gray-400 rounded-2xl overflow-hidden aspect-[4/5] md:aspect-auto md:h-[420px]">
                 <img
                   src={profileData.main_image}
                   alt={profileData.name}
-                  className="w-full h-full object-cover"
+                  className="block w-full h-full object-cover object-center"
                   draggable={false}
                   onError={(e) => {
                     e.target.onerror = null;
