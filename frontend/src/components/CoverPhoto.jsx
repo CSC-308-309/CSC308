@@ -32,7 +32,7 @@ async function processImageToBlob(file, maxWidth) {
 }
 
 export default function CoverPhoto({
-  storageKey = "coverPhotoUrl",
+  storageKey = "coverBannerUrl",
   fallbackSrc = defaultCover,
   className = "mt-10",
   objectPosition = "center",

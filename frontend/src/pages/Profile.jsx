@@ -88,9 +88,12 @@ export default function Profile() {
           setProfileImageUrl(dbUser.main_image);
           localStorage.setItem("profilePhotoUrl", dbUser.main_image);
         }
-        if (dbUser?.concert_image) {
-          setCoverImageUrl(dbUser.concert_image);
-          localStorage.setItem("coverPhotoUrl", dbUser.concert_image);
+        // Keep cover separate from concert media.
+        const storedCover =
+          dbUser?.cover_image || dbUser?.coverPhotoUrl || dbUser?.coverPhotoURL;
+        if (storedCover) {
+          setCoverImageUrl(storedCover);
+          localStorage.setItem("coverBannerUrl", storedCover);
         }
       } catch (error) {
         console.error("Failed to load profile from DB:", error);
