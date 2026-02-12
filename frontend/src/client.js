@@ -148,6 +148,9 @@ export const api = {
     requestTypes.put("/media/presign", uploadParams),
   presignView: (viewParams) =>
     requestTypes.put("/media/presign-view", viewParams),
+  // Backward-compatible helper used by existing components.
+  presignViewUrl: (fileUrl) =>
+    requestTypes.put("/media/presign-view", { fileUrl }),
 };
 
 export { BASE_URL };

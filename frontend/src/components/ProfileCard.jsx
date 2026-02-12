@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Mic, Cake, User, Music, FileText } from "lucide-react";
 import SwipeDragController from "./SwipeDragController";
 import concertImage from "../assets/concert_image.png";
+import defaultProfilePhoto from "../assets/DefaultProfilePhoto.png";
 import { api } from "../client";
 
 export default function ProfileCard({ profile, isActive = true, onSwipe }) {
@@ -30,7 +31,7 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
     const resolveImage = async (rawUrl, setter) => {
       if (!rawUrl) return;
       try {
-        const { viewUrl } = await api.presignView({ fileUrl: rawUrl });
+        const { viewUrl } = await api.presignViewUrl(rawUrl);
         if (!cancelled && viewUrl) setter(viewUrl);
       } catch {
         if (!cancelled) setter(rawUrl);
