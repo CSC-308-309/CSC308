@@ -17,7 +17,7 @@ export default function ChatList({
       const nameMatch = (c.name || "").toLowerCase().includes(q);
 
       const participantMatch = Array.isArray(c.participants)
-        ? c.participants.some((u) => String(u).toLowerCase().includes(q))
+        ? c.participants.some(u => String(u).toLowerCase().includes(q))
         : false;
 
       return nameMatch || participantMatch;
