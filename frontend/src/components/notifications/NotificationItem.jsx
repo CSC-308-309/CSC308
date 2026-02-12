@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { api } from "../../client";
-import { useNotifications } from "./NotificationsContext";
+import { useNotifications } from "./useNotifications";
 
 export default function NotificationItem({
   id,
