@@ -16,7 +16,7 @@ export default function groupNotifications(notifications = []) {
     }
 
     const daysAgo = Math.floor(
-      (now - createdAt.getTime()) / (1000 * 60 * 60 * 24)
+      (now - createdAt.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     if (daysAgo <= 1) groups.new.push(notif);

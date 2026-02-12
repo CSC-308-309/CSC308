@@ -8,16 +8,14 @@ export default function NotificationItem({
   message,
   time,
   postText,
-  actionVariant = "read", 
+  actionVariant = "read",
   initialIsRead = false,
-}) 
-
-{
+}) {
   const [isRead, setIsRead] = useState(Boolean(initialIsRead));
   const [isSyncedBack, setIsSyncedBack] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { refreshUnreadCount} = useNotifications();
+  const { refreshUnreadCount } = useNotifications();
 
   const buttonText = useMemo(() => {
     if (actionVariant === "sync") return isSyncedBack ? "Synced" : "Sync Back";
@@ -29,42 +27,31 @@ export default function NotificationItem({
 
     setLoading(true);
     try {
-
       if (actionVariant === "sync") {
-        
         // will give sync a different function once username is fixed in api route
         if (!isSyncedBack) {
           await api.markNotificationRead(id);
           setIsSyncedBack(true);
           setIsRead(true);
-        } 
-        
-        else {
+        } else {
           await api.markNotificationUnread(id);
           setIsSyncedBack(false);
           setIsRead(false);
         }
-      } 
-      
-      else {
+      } else {
         if (!isRead) {
           await api.markNotificationRead(id);
           setIsRead(true);
-        } 
-        
-        else {
+        } else {
           await api.markNotificationUnread(id);
           setIsRead(false);
         }
       }
 
       await refreshUnreadCount();
-
     } catch (err) {
       console.error("Notification action failed:", err);
-    } 
-    
-    finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -94,12 +81,12 @@ export default function NotificationItem({
           loading
             ? "bg-gray-200 text-gray-500 cursor-not-allowed"
             : actionVariant === "sync"
-            ? isSyncedBack
-              ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
-              : "bg-purple-300 hover:bg-purple-400"
-            : isRead
-            ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
-            : "bg-purple-300 hover:bg-purple-400"
+              ? isSyncedBack
+                ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
+                : "bg-purple-300 hover:bg-purple-400"
+              : isRead
+                ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
+                : "bg-purple-300 hover:bg-purple-400"
         }`}
       >
         {loading ? "..." : buttonText}

@@ -1,8 +1,12 @@
 export default function ChatItem({ chat, isSelected, onClick }) {
-
   // supports avatar transition
-  const avatarUrl = chat.avatarUrl || chat.avatar || chat.profilePicture || chat.avatarColor;
-  const hasImage = typeof avatarUrl === "string" && (avatarUrl.startsWith("http") || avatarUrl.startsWith("/") || avatarUrl.startsWith("data:"));
+  const avatarUrl =
+    chat.avatarUrl || chat.avatar || chat.profilePicture || chat.avatarColor;
+  const hasImage =
+    typeof avatarUrl === "string" &&
+    (avatarUrl.startsWith("http") ||
+      avatarUrl.startsWith("/") ||
+      avatarUrl.startsWith("data:"));
 
   return (
     <div

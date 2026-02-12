@@ -21,7 +21,9 @@ export function NotificationsProvider({ username, children }) {
   }, [refreshUnreadCount]);
 
   return (
-    <NotificationsContext.Provider value={{ unreadCount, setUnreadCount, refreshUnreadCount }}>
+    <NotificationsContext.Provider
+      value={{ unreadCount, setUnreadCount, refreshUnreadCount }}
+    >
       {children}
     </NotificationsContext.Provider>
   );
