@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import groupNotifications from "./GroupNotifications";
 import NotificationSection from "./NotificationSection";
-import { api } from '../../client';
+import { api } from "../../client";
 
 export default function NotificationsPanel({ username }) {
   const [notifications, setNotifications] = useState([]);
@@ -13,7 +13,9 @@ export default function NotificationsPanel({ username }) {
 
     async function load() {
       if (!username) {
-        setError("No username provided. Provide a `username` prop or enable a backend /client API wrapper for the current user.");
+        setError(
+          "No username provided. Provide a `username` prop or enable a backend /client API wrapper for the current user.",
+        );
         return;
       }
 
@@ -22,7 +24,7 @@ export default function NotificationsPanel({ username }) {
 
       try {
         const res = await api.listNotifications(username);
-        const items = Array.isArray(res) ? res : res?.items ?? [];
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
 
         if (!cancelled) setNotifications(items);
       } catch (e) {
@@ -38,7 +40,10 @@ export default function NotificationsPanel({ username }) {
     };
   }, [username]);
 
-  const grouped = useMemo(() => groupNotifications(notifications), [notifications]);
+  const grouped = useMemo(
+    () => groupNotifications(notifications),
+    [notifications],
+  );
 
   if (loading) {
     return (
@@ -64,10 +69,18 @@ export default function NotificationsPanel({ username }) {
         <p className="text-gray-600">You have no notifications yet.</p>
       ) : (
         <>
-          {grouped.new.length > 0 && <NotificationSection title="New" items={grouped.new} />}
-          {grouped.week.length > 0 && <NotificationSection title="This Week" items={grouped.week} />}
-          {grouped.month.length > 0 && <NotificationSection title="This Month" items={grouped.month} />}
-          {grouped.older.length > 0 && <NotificationSection title="Older" items={grouped.older} />}
+          {grouped.new.length > 0 && (
+            <NotificationSection title="New" items={grouped.new} />
+          )}
+          {grouped.week.length > 0 && (
+            <NotificationSection title="This Week" items={grouped.week} />
+          )}
+          {grouped.month.length > 0 && (
+            <NotificationSection title="This Month" items={grouped.month} />
+          )}
+          {grouped.older.length > 0 && (
+            <NotificationSection title="Older" items={grouped.older} />
+          )}
         </>
       )}
     </div>

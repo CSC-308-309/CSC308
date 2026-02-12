@@ -38,7 +38,7 @@ export default function Login() {
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative bg-[#7E5179]">

@@ -19,7 +19,8 @@ export default function Navbar() {
   const navigate = useNavigate();
   const loggedIn = isLoggedIn();
 
-  const { unreadCount, refreshUnreadCount, setUnreadCount } = useNotifications();
+  const { unreadCount, refreshUnreadCount, setUnreadCount } =
+    useNotifications();
 
   function getUsername() {
     try {
@@ -27,9 +28,7 @@ export default function Navbar() {
       if (!raw) return null;
       const user = JSON.parse(raw);
       return user?.username || null;
-    } 
-    
-    catch {
+    } catch {
       return null;
     }
   }
@@ -91,7 +90,11 @@ export default function Navbar() {
             </Link>
 
             <Link to="/notifications">
-              <NavItem icon={<Bell />} label="Notifications" badge={unreadCount} />
+              <NavItem
+                icon={<Bell />}
+                label="Notifications"
+                badge={unreadCount}
+              />
             </Link>
 
             <Link to="/events">

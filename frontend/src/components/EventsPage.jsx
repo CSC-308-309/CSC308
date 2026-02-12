@@ -95,8 +95,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 
 // EventsPage Component (without EventsTitle - that's handled by parent)
 export default function EventsPage() {
-  const [activeTab, setActiveTab] = useState('active');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState("active");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   const [events, setEvents] = useState([]);
@@ -107,15 +107,13 @@ export default function EventsPage() {
       try {
         const data = await api.listEvents();
         setEvents(data || []);
-      } 
-      
-      catch (err) {
+      } catch (err) {
         console.error("Failed to load events:", err);
       }
     }
 
     loadEvents();
-  }, []);  
+  }, []);
 
   /* const events = [
     {
