@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { api } from "../../client";
+import { api } from "../client";
 import { Search, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 
 // EventCard Component
