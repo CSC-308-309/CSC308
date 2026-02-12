@@ -90,7 +90,7 @@ export default function Profile() {
         }
         // Keep cover separate from concert media.
         const storedCover =
-          dbUser?.cover_image || dbUser?.coverPhotoUrl || dbUser?.coverPhotoURL;
+          dbUser?.concert_image
         if (storedCover) {
           setCoverImageUrl(storedCover);
           localStorage.setItem("coverBannerUrl", storedCover);

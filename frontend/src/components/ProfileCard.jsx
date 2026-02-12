@@ -28,8 +28,29 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
   useEffect(() => {
     let cancelled = false;
 
+    const shouldPresign = (rawUrl) => {
+      const value = String(rawUrl || "").trim();
+      if (!value) return false;
+      if (value.startsWith("data:") || value.startsWith("blob:")) return false;
+      if (value.startsWith("/")) return false;
+
+      try {
+        const parsed = new URL(value);
+        if (parsed.searchParams.has("X-Amz-Signature")) return false;
+        const host = parsed.hostname.toLowerCase();
+        return host.endsWith("amazonaws.com");
+      } catch {
+        // Non-URL values are treated as object keys that need signing.
+        return true;
+      }
+    };
+
     const resolveImage = async (rawUrl, setter) => {
       if (!rawUrl) return;
+      if (!shouldPresign(rawUrl)) {
+        if (!cancelled) setter(rawUrl);
+        return;
+      }
       try {
         const { viewUrl } = await api.presignViewUrl(rawUrl);
         if (!cancelled && viewUrl) setter(viewUrl);

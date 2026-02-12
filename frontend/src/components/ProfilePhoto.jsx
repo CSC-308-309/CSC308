@@ -45,6 +45,7 @@ export default function EditableProfilePhoto({
   username,
   initialSrc = "",
 }) {
+  const uploadSize = Math.max(size * 2, 512);
   const inputRef = useRef(null);
   const [src, setSrc] = useState(fallbackSrc);
   const [isUploading, setIsUploading] = useState(false);
@@ -101,7 +102,7 @@ export default function EditableProfilePhoto({
       if (!username) throw new Error("Missing username (used as userId)");
       setIsUploading(true);
 
-      const blob = await processImageToBlobSquare(file, size);
+      const blob = await processImageToBlobSquare(file, uploadSize);
 
       previewUrl = URL.createObjectURL(blob);
       setSrc(previewUrl);
