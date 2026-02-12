@@ -22,7 +22,6 @@ const BASE_URL = "http://localhost:8000";
 // }
 
 async function request(path, options = {}) {
-  const token = localStorage.getItem('token');
 
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
@@ -125,22 +124,6 @@ export const api = {
 
     // Event routes
     listEvents: () => requestTypes.get('/events'),
-
-  
-
-  // Interaction routes
-  like: (username, targetUsername) =>
-    requestTypes.post(`/users/${encodeURIComponent(username)}/like`, {
-      targetUsername,
-    }),
-  dislike: (username, targetUsername) =>
-    requestTypes.post(`/users/${encodeURIComponent(username)}/dislike`, {
-      targetUsername,
-    }),
-  block: (username, targetUsername) =>
-    requestTypes.post(`/users/${encodeURIComponent(username)}/block`, {
-      targetUsername,
-    }),
 
   //Photo Storage routes
   presignUpload: (uploadParams) =>

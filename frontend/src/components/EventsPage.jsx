@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { api } from "../../client";
 import { Search, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 
 // EventCard Component
@@ -93,12 +94,28 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 // EventsPage Component (without EventsTitle - that's handled by parent)
-export default async function EventsPage() {
+export default function EventsPage() {
   const [activeTab, setActiveTab] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const events = await api.listEvents(); // Fetch events from backend
+  const [events, setEvents] = useState([]);
+
+  // Fetch events from backend
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const data = await api.listEvents();
+        setEvents(data || []);
+      } 
+      
+      catch (err) {
+        console.error("Failed to load events:", err);
+      }
+    }
+
+    loadEvents();
+  }, []);  
 
   /* const events = [
     {

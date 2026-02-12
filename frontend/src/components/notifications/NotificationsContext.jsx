@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useState } from "react";
 import { api } from "../../client";
 
 const NotificationsContext = createContext(null);
@@ -27,8 +27,4 @@ export function NotificationsProvider({ username, children }) {
   );
 }
 
-export function useNotifications() {
-  const ctx = useContext(NotificationsContext);
-  if (!ctx) throw new Error("useNotifications must be used inside NotificationsProvider");
-  return ctx;
-}
+export { NotificationsContext };

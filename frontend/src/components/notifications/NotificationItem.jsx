@@ -17,7 +17,7 @@ export default function NotificationItem({
   const [isSyncedBack, setIsSyncedBack] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { refreshUnreadCount, setUnreadCount, unreadCount } = useNotifications();
+  const { refreshUnreadCount} = useNotifications();
 
   const buttonText = useMemo(() => {
     if (actionVariant === "sync") return isSyncedBack ? "Synced" : "Sync Back";
@@ -29,7 +29,6 @@ export default function NotificationItem({
 
     setLoading(true);
     try {
-      const wasUnread = !isRead;
 
       if (actionVariant === "sync") {
         
@@ -58,10 +57,6 @@ export default function NotificationItem({
           setIsRead(false);
         }
       }
-
-      const nowUnread = actionVariant === "sync"
-        ? (isSyncedBack ? true : false) 
-        : isRead; 
 
       await refreshUnreadCount();
 

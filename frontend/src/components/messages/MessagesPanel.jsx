@@ -35,9 +35,9 @@ export default function MessagesPanel() {
         } 
         
         finally {
-          if (!isMounted) return;
-          setIsLoadingChats(false);
+          if (isMounted) setIsLoadingChats(false);
         }
+
       }
 
     loadChats();
@@ -66,8 +66,7 @@ export default function MessagesPanel() {
       } 
       
       finally {
-        if (!isMounted) return;
-        setIsLoadingMessages(false);
+        if (isMounted) setIsLoadingMessages(false);
       }
     }
 
