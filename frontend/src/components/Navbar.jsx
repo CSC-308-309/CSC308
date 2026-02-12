@@ -13,7 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import logoIcon from "../assets/logo.svg";
 import { isLoggedIn, logout } from "../utils/auth";
-import { useNotifications } from "../components/notifications/NotificationsContext";
+import { useNotifications } from "./notifications/useNotifications";
 
 export default function Navbar() {
   const navigate = useNavigate();
