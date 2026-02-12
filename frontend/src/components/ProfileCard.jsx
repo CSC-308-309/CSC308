@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Mic, Cake, User, Music, FileText } from "lucide-react";
 import SwipeDragController from "./SwipeDragController";
 import concertImage from "../assets/concert_image.png";
+import { api } from "../client";
 
 export default function ProfileCard({ profile, isActive = true, onSwipe }) {
   const defaultProfile = {
@@ -101,7 +102,7 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               {/* Right Column - Main Image */}
               <div className="bg-gray-400 rounded-2xl overflow-hidden aspect-[4/5] md:aspect-auto md:h-[420px]">
                 <img
-                  src={profileData.main_image}
+                  src={mainImageSrc}
                   alt={profileData.name}
                   className="block w-full h-full object-cover object-center"
                   draggable={false}
@@ -118,7 +119,7 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               {/* Concert Image */}
               <div className="bg-gray-400 rounded-2xl overflow-hidden h-48">
                 <img
-                  src={profileData.concert_image}
+                  src={concertImageSrc}
                   alt="Concert"
                   className="w-full h-full object-cover"
                   draggable={false}
