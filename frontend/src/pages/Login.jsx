@@ -4,9 +4,11 @@ import { useState } from "react";
 import logoIcon from "../assets/logo.svg";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClose = () => navigate(-1);
 
