@@ -93,12 +93,14 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 // EventsPage Component (without EventsTitle - that's handled by parent)
-export default function EventsPage() {
-  const [activeTab, setActiveTab] = useState("active");
-  const [searchQuery, setSearchQuery] = useState("");
+export default async function EventsPage() {
+  const [activeTab, setActiveTab] = useState('active');
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const events = [
+  const events = await api.listEvents(); // Fetch events from backend
+
+  /* const events = [
     {
       id: 1,
       date: "October 29, 2025 - 8:00 PM",
@@ -131,11 +133,11 @@ export default function EventsPage() {
     },
     {
       id: 6,
-      date: "October 29, 2025 - 8:00 PM",
-      title: "Taylor Swift Concert",
-      location: "Sunset Park, Los Angeles, CA",
-    },
-  ];
+      date: 'October 29, 2025 - 8:00 PM',
+      title: 'Taylor Swift Concert',
+      location: 'Sunset Park, Los Angeles, CA'
+    }
+  ]; */
 
   return (
     <div className="max-w-[1200px] bg-[#ECE6F0] mx-auto rounded-lg p-2 mb-4 m-4 sm: p-6 md:p-8 flex flex-col">

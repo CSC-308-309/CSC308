@@ -2,6 +2,8 @@ import Navbar from "../components/Navbar";
 import NotificationsPanel from "../components/notifications/NotificationsPanel";
 
 export default function Notifications() {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
   return (
     <div className="flex h-screen overflow-hidden font-sans">
       <Navbar />
@@ -11,7 +13,7 @@ export default function Notifications() {
           Notifications
         </h1>
 
-        <NotificationsPanel />
+        <NotificationsPanel username={user?.username} />
       </div>
     </div>
   );
