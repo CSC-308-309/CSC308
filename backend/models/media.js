@@ -1,5 +1,5 @@
 // models/media.js
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from "uuid";
 
@@ -106,6 +106,43 @@ export async function presignUpload(req, res) {
     console.error("Presign PUT error:", e);
     return res.status(500).json({
       error: "Failed to create upload URL",
+      details: e?.message || String(e),
+    });
+  }
+}
+
+export async function presignViewUrl(req, res) {
+  try {
+    const { fileUrl } = req.body;
+    if (!fileUrl) return res.status(400).json({ error: "fileUrl required" });
+
+    const bucket = env("S3_BUCKET");
+    const region = env("AWS_REGION");
+    const url = new URL(fileUrl);
+    const host = url.host.toLowerCase();
+    const validHosts = new Set([
+      `${bucket}.s3.${region}.amazonaws.com`.toLowerCase(),
+      `${bucket}.s3.amazonaws.com`.toLowerCase(),
+    ]);
+
+    if (!validHosts.has(host)) {
+      return res.json({ viewUrl: fileUrl });
+    }
+
+    const key = decodeURIComponent(url.pathname.replace(/^\/+/, ""));
+    if (!key) return res.status(400).json({ error: "Invalid S3 object URL" });
+
+    const s3 = makeS3Client();
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+    const viewUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    return res.json({ viewUrl });
+  } catch (e) {
+    console.error("Presign GET error:", e);
+    return res.status(500).json({
+      error: "Failed to create view URL",
       details: e?.message || String(e),
     });
   }

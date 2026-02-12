@@ -48,10 +48,47 @@ export default function EditableProfilePhoto({
   const [src, setSrc] = useState(fallbackSrc);
   const [isUploading, setIsUploading] = useState(false);
 
+  const resolveViewUrl = async (rawUrl) => {
+    if (!rawUrl) return "";
+    try {
+      const result = await api.presignViewUrl(rawUrl);
+      return result?.viewUrl || rawUrl;
+    } catch (err) {
+      console.error("Failed to resolve image view URL:", err);
+      return rawUrl;
+    }
+  };
+
   useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    if (saved) setSrc(saved);
-  }, [storageKey]);
+    let cancelled = false;
+
+    const hydratePhoto = async () => {
+      const savedRaw = localStorage.getItem(storageKey);
+      if (savedRaw) {
+        const savedView = await resolveViewUrl(savedRaw);
+        if (!cancelled) setSrc(savedView || fallbackSrc);
+      }
+
+      if (!username) return;
+
+      try {
+        const user = await api.getByUsername(username);
+        const dbPhotoRaw = (user?.main_image || "").trim();
+        if (dbPhotoRaw && !cancelled) {
+          const dbPhotoView = await resolveViewUrl(dbPhotoRaw);
+          if (!cancelled) setSrc(dbPhotoView || fallbackSrc);
+          localStorage.setItem(storageKey, dbPhotoRaw);
+        }
+      } catch (err) {
+        console.error("Failed to load profile photo:", err);
+      }
+    };
+
+    hydratePhoto();
+    return () => {
+      cancelled = true;
+    };
+  }, [storageKey, username]);
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
@@ -98,9 +135,10 @@ export default function EditableProfilePhoto({
         xhr.send(blob);
       });
 
-      await api.update(username, { profilePhotoUrl: fileUrl });
+      await api.update(username, { main_image: fileUrl });
 
-      setSrc(fileUrl);
+      const viewUrl = await resolveViewUrl(fileUrl);
+      setSrc(viewUrl || fileUrl);
       localStorage.setItem(storageKey, fileUrl);
     } catch (err) {
       console.error("Upload failed:", err);
@@ -127,6 +165,11 @@ export default function EditableProfilePhoto({
           alt="Profile"
           className="h-full w-full object-cover"
           draggable={false}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            setSrc(fallbackSrc);
+            localStorage.removeItem(storageKey);
+          }}
         />
 
         {isUploading && (

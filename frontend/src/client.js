@@ -78,6 +78,7 @@ export const api = {
     listUsers: () => requestTypes.get('/users'),
     getByUsername: (username) => requestTypes.get(`/users/${encodeURIComponent(username)}`),
     update: (username, data) => requestTypes.put(`/users/${encodeURIComponent(username)}`, data),
+    updateCoverPhoto: (username, data) => requestTypes.put(`/users/${encodeURIComponent(username)}/coverPhoto`, data),
     deleteUser: (username) => requestTypes.delete(`/users/${encodeURIComponent(username)}`),
     signup: (profile) => requestTypes.post('/auth/signup', profile),
     login: (credentials) => requestTypes.post('/auth/login', credentials),
@@ -145,6 +146,8 @@ export const api = {
   //Photo Storage routes
   presignUpload: (uploadParams) =>
     requestTypes.put("/media/presign", uploadParams),
+  presignViewUrl: (fileUrl) =>
+    requestTypes.post("/media/view-url", { fileUrl }),
 };
 
 export { BASE_URL };

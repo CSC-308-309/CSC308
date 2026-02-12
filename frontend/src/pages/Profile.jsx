@@ -18,6 +18,14 @@ import MusicClips from "../components/musicclips/MusicClips";
 
 export default function Profile() {
   const [profileData, setProfileData] = useState(getInitialProfileData);
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  })();
+  const username = currentUser?.username || "";
 
   const handleProfileSave = (data) => {
     setProfileData(data);
@@ -33,10 +41,16 @@ export default function Profile() {
         <div className="mx-auto justify-center p-6 w-[1160px]">
           <TopProfileCard>
             <div className="relative">
-              <CoverPhoto username="testuser" />
+              <CoverPhoto
+                username={username}
+                storageKey={username ? `coverPhotoUrl:${username}` : "coverPhotoUrl"}
+              />
 
               <div className="absolute left-14 -bottom-[68px] z-20">
-                <EditProfilePhoto username="testuser" />
+                <EditProfilePhoto
+                  username={username}
+                  storageKey={username ? `profilePhotoUrl:${username}` : "profilePhotoUrl"}
+                />
               </div>
 
               <div className="absolute right-12 top-[260px] z-30">

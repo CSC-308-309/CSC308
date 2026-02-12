@@ -1,6 +1,7 @@
 import { Mic, Cake, User, Music, FileText } from "lucide-react";
 import SwipeDragController from "./SwipeDragController";
 import concertImage from "../assets/concert_image.png";
+import defaultProfilePhoto from "../assets/DefaultProfilePhoto.png";
 
 export default function ProfileCard({ profile, isActive = true, onSwipe }) {
   const defaultProfile = {
@@ -10,8 +11,7 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
     gender: "Woman (she/her)",
     genre: "Pop/Country",
     experience: "12 years of experience",
-    main_image:
-      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop",
+    main_image: defaultProfilePhoto,
     concert_image: concertImage,
     last_song: "Dracula by Tame Impala",
     last_song_desc: "The last song that gave me chills is...",
@@ -74,14 +74,13 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               {/* Right Column - Main Image */}
               <div className="bg-gray-400 rounded-2xl overflow-hidden">
                 <img
-                  src={profileData.main_image}
+                  src={profileData.main_image || defaultProfile.main_image}
                   alt={profileData.name}
                   className="w-full h-full object-cover"
                   draggable={false}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src =
-                      "https://via.placeholder.com/400x500?text=No+Image";
+                    e.target.src = defaultProfile.main_image;
                   }}
                 />
               </div>
@@ -92,14 +91,13 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               {/* Concert Image */}
               <div className="bg-gray-400 rounded-2xl overflow-hidden h-48">
                 <img
-                  src={profileData.concert_image}
+                  src={profileData.concert_image || defaultProfile.concert_image}
                   alt="Concert"
                   className="w-full h-full object-cover"
                   draggable={false}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src =
-                      "https://via.placeholder.com/800x600?text=No+Concert+Image";
+                    e.target.src = defaultProfile.concert_image;
                   }}
                 />
               </div>

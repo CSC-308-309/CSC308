@@ -93,7 +93,7 @@ export default function CoverPhoto({
         xhr.send(blob);
       });
 
-      await api.update(username, { coverPhotoUrl: fileUrl });
+      await api.updateCoverPhoto(username, { url: fileUrl });
 
       setSrc(fileUrl);
       localStorage.setItem(storageKey, fileUrl);
@@ -115,6 +115,10 @@ export default function CoverPhoto({
           alt="Cover"
           className="absolute inset-0 h-full w-full object-cover"
           style={{ objectPosition, opacity: isUploading ? 0.6 : 1 }}
+          onError={() => {
+            setSrc(fallbackSrc);
+            localStorage.removeItem(storageKey);
+          }}
         />
         <div className="absolute inset-0 bg-black/10 pointer-events-none" />
 
