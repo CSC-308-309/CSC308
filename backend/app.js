@@ -3,7 +3,6 @@ import cors from "cors";
 import { presignUpload } from "./models/media.js";
 
 export function createApp({ db }) {
-
   const app = express();
 
   app.use(cors());
@@ -54,7 +53,10 @@ export function createApp({ db }) {
 
   // Push image URL to database
   app.put("/users/:username/coverPhoto", async (req, res) => {
-    const updatedUser = await db.Profile.updateCoverPhoto(req.params.username, req.body);
+    const updatedUser = await db.Profile.updateCoverPhoto(
+      req.params.username,
+      req.body,
+    );
     if (updatedUser) {
       res.json(updatedUser);
     } else {
@@ -70,12 +72,24 @@ export function createApp({ db }) {
   app.post("/users/:username/like", async (req, res) => {
     try {
       const actor = await db.User.getUserByUsername(req.params.username);
-      if (!actor) return res.status(404).json({ error: "User not found", username: req.params.username });
+      if (!actor)
+        return res
+          .status(404)
+          .json({ error: "User not found", username: req.params.username });
 
       const target = await db.User.getUserByUsername(req.body.targetUsername);
-      if (!target) return res.status(400).json({ error: "Target user does not exist", targetUsername: req.body.targetUsername });
+      if (!target)
+        return res
+          .status(400)
+          .json({
+            error: "Target user does not exist",
+            targetUsername: req.body.targetUsername,
+          });
 
-      const result = await db.Interactions.likeUser(req.params.username, req.body.targetUsername);
+      const result = await db.Interactions.likeUser(
+        req.params.username,
+        req.body.targetUsername,
+      );
       res.json(result);
     } catch (err) {
       console.error("Error in like route:", err);
@@ -87,12 +101,24 @@ export function createApp({ db }) {
   app.post("/users/:username/dislike", async (req, res) => {
     try {
       const actor = await db.User.getUserByUsername(req.params.username);
-      if (!actor) return res.status(404).json({ error: "User not found", username: req.params.username });
+      if (!actor)
+        return res
+          .status(404)
+          .json({ error: "User not found", username: req.params.username });
 
       const target = await db.User.getUserByUsername(req.body.targetUsername);
-      if (!target) return res.status(400).json({ error: "Target user does not exist", targetUsername: req.body.targetUsername });
+      if (!target)
+        return res
+          .status(400)
+          .json({
+            error: "Target user does not exist",
+            targetUsername: req.body.targetUsername,
+          });
 
-      const result = await db.Interactions.dislikeUser(req.params.username, req.body.targetUsername);
+      const result = await db.Interactions.dislikeUser(
+        req.params.username,
+        req.body.targetUsername,
+      );
       res.json(result);
     } catch (err) {
       console.error("Error in dislike route:", err);
@@ -104,19 +130,30 @@ export function createApp({ db }) {
   app.post("/users/:username/block", async (req, res) => {
     try {
       const actor = await db.User.getUserByUsername(req.params.username);
-      if (!actor) return res.status(404).json({ error: "User not found", username: req.params.username });
+      if (!actor)
+        return res
+          .status(404)
+          .json({ error: "User not found", username: req.params.username });
 
       const target = await db.User.getUserByUsername(req.body.targetUsername);
-      if (!target) return res.status(400).json({ error: "Target user does not exist", targetUsername: req.body.targetUsername });
+      if (!target)
+        return res
+          .status(400)
+          .json({
+            error: "Target user does not exist",
+            targetUsername: req.body.targetUsername,
+          });
 
-      const result = await db.Interactions.blockUser(req.params.username, req.body.targetUsername);
+      const result = await db.Interactions.blockUser(
+        req.params.username,
+        req.body.targetUsername,
+      );
       res.json(result);
     } catch (err) {
       console.error("Error in block route:", err);
       res.status(500).json({ error: "Internal server error" });
     }
   });
-
 
   //// MESSAGE ROUTES ////
   // Fetch chat history
@@ -148,16 +185,19 @@ export function createApp({ db }) {
       res.status(404).send("Chat not found");
     }
   });
-  
+
   app.patch("/chats/:chatId", async (req, res) => {
-    const updatedChat = await db.Messages.updateChat(req.params.chatId, req.body);
+    const updatedChat = await db.Messages.updateChat(
+      req.params.chatId,
+      req.body,
+    );
     if (updatedChat) {
       res.json(updatedChat);
     } else {
       res.status(404).send("Chat not found");
     }
   });
-  
+
   app.delete("/chats/:chatId", async (req, res) => {
     const success = await db.Messages.deleteChat(req.params.chatId);
     if (success) {
@@ -168,17 +208,25 @@ export function createApp({ db }) {
   });
 
   app.get("/chats/:chatId/participants", async (req, res) => {
-    const participants = await db.Messages.listChatParticipants(req.params.chatId);
+    const participants = await db.Messages.listChatParticipants(
+      req.params.chatId,
+    );
     res.json(participants);
   });
 
   app.post("/chats/:chatId/participants", async (req, res) => {
-    const result = await db.Messages.addChatParticipants(req.params.chatId, req.body);
+    const result = await db.Messages.addChatParticipants(
+      req.params.chatId,
+      req.body,
+    );
     res.json(result);
   });
 
   app.delete("/chats/:chatId/participants/:username", async (req, res) => {
-    const success = await db.Messages.removeChatParticipant(req.params.chatId, req.params.username);
+    const success = await db.Messages.removeChatParticipant(
+      req.params.chatId,
+      req.params.username,
+    );
     if (success) {
       res.status(204).send();
     } else {
@@ -187,36 +235,52 @@ export function createApp({ db }) {
   });
 
   app.get("/chats/:chatId/messages", async (req, res) => {
-    const messages = await db.Messages.listMessages(req.params.chatId, req.query);
+    const messages = await db.Messages.listMessages(
+      req.params.chatId,
+      req.query,
+    );
     res.json(messages);
   });
 
   app.get("/chats/:chatId/messages/:messageId", async (req, res) => {
-    const message = await db.Messages.getMessage(req.params.chatId, req.params.messageId);
+    const message = await db.Messages.getMessage(
+      req.params.chatId,
+      req.params.messageId,
+    );
     if (message) {
       res.json(message);
     } else {
       res.status(404).send("Message not found");
     }
   });
-  
+
   app.post("/chats/:chatId/messages", async (req, res) => {
     console.log("++++++++++++++++++ message sent?", req.body);
-    const newMessage = await db.Messages.sendMessage(req.params.chatId, req.body);
+    const newMessage = await db.Messages.sendMessage(
+      req.params.chatId,
+      req.body,
+    );
     res.status(201).json(newMessage);
   });
 
   app.patch("/chats/:chatId/messages/:messageId", async (req, res) => {
-    const updatedMessage = await db.Messages.updateMessage(req.params.chatId, req.params.messageId, req.body);
+    const updatedMessage = await db.Messages.updateMessage(
+      req.params.chatId,
+      req.params.messageId,
+      req.body,
+    );
     if (updatedMessage) {
       res.json(updatedMessage);
     } else {
       res.status(404).send("Message not found");
     }
   });
-  
+
   app.delete("/chats/:chatId/messages/:messageId", async (req, res) => {
-    const success = await db.Messages.deleteMessage(req.params.chatId, req.params.messageId);
+    const success = await db.Messages.deleteMessage(
+      req.params.chatId,
+      req.params.messageId,
+    );
     if (success) {
       res.status(204).send();
     } else {
@@ -234,20 +298,25 @@ export function createApp({ db }) {
     res.json(result);
   });
 
-  
   //// NOTIFICATION ROUTES ////
   app.get("/notifications/:username", async (req, res) => {
-    const notifications = await db.Notifications.listNotifications(req.params.username);
+    const notifications = await db.Notifications.listNotifications(
+      req.params.username,
+    );
     res.json(notifications);
   });
 
   app.get("/notifications/:username/unreadCount", async (req, res) => {
-    const count = await db.Notifications.getUnreadNotificationsCount(req.params.username);
+    const count = await db.Notifications.getUnreadNotificationsCount(
+      req.params.username,
+    );
     res.json({ unreadCount: count });
   });
 
   app.get("/notifications/id/:notificationId", async (req, res) => {
-    const notification = await db.Notifications.getNotification(req.params.notificationId);
+    const notification = await db.Notifications.getNotification(
+      req.params.notificationId,
+    );
     if (notification) res.json(notification);
     else res.status(404).send("Notification not found");
   });
@@ -259,16 +328,20 @@ export function createApp({ db }) {
 
   // Mark notification as read
   app.post("/notifications/:notificationId/read", async (req, res) => {
-    const result = await db.Notifications.markNotificationRead(req.params.notificationId);
+    const result = await db.Notifications.markNotificationRead(
+      req.params.notificationId,
+    );
     res.json(result);
   });
 
   // Mark notification as unread
   app.post("/notifications/:notificationId/unread", async (req, res) => {
-    const result = await db.Notifications.markNotificationUnread(req.params.notificationId);
+    const result = await db.Notifications.markNotificationUnread(
+      req.params.notificationId,
+    );
     res.json(result);
   });
-  
+
   // Mark all notifications as read
   app.post("/notifications/readAll", async (req, res) => {
     const result = await db.Notifications.markAllNotificationsRead(req.body);
@@ -277,19 +350,25 @@ export function createApp({ db }) {
 
   // Archive notification
   app.post("/notifications/:notificationId/archive", async (req, res) => {
-    const result = await db.Notifications.archiveNotification(req.params.notificationId);
+    const result = await db.Notifications.archiveNotification(
+      req.params.notificationId,
+    );
     res.json(result);
   });
 
   // Unarchive notification
   app.post("/notifications/:notificationId/unarchive", async (req, res) => {
-    const result = await db.Notifications.unarchiveNotification(req.params.notificationId);
+    const result = await db.Notifications.unarchiveNotification(
+      req.params.notificationId,
+    );
     res.json(result);
   });
 
   // Delete notification
   app.delete("/notifications/id/:notificationId", async (req, res) => {
-    const success = await db.Notifications.deleteNotification(req.params.notificationId);
+    const success = await db.Notifications.deleteNotification(
+      req.params.notificationId,
+    );
     if (success) {
       res.status(204).send();
     } else {
@@ -299,16 +378,20 @@ export function createApp({ db }) {
 
   // Get notification preferences
   app.get("/notifications/preferences/:username", async (req, res) => {
-    const preferences = await db.User.getNotificationPreferences(req.params.username);
+    const preferences = await db.User.getNotificationPreferences(
+      req.params.username,
+    );
     res.json(preferences);
   });
 
   // Update notification preferences
   app.patch("/notifications/preferences/:username", async (req, res) => {
-    const updatedPreferences = await db.User.updateNotificationPreferences(req.params.username, req.body);
+    const updatedPreferences = await db.User.updateNotificationPreferences(
+      req.params.username,
+      req.body,
+    );
     res.json(updatedPreferences);
   });
-
 
   //// EVENT ROUTES ////
   // List all events
@@ -321,14 +404,13 @@ export function createApp({ db }) {
   app.post("/events", async (req, res) => {
     const newEvent = await db.Events.createEvent(req.body);
     res.status(201).json(newEvent);
-  }); 
+  });
 
   // Attend an event
   app.post("/events/:id/join", async (req, res) => {
     const result = await db.Events.joinEvent(req.params.id, req.body.userId);
     res.json(result);
   });
-
 
   //// BAND ROUTES ////
   // List all bands
@@ -349,8 +431,5 @@ export function createApp({ db }) {
     res.json(result);
   });
 
-
-
   return app;
 }
-

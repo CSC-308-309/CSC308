@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import ChatList from "./ChatList";
 import ChatWindow from "./ChatWindow";
 import { api } from "../../client";
 import NewChatModel from "./NewChatModel";
 import ParticipantsModel from "./ParticipantsModel";
-
 
 export default function MessagesPanel() {
   const [chats, setChats] = useState([]);
@@ -32,32 +31,34 @@ export default function MessagesPanel() {
       id: c.id,
       name: c.name || "(Unnamed chat)",
       lastMessage: c.last_message_content || "",
-      time: c.last_message_at ? new Date(c.last_message_at).toLocaleString() : "",
+      time: c.last_message_at
+        ? new Date(c.last_message_at).toLocaleString()
+        : "",
       avatarUrl: c.group_photo_url || null,
       ...c,
     };
   }
 
-  function normalizeMessage(m) {
-    return {
-      id: m.id,
-      sender: m.sender_name || m.sender_username || "Unknown",
-      text: m.content ?? "",
-      isOwnMessage: !!myUsername && m.sender_username === myUsername,
-      ...m,
-    };
-  }
+  const normalizeMessage = useCallback(
+    (m) => {
+      return {
+        id: m.id,
+        sender: m.sender_name || m.sender_username || "Unknown",
+        text: m.content ?? "",
+        isOwnMessage: !!myUsername && m.sender_username === myUsername,
+        ...m,
+      };
+    },
+    [myUsername],
+  );
 
   async function handleSelectChat(chat) {
     setSelectedChat(chat);
 
     try {
       const fresh = await api.getChat(chat.id);
-      setSelectedChat((prev) =>
-        prev ? { ...prev, ...fresh } : prev
-      );
-    } 
-    catch (e) {
+      setSelectedChat((prev) => (prev ? { ...prev, ...fresh } : prev));
+    } catch (e) {
       setError(e?.message || "Failed to get chat details");
     }
   }
@@ -71,16 +72,12 @@ export default function MessagesPanel() {
       setIsInfoOpen(true);
 
       const data = await api.listChatParticipants(selectedChat.id);
-      const list = Array.isArray(data) ? data : (data?.participants || []);
+      const list = Array.isArray(data) ? data : data?.participants || [];
 
       setParticipants(list);
-    } 
-    
-    catch (e) {
+    } catch (e) {
       setError(e?.message || "Failed to load participants");
-    } 
-    
-    finally {
+    } finally {
       setIsLoadingParticipants(false);
     }
   }
@@ -95,11 +92,17 @@ export default function MessagesPanel() {
     setChats(list);
 
     if (selectChatId) {
-      setSelectedChat(list.find((c) => String(c.id) === String(selectChatId)) || list[0] || null);
+      setSelectedChat(
+        list.find((c) => String(c.id) === String(selectChatId)) ||
+          list[0] ||
+          null,
+      );
     } else {
       setSelectedChat((prev) => {
         if (!prev) return list[0] || null;
-        return list.find((c) => String(c.id) === String(prev.id)) || list[0] || null;
+        return (
+          list.find((c) => String(c.id) === String(prev.id)) || list[0] || null
+        );
       });
     }
   }
@@ -114,7 +117,9 @@ export default function MessagesPanel() {
         setIsLoadingChats(true);
 
         if (!myUsername) {
-          throw new Error("You’re not logged in (missing user in localStorage).");
+          throw new Error(
+            "You are not logged in (missing user in localStorage).",
+          );
         }
 
         const data = await api.listChats({ username: myUsername });
@@ -131,8 +136,7 @@ export default function MessagesPanel() {
         setChats([]);
         setSelectedChat(null);
       } finally {
-        if (!isMounted) return;
-        setIsLoadingChats(false);
+        if (isMounted) setIsLoadingChats(false);
       }
     }
 
@@ -144,41 +148,43 @@ export default function MessagesPanel() {
 
   // hydrates participants list into chats that don't have them
   useEffect(() => {
-  let cancelled = false;
+    let cancelled = false;
 
-  async function hydrateParticipants() {
-    if (!chats.length) return;
+    async function hydrateParticipants() {
+      if (!chats.length) return;
 
-    const missing = chats.filter(c => !Array.isArray(c.participants));
-    if (!missing.length) return;
+      const missing = chats.filter((c) => !Array.isArray(c.participants));
+      if (!missing.length) return;
 
-    try {
-      const results = await Promise.allSettled(
-        missing.map(async (chat) => {
-          const data = await api.listChatParticipants(chat.id);
-          const usernames = (Array.isArray(data) ? data : []).map(p => p.username);
-          return { chatId: chat.id, participants: usernames };
-        })
-      );
+      try {
+        const results = await Promise.allSettled(
+          missing.map(async (chat) => {
+            const data = await api.listChatParticipants(chat.id);
+            const usernames = (Array.isArray(data) ? data : []).map(
+              (p) => p.username,
+            );
+            return { chatId: chat.id, participants: usernames };
+          }),
+        );
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      setChats(prev =>
-        prev.map(chat => {
-          const found = results.find(r => r.chatId === chat.id);
-          return found ? { ...chat, participants: found.participants } : chat;
-        })
-      );
-    } 
-    
-    catch (e) {
-      setError(e?.message || "Failed to load chat participants");
+        setChats((prev) =>
+          prev.map((chat) => {
+            const found = results.find((r) => r.chatId === chat.id);
+            return found ? { ...chat, participants: found.participants } : chat;
+          }),
+        );
+      } catch (e) {
+        setError(e?.message || "Failed to load chat participants");
+      }
     }
-  }
 
-  hydrateParticipants();
-  return () => { cancelled = true; };
-}, [chats]);
+    hydrateParticipants();
+    return () => {
+      cancelled = true;
+    };
+  }, [chats]);
 
   // loads messages whenever selectedChat changes
   useEffect(() => {
@@ -196,16 +202,11 @@ export default function MessagesPanel() {
         if (!isMounted) return;
 
         setChatMessages((prev) => ({ ...prev, [chatId]: msgs }));
-      } 
-      
-      catch (e) {
+      } catch (e) {
         if (!isMounted) return;
         setError(e?.message || "Failed to load messages");
-      } 
-      
-      finally {
-        if (!isMounted) return;
-        setIsLoadingMessages(false);
+      } finally {
+        if (isMounted) setIsLoadingMessages(false);
       }
     }
 
@@ -214,7 +215,7 @@ export default function MessagesPanel() {
     return () => {
       isMounted = false;
     };
-  }, [selectedChat?.id]);
+  }, [selectedChat?.id, normalizeMessage]);
 
   async function handleSendMessage(chatId, messageText) {
     if (!myUsername) {
@@ -262,12 +263,10 @@ export default function MessagesPanel() {
                 lastMessage: messageText,
                 time: new Date().toLocaleString(),
               }
-            : c
-        )
+            : c,
+        ),
       );
-    } 
-    
-    catch (e) {
+    } catch (e) {
       setError(e?.message || "Failed to send message");
       setChatMessages((prev) => ({
         ...prev,
@@ -288,11 +287,12 @@ export default function MessagesPanel() {
       await refreshChats(created?.id);
 
       if (created?.id) {
-        setChatMessages((prev) => ({ ...prev, [created.id]: prev[created.id] || [] }));
+        setChatMessages((prev) => ({
+          ...prev,
+          [created.id]: prev[created.id] || [],
+        }));
       }
-    } 
-    
-    catch (e) {
+    } catch (e) {
       setError(e?.message || "Failed to create chat");
     }
   }
@@ -311,7 +311,9 @@ export default function MessagesPanel() {
       />
 
       <div className="flex-1 relative">
-        {isLoadingChats && <div className="p-6 text-sm text-gray-500">Loading chats...</div>}
+        {isLoadingChats && (
+          <div className="p-6 text-sm text-gray-500">Loading chats...</div>
+        )}
 
         {!isLoadingChats && !selectedChat && (
           <div className="p-6 text-sm text-gray-500">No chats yet.</div>

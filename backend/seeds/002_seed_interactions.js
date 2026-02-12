@@ -1,31 +1,67 @@
-import { pool } from '../db/index.js';
+import { pool } from "../db/index.js";
 
 const sampleInteractions = [
-  { username: 'taylor_swift', target_username: 'ed_sheeran', interaction_type: 'like' },
-  { username: 'ed_sheeran', target_username: 'billie_eilish', interaction_type: 'like' },
-  { username: 'billie_eilish', target_username: 'john_mayer', interaction_type: 'dislike' },
-  { username: 'john_mayer', target_username: 'ariana_grande', interaction_type: 'block' },
-  { username: 'ariana_grande', target_username: 'bruno_mars', interaction_type: 'like' },
-  { username: 'bruno_mars', target_username: 'adele_official', interaction_type: 'dislike' },
-  { username: 'adele_official', target_username: 'the_weeknd', interaction_type: 'like' },
-  { username: 'the_weeknd', target_username: 'taylor_swift', interaction_type: 'block' }
+  {
+    username: "taylor_swift",
+    target_username: "ed_sheeran",
+    interaction_type: "like",
+  },
+  {
+    username: "ed_sheeran",
+    target_username: "billie_eilish",
+    interaction_type: "like",
+  },
+  {
+    username: "billie_eilish",
+    target_username: "john_mayer",
+    interaction_type: "dislike",
+  },
+  {
+    username: "john_mayer",
+    target_username: "ariana_grande",
+    interaction_type: "block",
+  },
+  {
+    username: "ariana_grande",
+    target_username: "bruno_mars",
+    interaction_type: "like",
+  },
+  {
+    username: "bruno_mars",
+    target_username: "adele_official",
+    interaction_type: "dislike",
+  },
+  {
+    username: "adele_official",
+    target_username: "the_weeknd",
+    interaction_type: "like",
+  },
+  {
+    username: "the_weeknd",
+    target_username: "taylor_swift",
+    interaction_type: "block",
+  },
 ];
 
 async function seedInteractions() {
   try {
-    console.log('Seeding interactions table...');
+    console.log("Seeding interactions table...");
 
-    await pool.query('TRUNCATE TABLE interactions RESTART IDENTITY CASCADE');
-    console.log('  Cleared existing interactions');
+    await pool.query("TRUNCATE TABLE interactions RESTART IDENTITY CASCADE");
+    console.log("  Cleared existing interactions");
 
     for (const interaction of sampleInteractions) {
       // Get user IDs from usernames
-      const userQuery = 'SELECT id FROM users WHERE username = $1';
+      const userQuery = "SELECT id FROM users WHERE username = $1";
       const userResult = await pool.query(userQuery, [interaction.username]);
-      const targetUserResult = await pool.query(userQuery, [interaction.target_username]);
+      const targetUserResult = await pool.query(userQuery, [
+        interaction.target_username,
+      ]);
 
       if (userResult.rows.length === 0 || targetUserResult.rows.length === 0) {
-        console.log(`  ⚠️  Skipped: ${interaction.username} -> ${interaction.target_username} (user not found)`);
+        console.log(
+          `  ⚠️  Skipped: ${interaction.username} -> ${interaction.target_username} (user not found)`,
+        );
         continue;
       }
 
@@ -41,13 +77,15 @@ async function seedInteractions() {
       const values = [userId, targetUserId, interaction.interaction_type];
       const result = await pool.query(query, values);
 
-      console.log(`${interaction.username} ${interaction.interaction_type}d ${interaction.target_username} (ID: ${result.rows[0].id})`);
+      console.log(
+        `${interaction.username} ${interaction.interaction_type}d ${interaction.target_username} (ID: ${result.rows[0].id})`,
+      );
     }
 
     console.log(`Successfully seeded interactions!`);
     process.exit(0);
   } catch (error) {
-    console.error('Error seeding interactions:', error);
+    console.error("Error seeding interactions:", error);
     process.exit(1);
   }
 }

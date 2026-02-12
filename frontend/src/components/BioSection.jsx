@@ -1,23 +1,23 @@
 // src/components/BioSection.jsx
 // eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_PROFILE = {
-  name: 'Your Name',
-  age: '', 
-  pronouns: '',
-  username: '',
-  city: '',
-  state: '',
-  role: '', 
-  artistgenre: '',
-  yearsofexperience: '',
-  bio: '',
+  name: "Your Name",
+  age: "",
+  pronouns: "",
+  username: "",
+  city: "",
+  state: "",
+  role: "",
+  artistgenre: "",
+  yearsofexperience: "",
+  bio: "",
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const normalizeUsername = (u = '') => u.replace(/^@+/, '').trim();
+export const normalizeUsername = (u = "") => u.replace(/^@+/, "").trim();
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function getInitialProfileData(storageKey = 'profileData') {
+export function getInitialProfileData(storageKey = "profileData") {
   try {
     const saved = localStorage.getItem(storageKey);
     return saved ? JSON.parse(saved) : DEFAULT_PROFILE;
@@ -28,16 +28,16 @@ export function getInitialProfileData(storageKey = 'profileData') {
 
 export default function BioSection({ profileData = DEFAULT_PROFILE }) {
   const {
-  name = '',
-  age = '', 
-  pronouns = '',
-  username = '',
-  city = '',
-  state = '',
-  role = '', 
-  artistgenre = '',
-  yearsofexperience = '',
-  bio = '',
+    name = "",
+    age = "",
+    pronouns = "",
+    username = "",
+    city = "",
+    state = "",
+    role = "",
+    artistgenre = "",
+    yearsofexperience = "",
+    bio = "",
   } = profileData || {};
 
   const roleParts = [role, artistgenre, yearsofexperience].filter(Boolean);
@@ -59,15 +59,13 @@ export default function BioSection({ profileData = DEFAULT_PROFILE }) {
         {(city || state) && (
           <p className="text-sm text-gray-600">
             {city}
-            {city && state ? ', ' : ''}
+            {city && state ? ", " : ""}
             {state}
           </p>
         )}
 
         {roleParts.length > 0 && (
-          <p className="text-sm text-gray-600">
-            {roleParts.join(' - ')}
-          </p>
+          <p className="text-sm text-gray-600">{roleParts.join(" - ")}</p>
         )}
       </div>
 

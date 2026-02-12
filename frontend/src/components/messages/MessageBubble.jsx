@@ -6,9 +6,10 @@ export default function MessageBubble({ message }) {
       <div
         className={`
           max-w-xs px-4 py-2 rounded-xl
-          ${isOwn 
-            ? "bg-melodious-purple text-white rounded-br-none" 
-            : "bg-gray-200 text-gray-800 rounded-bl-none"
+          ${
+            isOwn
+              ? "bg-melodious-purple text-white rounded-br-none"
+              : "bg-gray-200 text-gray-800 rounded-bl-none"
           }
         `}
       >

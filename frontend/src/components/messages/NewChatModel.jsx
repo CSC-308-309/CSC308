@@ -6,9 +6,7 @@ export default function NewChatModel({
   onCreate,
   api,
   myUsername,
-}) 
-
-{
+}) {
   const [users, setUsers] = useState([]);
   const [selected, setSelected] = useState(new Set());
   const [name, setName] = useState("");
@@ -29,30 +27,29 @@ export default function NewChatModel({
         setLoadingUsers(true);
 
         const data = await api.listUsers();
-        const list = Array.isArray(data) ? data : (data?.users || []);
-        const filtered = list.filter(u => u.username && u.username !== myUsername);
+        const list = Array.isArray(data) ? data : data?.users || [];
+        const filtered = list.filter(
+          (u) => u.username && u.username !== myUsername,
+        );
 
         if (!mounted) return;
         setUsers(filtered);
-      } 
-      
-      catch (e) {
+      } catch (e) {
         if (!mounted) return;
         setError(e?.message || "Failed to load users");
-      } 
-      
-      finally {
-        if (!mounted) return;
-        setLoadingUsers(false);
+      } finally {
+        if (mounted) setLoadingUsers(false);
       }
     }
 
     loadUsers();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [isOpen, api, myUsername]);
 
   function toggle(username) {
-    setSelected(prev => {
+    setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(username)) next.delete(username);
       else next.add(username);
@@ -65,7 +62,8 @@ export default function NewChatModel({
       setError(null);
 
       if (!myUsername) throw new Error("Not logged in.");
-      if (selectedUsernames.length === 0) throw new Error("Select at least one person.");
+      if (selectedUsernames.length === 0)
+        throw new Error("Select at least one person.");
       if (isGroup && !name.trim()) throw new Error("Group chats need a name.");
 
       setSubmitting(true);
@@ -81,13 +79,9 @@ export default function NewChatModel({
       onClose();
       setSelected(new Set());
       setName("");
-    } 
-    
-    catch (e) {
+    } catch (e) {
       setError(e?.message || "Failed to create chat");
-    } 
-    
-    finally {
+    } finally {
       setSubmitting(false);
     }
   }
@@ -99,7 +93,10 @@ export default function NewChatModel({
       <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
         <div className="px-5 py-4 border-b flex items-center justify-between">
           <div className="font-semibold text-lg">New Chat</div>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
             ✕
           </button>
         </div>
@@ -125,13 +122,15 @@ export default function NewChatModel({
               <div className="p-4 text-sm text-gray-500">Loading users...</div>
             ) : (
               <div className="max-h-64 overflow-y-auto">
-                {users.map(u => (
+                {users.map((u) => (
                   <label
                     key={u.username}
                     className="flex items-center justify-between px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
                   >
                     <div>
-                      <div className="font-medium text-gray-800">{u.name || u.username}</div>
+                      <div className="font-medium text-gray-800">
+                        {u.name || u.username}
+                      </div>
                       <div className="text-xs text-gray-500">@{u.username}</div>
                     </div>
                     <input
@@ -143,7 +142,9 @@ export default function NewChatModel({
                   </label>
                 ))}
                 {users.length === 0 && (
-                  <div className="p-4 text-sm text-gray-500">No other users found.</div>
+                  <div className="p-4 text-sm text-gray-500">
+                    No other users found.
+                  </div>
                 )}
               </div>
             )}

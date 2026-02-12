@@ -2,7 +2,12 @@ import { useState } from "react";
 import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
 
-export default function ChatWindow({ chat, messages, onSendMessage, onOpenInfo }) {
+export default function ChatWindow({
+  chat,
+  messages,
+  onSendMessage,
+  onOpenInfo,
+}) {
   const [input, setInput] = useState("");
 
   function handleSend() {
@@ -34,7 +39,10 @@ export default function ChatWindow({ chat, messages, onSendMessage, onOpenInfo }
           placeholder="Message..."
           className="flex-1 bg-gray-100 px-4 py-2 rounded-xl"
         />
-        <button onClick={handleSend} className="bg-melodious-purple text-white rounded-xl px-4 py-2">
+        <button
+          onClick={handleSend}
+          className="bg-melodious-purple text-white rounded-xl px-4 py-2"
+        >
           Send
         </button>
       </div>

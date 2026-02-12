@@ -6,9 +6,9 @@ import EditProfileModal from "./EditProfileModal";
 export default function EditBioButton({
   profileData,
   onSave,
-  storageKey = 'profileData',
-  label = 'Edit Profile',
-  className = '',
+  storageKey = "profileData",
+  label = "Edit Profile",
+  className = "",
 }) {
   const [open, setOpen] = useState(false);
 
@@ -25,7 +25,9 @@ export default function EditBioButton({
 
     try {
       localStorage.setItem(storageKey, JSON.stringify(merged));
-    } catch {}
+    } catch {
+      /* empty */
+    }
 
     onSave?.(merged);
     setOpen(false);

@@ -7,7 +7,7 @@ import Messages from "./pages/Messages";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { NotificationsProvider } from "./components/notifications/NotificationsContext";
-import ProfileSetup from './pages/ProfileSetup';
+import ProfileSetup from "./pages/ProfileSetup";
 
 function getUsernameFromStorage() {
   try {
@@ -15,9 +15,7 @@ function getUsernameFromStorage() {
     if (!raw) return null;
     const user = JSON.parse(raw);
     return user?.username || null;
-  } 
-  
-  catch {
+  } catch {
     return null;
   }
 }

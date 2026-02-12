@@ -1,5 +1,5 @@
 // models/Profile.js
-import pool from '../db/index.js';
+import pool from "../db/index.js";
 
 export const ProfileModel = {
   async listUsers() {
@@ -47,16 +47,18 @@ export const ProfileModel = {
       const result = await pool.query(query, values);
       return result.rows[0];
     } catch (error) {
-      console.error('Error in Profile.createUser:', error);
+      console.error("Error in Profile.createUser:", error);
       throw error;
     }
   },
 
   async updateUser(username, updateData) {
     const fields = Object.keys(updateData);
-    if (fields.length === 0) throw new Error('No fields to update');
-    const setClause = fields.map((field, idx) => `${field} = $${idx + 2}`).join(', ');
-    const values = [username, ...fields.map(f => updateData[f])];
+    if (fields.length === 0) throw new Error("No fields to update");
+    const setClause = fields
+      .map((field, idx) => `${field} = $${idx + 2}`)
+      .join(", ");
+    const values = [username, ...fields.map((f) => updateData[f])];
     const query = `
       UPDATE profiles SET ${setClause}
       WHERE username = $1
@@ -66,7 +68,7 @@ export const ProfileModel = {
       const result = await pool.query(query, values);
       return result.rows[0]?.username;
     } catch (error) {
-      console.error('Error in Profile.updateUser:', error);
+      console.error("Error in Profile.updateUser:", error);
       throw error;
     }
   },
@@ -79,14 +81,16 @@ export const ProfileModel = {
       const result = await pool.query(query, [username]);
       return result.rows[0];
     } catch (error) {
-      console.error('Error in Profile.deleteUser:', error);
+      console.error("Error in Profile.deleteUser:", error);
       throw error;
     }
   },
 
   // Mock notification preferences methods
   async getNotificationPreferences(username) {
-    console.log(`[PROFILE] getNotificationPreferences called for username: ${username}`);
+    console.log(
+      `[PROFILE] getNotificationPreferences called for username: ${username}`,
+    );
     // Mock preferences - in a real implementation, these would be stored in the database
     const mockPreferences = {
       username,
@@ -102,7 +106,9 @@ export const ProfileModel = {
   },
 
   async updateNotificationPreferences(username, preferences) {
-    console.log(`[PROFILE] updateNotificationPreferences called for username: ${username}`);
+    console.log(
+      `[PROFILE] updateNotificationPreferences called for username: ${username}`,
+    );
     console.log(`   → New preferences:`, preferences);
     // Mock update - in a real implementation, this would update the database
     const updatedPreferences = {
@@ -112,8 +118,8 @@ export const ProfileModel = {
     console.log(`   → Updated successfully`);
     return updatedPreferences;
   },
-  
-    async updateCoverPhoto(username, coverPhotoData) {
+
+  async updateCoverPhoto(username, coverPhotoData) {
     // TODO: add photo url to database
     // NOTE: For now, just printing the data
     console.log(`Updating cover photo for ${username}:`, coverPhotoData);
