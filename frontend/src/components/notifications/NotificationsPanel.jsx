@@ -1,68 +1,74 @@
+import { useEffect, useMemo, useState } from "react";
 import groupNotifications from "./GroupNotifications";
 import NotificationSection from "./NotificationSection";
+import { api } from '../../client';
 
-export default function NotificationsPanel() {
-  const exampleNotifications = [
-    {
-      id: 1,
-      user: "Juice",
-      message: "started syncing you",
-      time: "3 hours ago",
-      button: "Sync Back",
-      daysAgo: 0,
-    },
-    {
-      id: 2,
-      user: "caprisuneli",
-      message: "liked your comment:",
-      postText: "yesss mammaaa",
-      time: "2 days ago",
-      button: "Synced",
-      daysAgo: 2,
-    },
-    {
-      id: 3,
-      user: "Stefanie",
-      message: "liked your profile",
-      time: "5 days ago",
-      daysAgo: 5,
-    },
-    {
-      id: 4,
-      user: "Talia",
-      message: "liked your comment:",
-      postText: "Barcelona Baddieeee",
-      time: "Oct 8",
-      button: "Sync Back",
-      daysAgo: 25,
-    },
-    {
-      id: 5,
-      user: "Abeyah",
-      message: "liked your profile",
-      time: "Sept 15",
-      daysAgo: 60,
-    },
-  ];
+export default function NotificationsPanel({ username }) {
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const grouped = groupNotifications(exampleNotifications);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      if (!username) {
+        setError("No username provided. Provide a `username` prop or enable a backend /client API wrapper for the current user.");
+        return;
+      }
+
+      setLoading(true);
+      setError("");
+
+      try {
+        const res = await api.listNotifications(username);
+        const items = Array.isArray(res) ? res : res?.items ?? [];
+
+        if (!cancelled) setNotifications(items);
+      } catch (e) {
+        if (!cancelled) setError(e?.message || "Failed to load notifications");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [username]);
+
+  const grouped = useMemo(() => groupNotifications(notifications), [notifications]);
+
+  if (loading) {
+    return (
+      <div className="bg-white p-8 rounded-2xl shadow-md">
+        <p className="text-gray-600">Loading notifications...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white p-8 rounded-2xl shadow-md">
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  const total = notifications.length;
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-md space-y-10">
-      {grouped.new.length > 0 && (
-        <NotificationSection title="New" items={grouped.new} />
-      )}
-
-      {grouped.week.length > 0 && (
-        <NotificationSection title="This Week" items={grouped.week} />
-      )}
-
-      {grouped.month.length > 0 && (
-        <NotificationSection title="This Month" items={grouped.month} />
-      )}
-
-      {grouped.older.length > 0 && (
-        <NotificationSection title="Older" items={grouped.older} />
+      {total === 0 ? (
+        <p className="text-gray-600">You have no notifications yet.</p>
+      ) : (
+        <>
+          {grouped.new.length > 0 && <NotificationSection title="New" items={grouped.new} />}
+          {grouped.week.length > 0 && <NotificationSection title="This Week" items={grouped.week} />}
+          {grouped.month.length > 0 && <NotificationSection title="This Month" items={grouped.month} />}
+          {grouped.older.length > 0 && <NotificationSection title="Older" items={grouped.older} />}
+        </>
       )}
     </div>
   );
