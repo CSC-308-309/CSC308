@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { api } from "../client";
 import { Search, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 
 // EventCard Component
@@ -98,7 +99,23 @@ export default function EventsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const events = [
+  const [events, setEvents] = useState([]);
+
+  // Fetch events from backend
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const data = await api.listEvents();
+        setEvents(data || []);
+      } catch (err) {
+        console.error("Failed to load events:", err);
+      }
+    }
+
+    loadEvents();
+  }, []);
+
+  /* const events = [
     {
       id: 1,
       date: "October 29, 2025 - 8:00 PM",
@@ -131,11 +148,11 @@ export default function EventsPage() {
     },
     {
       id: 6,
-      date: "October 29, 2025 - 8:00 PM",
-      title: "Taylor Swift Concert",
-      location: "Sunset Park, Los Angeles, CA",
-    },
-  ];
+      date: 'October 29, 2025 - 8:00 PM',
+      title: 'Taylor Swift Concert',
+      location: 'Sunset Park, Los Angeles, CA'
+    }
+  ]; */
 
   return (
     <div className="max-w-[1200px] bg-[#ECE6F0] mx-auto rounded-lg p-2 mb-4 m-4 sm: p-6 md:p-8 flex flex-col">
