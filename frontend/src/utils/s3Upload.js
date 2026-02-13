@@ -39,13 +39,11 @@ export async function uploadViaPresign({
 
   await putToSignedUrl({ uploadUrl, blobOrFile: file, contentType });
 
-  // Try to return a signed view URL too (same style as photos)
   let viewUrl = fileUrl;
   try {
     const res = await api.presignView({ fileUrl });
     if (res?.viewUrl) viewUrl = res.viewUrl;
   } catch {
-    // keep raw
   }
 
   return { fileUrl, viewUrl };
