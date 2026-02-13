@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { api } from "../client";
 import { Search, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "../client";
 
@@ -100,25 +101,20 @@ export default function EventsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [events, setEvents] = useState([]);
 
-  React.useEffect(() => {
-    let isMounted = true;
+  const [events, setEvents] = useState([]);
 
+  // Fetch events from backend
+  useEffect(() => {
     async function loadEvents() {
       try {
         const data = await api.listEvents();
-        if (!isMounted) return;
-        setEvents(Array.isArray(data) ? data : []);
+        setEvents(data || []);
       } catch (err) {
         console.error("Failed to load events:", err);
-        if (!isMounted) return;
-        setEvents([]);
       }
     }
 
     loadEvents();
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   /* const events = [
