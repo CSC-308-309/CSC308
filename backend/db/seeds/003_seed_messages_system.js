@@ -1,4 +1,4 @@
-import { pool } from '../db/index.js';
+import { pool } from '../index.js';
 
 const sampleChats = [
   {
@@ -111,8 +111,8 @@ async function seedMessagesSystem() {
           participantIds.push(userId);
 
           const memberQuery = `
-            INSERT INTO chat_members (chat_id, user_id, role)
-            VALUES ($1, $2, 'member')
+            INSERT INTO chat_members (chat_id, user_id)
+            VALUES ($1, $2)
             RETURNING id
           `;
           await pool.query(memberQuery, [chatId, userId]);
@@ -165,11 +165,10 @@ async function seedMessagesSystem() {
       }
     }
 
-    console.log(`Successfully seeded messages system!`);
-    process.exit(0);
+    console.log(`Successfully seeded ${sampleChats.length} chats with messages!`);
   } catch (error) {
     console.error('Error seeding messages system:', error);
-    process.exit(1);
+    throw error; // Throw instead of exit so other seeds can run
   }
 }
 

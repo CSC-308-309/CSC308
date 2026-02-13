@@ -1,4 +1,4 @@
-import { pool } from '../db/index.js';
+import { pool } from '../index.js';
 
 const sampleNotifications = [
   // Taylor Swift notifications
@@ -51,6 +51,9 @@ async function seedNotifications() {
         const actorResult = await pool.query(userQuery, [notif.actor]);
         if (actorResult.rows.length > 0) {
           actorId = actorResult.rows[0].id;
+        } else {
+          console.log(`Skipped notification for ${notif.actor} (actor not found)`);
+          continue;
         }
       }
 
@@ -85,10 +88,9 @@ async function seedNotifications() {
     }
 
     console.log(`Successfully seeded ${sampleNotifications.length} notifications!`);
-    process.exit(0);
   } catch (error) {
     console.error('Error seeding notifications:', error);
-    process.exit(1);
+    throw error; // Throw instead of exit so other seeds can run
   }
 }
 

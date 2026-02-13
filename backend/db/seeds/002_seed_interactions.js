@@ -1,4 +1,4 @@
-import { pool } from '../db/index.js';
+import { pool } from '../index.js';
 
 const sampleInteractions = [
   { username: 'taylor_swift', target_username: 'ed_sheeran', interaction_type: 'like' },
@@ -19,6 +19,8 @@ async function seedInteractions() {
     console.log('  Cleared existing interactions');
 
     for (const interaction of sampleInteractions) {
+      console.log(`Processing interaction: ${interaction.username} -> ${interaction.target_username} (${interaction.interaction_type})`);
+      
       // Get user IDs from usernames
       const userQuery = 'SELECT id FROM users WHERE username = $1';
       const userResult = await pool.query(userQuery, [interaction.username]);
@@ -44,11 +46,10 @@ async function seedInteractions() {
       console.log(`${interaction.username} ${interaction.interaction_type}d ${interaction.target_username} (ID: ${result.rows[0].id})`);
     }
 
-    console.log(`Successfully seeded interactions!`);
-    process.exit(0);
+    console.log(`Successfully seeded ${sampleInteractions.length} interactions!`);
   } catch (error) {
     console.error('Error seeding interactions:', error);
-    process.exit(1);
+    throw error; // Throw instead of exit so other seeds can run
   }
 }
 

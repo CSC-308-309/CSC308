@@ -71,14 +71,14 @@ validateUsernameFormat(username) {
     const query = `
       INSERT INTO users (
         username, email, password_hash, name, role, age, gender, genre, experience,
-        main_image, concert_image, last_song, last_song_desc
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        main_image, concert_image, last_song, last_song_desc, profile_picture, cover_photo, concert_images, music_clips
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING id, username, email, created_at
     `;
 
     const values = [
       username, email, passwordHash, username, 'User',
-      null, null, null, null, null, null, null, null
+      null, null, null, null, null, null, null, null, null, null, null, null
     ];
 
     try {
@@ -93,7 +93,7 @@ validateUsernameFormat(username) {
   async findUserByEmail(email) {
     const query = `
       SELECT id, username, email, password_hash, name, role, age, gender, genre, experience,
-             main_image, concert_image, last_song, last_song_desc, created_at, updated_at
+             main_image, concert_image, last_song, last_song_desc, created_at, updated_at, profile_picture, cover_photo, concert_images, music_clips
       FROM users
       WHERE email = $1
     `;
@@ -110,7 +110,7 @@ validateUsernameFormat(username) {
   async listUsers() {
     const query = `
       SELECT id, username, email, name, role, age, gender, genre, experience,
-             main_image, concert_image, last_song, last_song_desc, created_at, updated_at
+             main_image, concert_image, last_song, last_song_desc, created_at, updated_at, profile_picture, cover_photo, concert_images, music_clips
       FROM users
       ORDER BY created_at DESC
     `;
@@ -127,7 +127,7 @@ validateUsernameFormat(username) {
   async getUserByUsername(username) {
     const query = `
       SELECT id, username, email, name, role, age, gender, genre, experience,
-             main_image, concert_image, last_song, last_song_desc, created_at, updated_at
+             main_image, concert_image, last_song, last_song_desc, created_at, updated_at, profile_picture, cover_photo, concert_images, music_clips
       FROM users
       WHERE username = $1
     `;
@@ -143,7 +143,7 @@ validateUsernameFormat(username) {
 
   async updateUser(username, updateData) {
     const allowedFields = ['name', 'role', 'age', 'gender', 'genre', 'experience', 
-                          'main_image', 'concert_image', 'last_song', 'last_song_desc'];
+                          'main_image', 'concert_image', 'last_song', 'last_song_desc', 'profile_picture', 'cover_photo', 'concert_images', 'music_clips'];
     
     const updateFields = [];
     const values = [];
@@ -168,7 +168,7 @@ validateUsernameFormat(username) {
       SET ${updateFields.join(', ')}
       WHERE username = $${paramCount}
       RETURNING id, username, email, name, role, age, gender, genre, experience,
-                main_image, concert_image, last_song, last_song_desc, updated_at
+                main_image, concert_image, last_song, last_song_desc, updated_at, profile_picture, cover_photo, concert_images, music_clips
     `;
 
     try {

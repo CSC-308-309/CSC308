@@ -16,7 +16,7 @@ export const MessagesModel = {
             )
             LEFT JOIN users u ON m.sent_by = u.id
             WHERE cm.user_id = (SELECT id FROM users WHERE username = $1)
-            ORDER BY m.created_at DESC NULLS LAST
+            ORDER BY COALESCE(m.created_at, c.created_at) DESC
             LIMIT $2 OFFSET $3
         `;
         
@@ -46,13 +46,14 @@ export const MessagesModel = {
             
             // Add participants
             const participantQuery = `
-                INSERT INTO chat_members (chat_id, username)
-                VALUES ($1, $2)
-                ON CONFLICT (chat_id, username) DO NOTHING
-                RETURNING id, username
+                INSERT INTO chat_members (chat_id, user_id)
+                VALUES ($1, (SELECT id FROM users WHERE username = $2))
+                ON CONFLICT (chat_id, user_id) DO NOTHING
+                RETURNING id, user_id
             `;
             
-            for (const participant of participants) {
+            const uniqueParticipants = Array.from(new Set([created_by, ...(participants || [])]));
+            for (const participant of uniqueParticipants) {
                 await pool.query(participantQuery, [chat.id, participant]);
             }
             
@@ -136,10 +137,10 @@ export const MessagesModel = {
 
     async listChatParticipants(chatId) {
         const query = `
-            SELECT cm.username, cm.joined_at,
+            SELECT u.username, cm.joined_at,
                    u.name, u.main_image as avatar
             FROM chat_members cm
-            LEFT JOIN users u ON cm.username = u.username
+            LEFT JOIN users u ON cm.user_id = u.id
             WHERE cm.chat_id = $1
             ORDER BY cm.joined_at ASC
         `;
@@ -160,10 +161,10 @@ export const MessagesModel = {
             await pool.query('BEGIN');
             
             const query = `
-                INSERT INTO chat_members (chat_id, username)
-                VALUES ($1, $2)
-                ON CONFLICT (chat_id, username) DO NOTHING
-                RETURNING username
+                INSERT INTO chat_members (chat_id, user_id)
+                VALUES ($1, (SELECT id FROM users WHERE username = $2))
+                ON CONFLICT (chat_id, user_id) DO NOTHING
+                RETURNING user_id
             `;
             
             const addedParticipants = [];
@@ -186,8 +187,8 @@ export const MessagesModel = {
     async removeChatParticipant(chatId, username) {
         const query = `
             DELETE FROM chat_members 
-            WHERE chat_id = $1 AND username = $2
-            RETURNING username
+            WHERE chat_id = $1 AND user_id = (SELECT id FROM users WHERE username = $2)
+            RETURNING user_id
         `;
         
         try {
@@ -285,7 +286,7 @@ export const MessagesModel = {
         `;
         
         try {
-            const { rows } = await pool.query(query, [text, chatId, messageId]);
+            const { rows } = await pool.query(query, [content, chatId, messageId]);
             return rows[0] || null;
         } catch (error) {
             console.error('Error in updateMessage:', error);
@@ -294,16 +295,22 @@ export const MessagesModel = {
     },
 
     async deleteMessage(chatId, messageId) {
-        const query = `
-            DELETE FROM messages 
-            WHERE chat_id = $1 AND id = $2
-            RETURNING id
-        `;
-        
         try {
-            const { rows } = await pool.query(query, [chatId, messageId]);
+            await pool.query('BEGIN');
+            
+            // Delete read receipts first
+            await pool.query('DELETE FROM messages_read WHERE message_id = $1', [messageId]);
+            
+            // Then delete the message
+            const { rows } = await pool.query(
+                'DELETE FROM messages WHERE chat_id = $1 AND id = $2 RETURNING id',
+                [chatId, messageId]
+            );
+            
+            await pool.query('COMMIT');
             return rows.length > 0;
         } catch (error) {
+            await pool.query('ROLLBACK');
             console.error('Error in deleteMessage:', error);
             throw error;
         }
