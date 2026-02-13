@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+// src/components/ConcertMemoryDetail.jsx
+import React, { useEffect, useMemo, useState } from "react";
 import { X, Heart, ArrowLeft, Star } from "lucide-react";
+import { api } from "../client";
 
 export default function ConcertMemoryDetail({
   memory,
@@ -10,6 +12,9 @@ export default function ConcertMemoryDetail({
 }) {
   const [selectedMemory, setSelectedMemory] = useState(memory);
   const [showComments, setShowComments] = useState(false);
+
+  const [playUrl, setPlayUrl] = useState("");
+
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState([
     {
@@ -21,15 +26,48 @@ export default function ConcertMemoryDetail({
     },
   ]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    setSelectedMemory(memory);
+    setShowComments(false);
+    setPlayUrl("");
+  }, [isOpen, memory]);
+
+  const mediaKey = useMemo(() => {
+    if (!selectedMemory) return "";
+    return selectedMemory.mediaUrl || selectedMemory.videoUrl || "";
+  }, [selectedMemory]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      setPlayUrl("");
+      if (!showComments || !mediaKey) return;
+
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: mediaKey });
+        if (!cancelled) setPlayUrl(viewUrl || mediaKey);
+      } catch {
+        if (!cancelled) setPlayUrl(mediaKey);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [showComments, mediaKey]);
+
   if (!isOpen) return null;
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
 
-    setComments([
-      ...comments,
+    setComments((prev) => [
+      ...prev,
       {
-        id: comments.length + 1,
+        id: prev.length + 1,
         user: "You",
         text: newComment,
         time: "Just now",
@@ -56,15 +94,19 @@ export default function ConcertMemoryDetail({
     }
   };
 
+  const renderThumbSrc = (mem) => {
+    return mem.thumbnailViewUrl || mem.thumbnailUrl || mem.thumbnail || "";
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       {!showComments ? (
-        // Grid view of all memories
         <div className="bg-white rounded-xl w-[90%] max-w-5xl h-[85vh] overflow-hidden flex flex-col p-6">
           <div className="relative mb-6">
             <button
               onClick={onClose}
               className="absolute top-0 right-0 text-gray-500 hover:text-gray-700"
+              type="button"
             >
               <X size={24} />
             </button>
@@ -91,6 +133,7 @@ export default function ConcertMemoryDetail({
                     <button
                       onClick={(e) => handleToggleStar(mem.id, e)}
                       className="absolute top-3 right-3 z-10"
+                      type="button"
                     >
                       <Star
                         size={20}
@@ -103,7 +146,7 @@ export default function ConcertMemoryDetail({
                     </button>
 
                     <img
-                      src={mem.thumbnail}
+                      src={renderThumbSrc(mem)}
                       alt={mem.title}
                       className="w-full h-full object-cover"
                     />
@@ -117,21 +160,21 @@ export default function ConcertMemoryDetail({
           </div>
         </div>
       ) : (
-        // Detail view with video and comments
         <div className="bg-white rounded-xl w-[90%] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
             <button
               onClick={() => setShowComments(false)}
               className="text-gray-500 hover:text-gray-700"
+              type="button"
             >
               <ArrowLeft size={24} />
             </button>
             <div className="flex items-center gap-3">
-              {/* Star Button in Detail View */}
               <button
                 onClick={(e) => handleToggleStar(selectedMemory.id, e)}
                 className="text-gray-500 hover:text-yellow-500"
+                type="button"
               >
                 <Star
                   size={24}
@@ -145,6 +188,7 @@ export default function ConcertMemoryDetail({
               <button
                 onClick={onClose}
                 className="text-gray-500 hover:text-gray-700"
+                type="button"
               >
                 <X size={24} />
               </button>
@@ -155,17 +199,17 @@ export default function ConcertMemoryDetail({
           <div className="flex flex-1 overflow-hidden">
             {/* Video Section */}
             <div className="flex-1 bg-black flex items-center justify-center p-4">
-              {selectedMemory.video ? (
-                <video
-                  controls
-                  className="max-w-full max-h-full"
-                  src={URL.createObjectURL(selectedMemory.video)}
-                >
-                  Your browser does not support the video tag.
-                </video>
+              {mediaKey ? (
+                playUrl ? (
+                  <video controls className="max-w-full max-h-full" src={playUrl}>
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <div className="text-white/80 text-sm">Loading...</div>
+                )
               ) : (
                 <img
-                  src={selectedMemory.thumbnail}
+                  src={renderThumbSrc(selectedMemory)}
                   alt={selectedMemory.title}
                   className="max-w-full max-h-full object-contain"
                 />
@@ -184,10 +228,7 @@ export default function ConcertMemoryDetail({
                     <p className="font-semibold text-sm">eliska</p>
                     <p className="text-xs text-gray-500">Online</p>
                   </div>
-                  <Heart
-                    size={20}
-                    className="ml-auto text-red-500 fill-red-500"
-                  />
+                  <Heart size={20} className="ml-auto text-red-500 fill-red-500" />
                 </div>
                 <p className="mt-3 text-sm">{selectedMemory.title}</p>
                 {selectedMemory.description && (
@@ -229,12 +270,13 @@ export default function ConcertMemoryDetail({
                     placeholder="Write a comment..."
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleAddComment()}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
                     className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
                   />
                   <button
                     onClick={handleAddComment}
                     className="px-4 py-2 bg-purple-500 text-white rounded-full text-sm hover:bg-purple-600"
+                    type="button"
                   >
                     Post
                   </button>
