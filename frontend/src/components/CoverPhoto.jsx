@@ -32,19 +32,46 @@ async function processImageToBlob(file, maxWidth) {
 }
 
 export default function CoverPhoto({
-  storageKey = "coverPhotoUrl",
+  storageKey = "coverBannerUrl",
   fallbackSrc = defaultCover,
   className = "mt-10",
   objectPosition = "center",
   username,
+  initialSrc = "",
 }) {
   const [src, setSrc] = useState(fallbackSrc);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    if (saved) setSrc(saved);
+    const hydrateSignedSrc = async () => {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: saved });
+        if (viewUrl) setSrc(viewUrl);
+      } catch {
+        setSrc(saved);
+      }
+    };
+    hydrateSignedSrc();
   }, [storageKey]);
+
+  useEffect(() => {
+    const hydrateInitialSrc = async () => {
+      if (!initialSrc) return;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: initialSrc });
+        if (viewUrl) {
+          setSrc(viewUrl);
+          return;
+        }
+      } catch {
+        // Fallback to raw URL below.
+      }
+      setSrc(initialSrc);
+    };
+    hydrateInitialSrc();
+  }, [initialSrc]);
 
   const handleFileSelect = async (file) => {
     if (!file?.type?.startsWith("image/")) return;
@@ -93,9 +120,17 @@ export default function CoverPhoto({
         xhr.send(blob);
       });
 
-      await api.update(username, { coverPhotoUrl: fileUrl });
+      await api.updateCoverPhoto(username, { url: fileUrl });
 
-      setSrc(fileUrl);
+      let renderedUrl = fileUrl;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl });
+        if (viewUrl) renderedUrl = viewUrl;
+      } catch {
+        // Keep raw URL fallback.
+      }
+
+      setSrc(renderedUrl);
       localStorage.setItem(storageKey, fileUrl);
     } catch (error) {
       console.error("Upload failed:", error);
@@ -115,6 +150,10 @@ export default function CoverPhoto({
           alt="Cover"
           className="absolute inset-0 h-full w-full object-cover"
           style={{ objectPosition, opacity: isUploading ? 0.6 : 1 }}
+          onError={() => {
+            setSrc(fallbackSrc);
+            localStorage.removeItem(storageKey);
+          }}
         />
         <div className="absolute inset-0 bg-black/10 pointer-events-none" />
 

@@ -98,7 +98,6 @@ export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("active");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
   const [events, setEvents] = useState([]);
 
   // Fetch events from backend
