@@ -28,12 +28,15 @@ export default function ProfileSetup() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8000/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(profile),
-      });
+      const res = await fetch(
+        "melodious-aec4gpergpb0bsd6.westus3-01.azurewebsites.net/profile",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(profile),
+        },
+      );
 
       if (!res.ok) throw new Error("Failed to create profile");
 

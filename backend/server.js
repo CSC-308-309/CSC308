@@ -3,11 +3,8 @@ import { createApp } from "./app.js";
 import { dbModels } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
 
-
-import dotenv from 'dotenv';
-dotenv.config()
-
-const port = process.env.PORT || 8000;
+import dotenv from "dotenv";
+dotenv.config();
 
 async function startServer() {
   try {
@@ -19,8 +16,9 @@ async function startServer() {
 
     app.use("/auth", authRoutes);
 
-    app.listen(port, () => {
-      console.log(`Server running at http://localhost:${port}`);
+    //added for CD
+    app.listen(process.env.PORT || port, () => {
+      console.log("REST API is listening.");
     });
   } catch (err) {
     console.error("Failed to connect to PostgreSQL:", err);

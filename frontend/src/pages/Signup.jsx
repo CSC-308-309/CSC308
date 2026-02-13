@@ -18,11 +18,14 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch(
+        "melodious-aec4gpergpb0bsd6.westus3-01.azurewebsites.net/auth/signup",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        },
+      );
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Signup failed");

@@ -3,7 +3,7 @@
 
 // For now, just localhost URL
 // TODO: allow injection of env var
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "melodious-aec4gpergpb0bsd6.westus3-01.azurewebsites.net";
 
 // async function request(path, options = {}) {
 //   const res = await fetch(`${BASE_URL}${path}`, {
