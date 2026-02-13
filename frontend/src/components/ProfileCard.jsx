@@ -1,6 +1,9 @@
+import { useEffect, useState } from "react";
 import { Mic, Cake, User, Music, FileText } from "lucide-react";
 import SwipeDragController from "./SwipeDragController";
 import concertImage from "../assets/concert_image.png";
+import defaultProfilePhoto from "../assets/DefaultProfilePhoto.png";
+import { api } from "../client";
 
 export default function ProfileCard({ profile, isActive = true, onSwipe }) {
   const defaultProfile = {
@@ -10,14 +13,61 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
     gender: "Woman (she/her)",
     genre: "Pop/Country",
     experience: "12 years of experience",
-    main_image:
-      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=500&fit=crop",
+    main_image: defaultProfilePhoto,
     concert_image: concertImage,
     last_song: "Dracula by Tame Impala",
     last_song_desc: "The last song that gave me chills is...",
   };
 
   const profileData = profile || defaultProfile;
+  const [mainImageSrc, setMainImageSrc] = useState(profileData.main_image);
+  const [concertImageSrc, setConcertImageSrc] = useState(
+    profileData.concert_image,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const shouldPresign = (rawUrl) => {
+      const value = String(rawUrl || "").trim();
+      if (!value) return false;
+      if (value.startsWith("data:") || value.startsWith("blob:")) return false;
+      if (value.startsWith("/")) return false;
+
+      try {
+        const parsed = new URL(value);
+        if (parsed.searchParams.has("X-Amz-Signature")) return false;
+        const host = parsed.hostname.toLowerCase();
+        return host.endsWith("amazonaws.com");
+      } catch {
+        // Non-URL values are treated as object keys that need signing.
+        return true;
+      }
+    };
+
+    const resolveImage = async (rawUrl, setter) => {
+      if (!rawUrl) return;
+      if (!shouldPresign(rawUrl)) {
+        if (!cancelled) setter(rawUrl);
+        return;
+      }
+      try {
+        const { viewUrl } = await api.presignViewUrl(rawUrl);
+        if (!cancelled && viewUrl) setter(viewUrl);
+      } catch {
+        if (!cancelled) setter(rawUrl);
+      }
+    };
+
+    setMainImageSrc(profileData.main_image);
+    setConcertImageSrc(profileData.concert_image);
+    resolveImage(profileData.main_image, setMainImageSrc);
+    resolveImage(profileData.concert_image, setConcertImageSrc);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [profileData.main_image, profileData.concert_image]);
 
   const handleSwipe = (direction) => {
     console.log(`Swiped ${direction} on ${profileData.name}`);
@@ -72,16 +122,15 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               </div>
 
               {/* Right Column - Main Image */}
-              <div className="bg-gray-400 rounded-2xl overflow-hidden">
+              <div className="bg-gray-400 rounded-2xl overflow-hidden aspect-[4/5] md:aspect-auto md:h-[420px]">
                 <img
-                  src={profileData.main_image}
+                  src={mainImageSrc}
                   alt={profileData.name}
-                  className="w-full h-full object-cover"
+                  className="block w-full h-full object-cover object-center"
                   draggable={false}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src =
-                      "https://via.placeholder.com/400x500?text=No+Image";
+                    e.target.src = defaultProfile.main_image;
                   }}
                 />
               </div>
@@ -92,14 +141,13 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
               {/* Concert Image */}
               <div className="bg-gray-400 rounded-2xl overflow-hidden h-48">
                 <img
-                  src={profileData.concert_image}
+                  src={concertImageSrc}
                   alt="Concert"
                   className="w-full h-full object-cover"
                   draggable={false}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src =
-                      "https://via.placeholder.com/800x600?text=No+Concert+Image";
+                    e.target.src = defaultProfile.concert_image;
                   }}
                 />
               </div>

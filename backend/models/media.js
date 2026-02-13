@@ -1,5 +1,5 @@
 // models/media.js
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from "uuid";
 
@@ -65,6 +65,20 @@ function extFromType(contentType) {
   return map[contentType] || "bin";
 }
 
+function toS3Key(input = "") {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+  if (!raw.startsWith("http://") && !raw.startsWith("https://")) return raw;
+
+  try {
+    const parsed = new URL(raw);
+    const pathname = parsed.pathname || "";
+    return decodeURIComponent(pathname.replace(/^\/+/, ""));
+  } catch {
+    return "";
+  }
+}
+
 
 export async function presignUpload(req, res) {
   try {
@@ -106,6 +120,34 @@ export async function presignUpload(req, res) {
     console.error("Presign PUT error:", e);
     return res.status(500).json({
       error: "Failed to create upload URL",
+      details: e?.message || String(e),
+    });
+  }
+}
+
+export async function presignView(req, res) {
+  try {
+    const { fileUrl, key, expiresIn } = req.body || {};
+    const objectKey = toS3Key(key || fileUrl);
+    if (!objectKey) return res.status(400).json({ error: "fileUrl or key required" });
+
+    const bucket = env("S3_BUCKET");
+    const s3 = makeS3Client();
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: objectKey,
+    });
+
+    const ttl = Number.isInteger(expiresIn) ? expiresIn : 3600;
+    const viewUrl = await getSignedUrl(s3, command, {
+      expiresIn: Math.max(60, Math.min(ttl, 7 * 24 * 3600)),
+    });
+
+    return res.json({ viewUrl, key: objectKey });
+  } catch (e) {
+    console.error("Presign GET error:", e);
+    return res.status(500).json({
+      error: "Failed to create view URL",
       details: e?.message || String(e),
     });
   }
