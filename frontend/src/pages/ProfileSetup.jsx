@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoIcon from "../assets/logo.svg";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "melodious-aec4gpergpb0bsd6.westus3-01.azurewebsites.net";
 
 const GENRES = [
   "Pop", "Rock", "Hip-Hop", "R&B", "Country", "Jazz", "Classical",
