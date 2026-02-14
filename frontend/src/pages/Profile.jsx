@@ -155,7 +155,7 @@ export default function Profile() {
             <div className="col-span-12 lg:col-span-8 pr-5 space-y-10">
               {/* Concert Memories Section */}
               <section>
-                <ConcertMemories />
+                <ConcertMemories username={username}/>
               </section>
 
               {/* Divider for clarity */}
@@ -163,7 +163,7 @@ export default function Profile() {
 
               {/* Music Clips Section */}
               <section>
-                <MusicClips />
+                <MusicClips username={username}/>
               </section>
             </div>
 
