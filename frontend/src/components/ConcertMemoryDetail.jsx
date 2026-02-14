@@ -201,7 +201,11 @@ export default function ConcertMemoryDetail({
             <div className="flex-1 bg-black flex items-center justify-center p-4">
               {mediaKey ? (
                 playUrl ? (
-                  <video controls className="max-w-full max-h-full" src={playUrl}>
+                  <video
+                    controls
+                    className="max-w-full max-h-full"
+                    src={playUrl}
+                  >
                     Your browser does not support the video tag.
                   </video>
                 ) : (
@@ -228,7 +232,10 @@ export default function ConcertMemoryDetail({
                     <p className="font-semibold text-sm">eliska</p>
                     <p className="text-xs text-gray-500">Online</p>
                   </div>
-                  <Heart size={20} className="ml-auto text-red-500 fill-red-500" />
+                  <Heart
+                    size={20}
+                    className="ml-auto text-red-500 fill-red-500"
+                  />
                 </div>
                 <p className="mt-3 text-sm">{selectedMemory.title}</p>
                 {selectedMemory.description && (

@@ -1,5 +1,9 @@
 // models/media.js
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from "uuid";
 
@@ -45,7 +49,7 @@ const ALLOWED = {
     types: ["video/mp4", "video/webm", "audio/mpeg", "audio/mp4"],
   },
 
-    videoThumb: {
+  videoThumb: {
     prefix: "public/video-thumbnails",
     maxBytes: 2 * 1024 * 1024,
     types: ["image/jpeg", "image/png", "image/webp"],
@@ -78,7 +82,6 @@ function toS3Key(input = "") {
     return "";
   }
 }
-
 
 export async function presignUpload(req, res) {
   try {
@@ -123,7 +126,8 @@ export async function presignView(req, res) {
   try {
     const { fileUrl, key, expiresIn } = req.body || {};
     const objectKey = toS3Key(key || fileUrl);
-    if (!objectKey) return res.status(400).json({ error: "fileUrl or key required" });
+    if (!objectKey)
+      return res.status(400).json({ error: "fileUrl or key required" });
 
     const bucket = env("S3_BUCKET");
     const s3 = makeS3Client();

@@ -23,7 +23,7 @@ export default function MusicClips({ username }) {
       id: Date.now(),
       title: clipData.title,
       description: clipData.description || "",
-      type: clipData.type, 
+      type: clipData.type,
       starred: false,
 
       mediaUrl: clipData.mediaUrl,
@@ -92,7 +92,12 @@ export default function MusicClips({ username }) {
                 <div className="text-gray-700 font-semibold">🎵 Audio</div>
               ) : (
                 <img
-                  src={clip.thumbnailViewUrl || clip.thumbnailUrl || clip.thumbnail || ""}
+                  src={
+                    clip.thumbnailViewUrl ||
+                    clip.thumbnailUrl ||
+                    clip.thumbnail ||
+                    ""
+                  }
                   alt={clip.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {

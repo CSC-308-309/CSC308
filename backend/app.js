@@ -10,7 +10,7 @@ export function createApp({ db }) {
     cors({
       origin: "http://localhost:5173",
       credentials: true,
-    })
+    }),
   );
   app.use(express.json());
 
@@ -43,19 +43,40 @@ export function createApp({ db }) {
       const gender = (body.gender ?? "").toString().trim();
       const genre = (body.genre ?? "").toString().trim();
       const experience = toInt(body.experience);
-      const mainImage = (body.profileImage ?? body.main_image ?? "").toString().trim();
-      const lastSong = (body.favoriteSong ?? body.last_song ?? "").toString().trim();
-      const lastSongDesc = (body.songDescription ?? body.last_song_desc ?? "").toString().trim();
+      const mainImage = (body.profileImage ?? body.main_image ?? "")
+        .toString()
+        .trim();
+      const lastSong = (body.favoriteSong ?? body.last_song ?? "")
+        .toString()
+        .trim();
+      const lastSongDesc = (body.songDescription ?? body.last_song_desc ?? "")
+        .toString()
+        .trim();
 
       if (!name) return res.status(400).json({ message: "Name is required" });
       if (!role) return res.status(400).json({ message: "Role is required" });
-      if (age == null || age < 1) return res.status(400).json({ message: "Age is required and must be a positive integer" });
-      if (!gender) return res.status(400).json({ message: "Gender is required" });
+      if (age == null || age < 1)
+        return res
+          .status(400)
+          .json({ message: "Age is required and must be a positive integer" });
+      if (!gender)
+        return res.status(400).json({ message: "Gender is required" });
       if (!genre) return res.status(400).json({ message: "Genre is required" });
-      if (experience == null || experience < 0) return res.status(400).json({ message: "Experience is required and must be a non-negative integer" });
-      if (!mainImage) return res.status(400).json({ message: "Profile photo is required" });
-      if (!lastSong) return res.status(400).json({ message: "Favorite song is required" });
-      if (!lastSongDesc) return res.status(400).json({ message: "Song description is required" });
+      if (experience == null || experience < 0)
+        return res
+          .status(400)
+          .json({
+            message:
+              "Experience is required and must be a non-negative integer",
+          });
+      if (!mainImage)
+        return res.status(400).json({ message: "Profile photo is required" });
+      if (!lastSong)
+        return res.status(400).json({ message: "Favorite song is required" });
+      if (!lastSongDesc)
+        return res
+          .status(400)
+          .json({ message: "Song description is required" });
 
       const updateData = {
         name,
@@ -145,12 +166,10 @@ export function createApp({ db }) {
 
       const target = await db.User.getUserByUsername(req.body.targetUsername);
       if (!target)
-        return res
-          .status(400)
-          .json({
-            error: "Target user does not exist",
-            targetUsername: req.body.targetUsername,
-          });
+        return res.status(400).json({
+          error: "Target user does not exist",
+          targetUsername: req.body.targetUsername,
+        });
 
       const result = await db.Interactions.likeUser(
         req.params.username,
@@ -174,12 +193,10 @@ export function createApp({ db }) {
 
       const target = await db.User.getUserByUsername(req.body.targetUsername);
       if (!target)
-        return res
-          .status(400)
-          .json({
-            error: "Target user does not exist",
-            targetUsername: req.body.targetUsername,
-          });
+        return res.status(400).json({
+          error: "Target user does not exist",
+          targetUsername: req.body.targetUsername,
+        });
 
       const result = await db.Interactions.dislikeUser(
         req.params.username,
@@ -203,12 +220,10 @@ export function createApp({ db }) {
 
       const target = await db.User.getUserByUsername(req.body.targetUsername);
       if (!target)
-        return res
-          .status(400)
-          .json({
-            error: "Target user does not exist",
-            targetUsername: req.body.targetUsername,
-          });
+        return res.status(400).json({
+          error: "Target user does not exist",
+          targetUsername: req.body.targetUsername,
+        });
 
       const result = await db.Interactions.blockUser(
         req.params.username,

@@ -20,16 +20,16 @@ const PROFILE_COLUMNS = `
 `;
 
 const PROFILE_FIELDS = new Set([
-  'name',
-  'role',
-  'age',
-  'gender',
-  'genre',
-  'experience',
-  'main_image',
-  'concert_image',
-  'last_song',
-  'last_song_desc',
+  "name",
+  "role",
+  "age",
+  "gender",
+  "genre",
+  "experience",
+  "main_image",
+  "concert_image",
+  "last_song",
+  "last_song_desc",
 ]);
 
 function normalizeUpdateData(updateData = {}) {
@@ -105,10 +105,14 @@ export const ProfileModel = {
 
   async updateUser(username, updateData) {
     const normalized = normalizeUpdateData(updateData);
-    const fields = Object.keys(normalized).filter((field) => PROFILE_FIELDS.has(field));
-    if (fields.length === 0) throw new Error('No fields to update');
+    const fields = Object.keys(normalized).filter((field) =>
+      PROFILE_FIELDS.has(field),
+    );
+    if (fields.length === 0) throw new Error("No fields to update");
 
-    const setClause = fields.map((field, idx) => `${field} = $${idx + 2}`).join(', ');
+    const setClause = fields
+      .map((field, idx) => `${field} = $${idx + 2}`)
+      .join(", ");
     const values = [username, ...fields.map((f) => normalized[f])];
     const query = `
       UPDATE users
@@ -173,6 +177,8 @@ export const ProfileModel = {
   },
 
   async updateCoverPhoto(username, coverPhotoData) {
-    return this.updateUser(username, { concert_image: coverPhotoData?.url ?? '' });
+    return this.updateUser(username, {
+      concert_image: coverPhotoData?.url ?? "",
+    });
   },
 };

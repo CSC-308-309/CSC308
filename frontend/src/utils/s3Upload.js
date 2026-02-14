@@ -26,7 +26,8 @@ export async function uploadViaPresign({
   if (!file) throw new Error("Missing file");
   if (!userId) throw new Error("Missing userId");
 
-  const contentType = contentTypeOverride || file.type || "application/octet-stream";
+  const contentType =
+    contentTypeOverride || file.type || "application/octet-stream";
 
   const { uploadUrl, fileUrl } = await api.presignUpload({
     kind,
@@ -35,7 +36,8 @@ export async function uploadViaPresign({
     userId,
   });
 
-  if (!uploadUrl || !fileUrl) throw new Error("Backend did not return uploadUrl/fileUrl");
+  if (!uploadUrl || !fileUrl)
+    throw new Error("Backend did not return uploadUrl/fileUrl");
 
   await putToSignedUrl({ uploadUrl, blobOrFile: file, contentType });
 
@@ -43,8 +45,7 @@ export async function uploadViaPresign({
   try {
     const res = await api.presignView({ fileUrl });
     if (res?.viewUrl) viewUrl = res.viewUrl;
-  } catch {
-  }
+  } catch {}
 
   return { fileUrl, viewUrl };
 }

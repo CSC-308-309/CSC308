@@ -40,7 +40,8 @@ export default function NewMusicClip({ isOpen, onClose, onSave, username }) {
         canvas.toBlob(
           (blob) => {
             URL.revokeObjectURL(objectUrl);
-            if (!blob) return reject(new Error("Failed to create thumbnail blob"));
+            if (!blob)
+              return reject(new Error("Failed to create thumbnail blob"));
             resolve(blob);
           },
           "image/jpeg",

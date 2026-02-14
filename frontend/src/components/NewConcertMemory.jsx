@@ -3,7 +3,12 @@ import React, { useState } from "react";
 import ConcertIcon from "../assets/concert.svg";
 import { uploadViaPresign } from "../utils/s3Upload";
 
-export default function NewConcertMemory({ isOpen, onClose, onSave, username }) {
+export default function NewConcertMemory({
+  isOpen,
+  onClose,
+  onSave,
+  username,
+}) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [video, setVideo] = useState(null);
@@ -25,7 +30,10 @@ export default function NewConcertMemory({ isOpen, onClose, onSave, username }) 
       videoEl.playsInline = true;
 
       videoEl.onloadedmetadata = () => {
-        videoEl.currentTime = Math.min(1, videoEl.duration ? videoEl.duration / 2 : 1);
+        videoEl.currentTime = Math.min(
+          1,
+          videoEl.duration ? videoEl.duration / 2 : 1,
+        );
       };
 
       videoEl.onerror = () => {
@@ -41,7 +49,8 @@ export default function NewConcertMemory({ isOpen, onClose, onSave, username }) 
         canvas.toBlob(
           (blob) => {
             URL.revokeObjectURL(objectUrl);
-            if (!blob) return reject(new Error("Failed to create thumbnail blob"));
+            if (!blob)
+              return reject(new Error("Failed to create thumbnail blob"));
             resolve(blob);
           },
           "image/jpeg",
@@ -76,7 +85,9 @@ export default function NewConcertMemory({ isOpen, onClose, onSave, username }) 
       let thumb = { fileUrl: "", viewUrl: ConcertIcon };
 
       const thumbBlob = await generateVideoThumbnailBlob(video);
-      const thumbFile = new File([thumbBlob], "thumb.jpg", { type: "image/jpeg" });
+      const thumbFile = new File([thumbBlob], "thumb.jpg", {
+        type: "image/jpeg",
+      });
 
       thumb = await uploadViaPresign({
         kind: "videoThumb",
