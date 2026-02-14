@@ -4,11 +4,9 @@ import pool from "./db/index.js";
 import { createApp } from "./app.js";
 import { dbModels } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
+import dotenv from "dotenv";
 
-
-import dotenv from 'dotenv';
-dotenv.config()
-
+dotenv.config();
 const port = process.env.PORT || 8000;
 
 async function startServer() {

@@ -1,5 +1,5 @@
 // models/Profile.js
-import pool from '../db/index.js';
+import pool from "../db/index.js";
 
 const PROFILE_COLUMNS = `
   id,
@@ -20,16 +20,16 @@ const PROFILE_COLUMNS = `
 `;
 
 const PROFILE_FIELDS = new Set([
-  'name',
-  'role',
-  'age',
-  'gender',
-  'genre',
-  'experience',
-  'main_image',
-  'concert_image',
-  'last_song',
-  'last_song_desc',
+  "name",
+  "role",
+  "age",
+  "gender",
+  "genre",
+  "experience",
+  "main_image",
+  "concert_image",
+  "last_song",
+  "last_song_desc",
 ]);
 
 function normalizeUpdateData(updateData = {}) {
@@ -70,12 +70,49 @@ export const ProfileModel = {
     return rows[0];
   },
 
+  async createUser(profileData) {
+    // Accept a JSON object and map to the correct column order
+    const query = `
+      INSERT INTO profiles (
+        username, name, role, age, gender, genre,
+        experience, main_image, concert_image, last_song, last_song_desc
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *
+    `;
+
+    const values = [
+      profileData.username,
+      profileData.name,
+      profileData.role,
+      profileData.age,
+      profileData.gender,
+      profileData.genre,
+      profileData.experience,
+      profileData.main_image,
+      profileData.concert_image,
+      profileData.last_song,
+      profileData.last_song_desc,
+    ];
+
+    try {
+      const result = await pool.query(query, values);
+      return result.rows[0];
+    } catch (error) {
+      console.error("Error in Profile.createUser:", error);
+      throw error;
+    }
+  },
+
   async updateUser(username, updateData) {
     const normalized = normalizeUpdateData(updateData);
-    const fields = Object.keys(normalized).filter((field) => PROFILE_FIELDS.has(field));
-    if (fields.length === 0) throw new Error('No fields to update');
+    const fields = Object.keys(normalized).filter((field) =>
+      PROFILE_FIELDS.has(field),
+    );
+    if (fields.length === 0) throw new Error("No fields to update");
 
-    const setClause = fields.map((field, idx) => `${field} = $${idx + 2}`).join(', ');
+    const setClause = fields
+      .map((field, idx) => `${field} = $${idx + 2}`)
+      .join(", ");
     const values = [username, ...fields.map((f) => normalized[f])];
     const query = `
       UPDATE users
@@ -88,7 +125,7 @@ export const ProfileModel = {
       const result = await pool.query(query, values);
       return result.rows[0] ?? null;
     } catch (error) {
-      console.error('Error in Profile.updateUser:', error);
+      console.error("Error in Profile.updateUser:", error);
       throw error;
     }
   },
@@ -101,14 +138,16 @@ export const ProfileModel = {
       const result = await pool.query(query, [username]);
       return result.rows[0] ?? null;
     } catch (error) {
-      console.error('Error in Profile.deleteUser:', error);
+      console.error("Error in Profile.deleteUser:", error);
       throw error;
     }
   },
 
   // Mock notification preferences methods
   async getNotificationPreferences(username) {
-    console.log(`[PROFILE] getNotificationPreferences called for username: ${username}`);
+    console.log(
+      `[PROFILE] getNotificationPreferences called for username: ${username}`,
+    );
     // Mock preferences - in a real implementation, these would be stored in the database
     const mockPreferences = {
       username,
@@ -124,7 +163,9 @@ export const ProfileModel = {
   },
 
   async updateNotificationPreferences(username, preferences) {
-    console.log(`[PROFILE] updateNotificationPreferences called for username: ${username}`);
+    console.log(
+      `[PROFILE] updateNotificationPreferences called for username: ${username}`,
+    );
     console.log(`   → New preferences:`, preferences);
     // Mock update - in a real implementation, this would update the database
     const updatedPreferences = {
@@ -134,8 +175,10 @@ export const ProfileModel = {
     console.log(`   → Updated successfully`);
     return updatedPreferences;
   },
-  
+
   async updateCoverPhoto(username, coverPhotoData) {
-    return this.updateUser(username, { concert_image: coverPhotoData?.url ?? '' });
+    return this.updateUser(username, {
+      concert_image: coverPhotoData?.url ?? "",
+    });
   },
 };

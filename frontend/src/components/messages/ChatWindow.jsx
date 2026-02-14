@@ -2,7 +2,12 @@ import { useState } from "react";
 import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
 
-export default function ChatWindow({ chat, messages, onSendMessage }) {
+export default function ChatWindow({
+  chat,
+  messages,
+  onSendMessage,
+  onOpenInfo,
+}) {
   const [input, setInput] = useState("");
 
   function handleSend() {
@@ -13,7 +18,7 @@ export default function ChatWindow({ chat, messages, onSendMessage }) {
 
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
-      <ChatHeader chat={chat} />
+      <ChatHeader chat={chat} onInfo={onOpenInfo} />
 
       <div className="flex-1 p-6 overflow-y-auto space-y-4">
         {messages.map((msg) => (

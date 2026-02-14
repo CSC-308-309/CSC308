@@ -1,4 +1,4 @@
-const { pool } = require("../index");
+import { pool } from "../db/index.js";
 
 const sampleInteractions = [
   {
@@ -45,31 +45,44 @@ const sampleInteractions = [
 
 async function seedInteractions() {
   try {
-    console.log("Starting to seed interactions...");
+    console.log("Seeding interactions table...");
 
     await pool.query("TRUNCATE TABLE interactions RESTART IDENTITY CASCADE");
-    console.log(" Cleared existing interactions");
+    console.log("  Cleared existing interactions");
 
     for (const interaction of sampleInteractions) {
-      const query = `
-        INSERT INTO interactions (username, target_username, interaction_type)
-        VALUES ($1, $2, $3)
-        RETURNING username, target_username, interaction_type
-      `;
-      const values = [
-        interaction.username,
+      // Get user IDs from usernames
+      const userQuery = "SELECT id FROM users WHERE username = $1";
+      const userResult = await pool.query(userQuery, [interaction.username]);
+      const targetUserResult = await pool.query(userQuery, [
         interaction.target_username,
-        interaction.interaction_type,
-      ];
+      ]);
+
+      if (userResult.rows.length === 0 || targetUserResult.rows.length === 0) {
+        console.log(
+          `  ⚠️  Skipped: ${interaction.username} -> ${interaction.target_username} (user not found)`,
+        );
+        continue;
+      }
+
+      const userId = userResult.rows[0].id;
+      const targetUserId = targetUserResult.rows[0].id;
+
+      const query = `
+        INSERT INTO interactions (user_id, target_user_id, interaction_type)
+        VALUES ($1, $2, $3)
+        RETURNING id, user_id, target_user_id, interaction_type
+      `;
+
+      const values = [userId, targetUserId, interaction.interaction_type];
       const result = await pool.query(query, values);
+
       console.log(
-        `  ${result.rows[0].username} ${result.rows[0].interaction_type}d ${result.rows[0].target_username}`,
+        `${interaction.username} ${interaction.interaction_type}d ${interaction.target_username} (ID: ${result.rows[0].id})`,
       );
     }
 
-    console.log(
-      `\n Successfully seeded ${sampleInteractions.length} interactions!`,
-    );
+    console.log(`Successfully seeded interactions!`);
     process.exit(0);
   } catch (error) {
     console.error("Error seeding interactions:", error);
@@ -77,8 +90,8 @@ async function seedInteractions() {
   }
 }
 
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   seedInteractions();
 }
 
-module.exports = seedInteractions;
+export default seedInteractions;

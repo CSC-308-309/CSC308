@@ -1,5 +1,4 @@
-export default function ChatHeader({ chat }) {
-  // supports avatar transition
+export default function ChatHeader({ chat, onInfo }) {
   const avatarUrl =
     chat.avatarUrl || chat.avatar || chat.profilePicture || chat.avatarColor;
   const hasImage =
@@ -22,7 +21,17 @@ export default function ChatHeader({ chat }) {
         )}
       </div>
 
-      <h2 className="font-semibold text-lg text-gray-700">{chat.name}</h2>
+      <h2 className="font-semibold text-lg text-gray-700 flex-1">
+        {chat.name}
+      </h2>
+
+      <button
+        onClick={onInfo}
+        className="px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-sm text-gray-700"
+        title="Chat info"
+      >
+        Info
+      </button>
     </div>
   );
 }

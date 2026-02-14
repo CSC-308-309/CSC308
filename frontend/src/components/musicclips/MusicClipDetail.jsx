@@ -22,7 +22,6 @@ export default function MusicClipDetail({
     setShowDetail(false);
   }, [clip, isOpen]);
 
-
   const mediaKey = useMemo(() => {
     if (!selectedClip) return "";
     return (
@@ -245,7 +244,11 @@ export default function MusicClipDetail({
             <div className="flex-1 bg-black flex flex-col items-center justify-center p-8">
               {mediaKey && (isVideo || (!isAudio && !isVideo)) ? (
                 playUrl ? (
-                  <video controls className="max-w-full max-h-full" src={playUrl}>
+                  <video
+                    controls
+                    className="max-w-full max-h-full"
+                    src={playUrl}
+                  >
                     Your browser does not support the video tag.
                   </video>
                 ) : (
@@ -276,7 +279,11 @@ export default function MusicClipDetail({
                 </div>
               ) : (
                 <img
-                  src={thumbUrl || selectedClip?.thumbnailViewUrl || selectedClip?.thumbnail}
+                  src={
+                    thumbUrl ||
+                    selectedClip?.thumbnailViewUrl ||
+                    selectedClip?.thumbnail
+                  }
                   alt={selectedClip?.title}
                   className="max-w-full max-h-full object-contain"
                 />

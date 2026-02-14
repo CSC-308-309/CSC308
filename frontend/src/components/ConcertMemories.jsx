@@ -57,7 +57,10 @@ export default function ConcertMemories({ username }) {
     const firstPlaceholderIndex = memories.findIndex((m) => m.isPlaceholder);
 
     const newMemory = {
-      id: firstPlaceholderIndex !== -1 ? memories[firstPlaceholderIndex].id : Date.now(),
+      id:
+        firstPlaceholderIndex !== -1
+          ? memories[firstPlaceholderIndex].id
+          : Date.now(),
       title: memoryData.title,
       description: memoryData.description || "",
       type: "video",
@@ -135,9 +138,7 @@ export default function ConcertMemories({ username }) {
 
               <img
                 src={
-                  memory.thumbnailViewUrl ||
-                  memory.thumbnailUrl ||
-                  ConcertIcon
+                  memory.thumbnailViewUrl || memory.thumbnailUrl || ConcertIcon
                 }
                 alt="Memory"
                 className="w-full h-full object-cover opacity-90"
