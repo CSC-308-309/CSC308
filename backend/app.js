@@ -1,11 +1,17 @@
 import express from "express";
 import cors from "cors";
-import { presignUpload } from "./models/media.js";
+import { presignUpload, presignView } from "./models/media.js";
 
 export function createApp({ db }) {
   const app = express();
 
-  app.use(cors());
+  // When frontend uses credentials: "include", origin cannot be "*" — must be exact origin
+  app.use(
+    cors({
+      origin: "http://localhost:5173",
+      credentials: true,
+    })
+  );
   app.use(express.json());
 
   // basic test
@@ -15,6 +21,65 @@ export function createApp({ db }) {
   // NOTE: Auth routes are handled in routes/auth.js and mounted in server.js
 
   //// USER ROUTES ////
+  // Update profile (after signup) — user row already exists in users; we only set profile fields
+  app.post("/profile", async (req, res) => {
+    try {
+      const body = req.body;
+      const username = body.username;
+      if (!username) {
+        return res.status(400).json({ message: "Username is required" });
+      }
+
+      const toInt = (v) => {
+        if (v == null || v === "") return null;
+        const n = Number(v);
+        return Number.isNaN(n) ? null : n;
+      };
+
+      // Validate required fields and types
+      const name = (body.name ?? "").toString().trim();
+      const role = (body.role ?? "").toString().trim();
+      const age = toInt(body.age);
+      const gender = (body.gender ?? "").toString().trim();
+      const genre = (body.genre ?? "").toString().trim();
+      const experience = toInt(body.experience);
+      const mainImage = (body.profileImage ?? body.main_image ?? "").toString().trim();
+      const lastSong = (body.favoriteSong ?? body.last_song ?? "").toString().trim();
+      const lastSongDesc = (body.songDescription ?? body.last_song_desc ?? "").toString().trim();
+
+      if (!name) return res.status(400).json({ message: "Name is required" });
+      if (!role) return res.status(400).json({ message: "Role is required" });
+      if (age == null || age < 1) return res.status(400).json({ message: "Age is required and must be a positive integer" });
+      if (!gender) return res.status(400).json({ message: "Gender is required" });
+      if (!genre) return res.status(400).json({ message: "Genre is required" });
+      if (experience == null || experience < 0) return res.status(400).json({ message: "Experience is required and must be a non-negative integer" });
+      if (!mainImage) return res.status(400).json({ message: "Profile photo is required" });
+      if (!lastSong) return res.status(400).json({ message: "Favorite song is required" });
+      if (!lastSongDesc) return res.status(400).json({ message: "Song description is required" });
+
+      const updateData = {
+        name,
+        role,
+        age,
+        gender,
+        genre,
+        experience,
+        main_image: mainImage,
+        concert_image: body.concert_image ?? mainImage,
+        last_song: lastSong,
+        last_song_desc: lastSongDesc,
+      };
+      const updated = await db.Profile.updateUser(username, updateData);
+      if (!updated) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(200).json(updated);
+    } catch (err) {
+      console.error("Error in POST /profile:", err);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // Get all users
   app.get("/users", async (req, res) => {
     const users = await db.User.listUsers();
@@ -66,6 +131,7 @@ export function createApp({ db }) {
 
   // Get presigned URL for S3 upload
   app.put("/media/presign", presignUpload);
+  app.put("/media/presign-view", presignView);
 
   //// INTERACTION ROUTES ////
   // Like another user

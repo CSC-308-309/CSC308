@@ -43,15 +43,54 @@ export default function EditableProfilePhoto({
   fallbackSrc = defaultPhoto,
   size = 136,
   username,
+  initialSrc = "",
 }) {
+  const uploadSize = Math.max(size * 2, 512);
   const inputRef = useRef(null);
   const [src, setSrc] = useState(fallbackSrc);
   const [isUploading, setIsUploading] = useState(false);
 
+  const resolveViewUrl = async (rawUrl) => {
+    if (!rawUrl) return "";
+    try {
+      const result = await api.presignViewUrl(rawUrl);
+      return result?.viewUrl || rawUrl;
+    } catch (err) {
+      console.error("Failed to resolve image view URL:", err);
+      return rawUrl;
+    }
+  };
+
   useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    if (saved) setSrc(saved);
+    const hydrateSignedSrc = async () => {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: saved });
+        if (viewUrl) setSrc(viewUrl);
+      } catch {
+        setSrc(saved);
+      }
+    };
+    hydrateSignedSrc();
   }, [storageKey]);
+
+  useEffect(() => {
+    const hydrateInitialSrc = async () => {
+      if (!initialSrc) return;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: initialSrc });
+        if (viewUrl) {
+          setSrc(viewUrl);
+          return;
+        }
+      } catch {
+        // Fallback to raw URL below.
+      }
+      setSrc(initialSrc);
+    };
+    hydrateInitialSrc();
+  }, [initialSrc]);
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
@@ -63,7 +102,7 @@ export default function EditableProfilePhoto({
       if (!username) throw new Error("Missing username (used as userId)");
       setIsUploading(true);
 
-      const blob = await processImageToBlobSquare(file, size);
+      const blob = await processImageToBlobSquare(file, uploadSize);
 
       previewUrl = URL.createObjectURL(blob);
       setSrc(previewUrl);
@@ -98,9 +137,17 @@ export default function EditableProfilePhoto({
         xhr.send(blob);
       });
 
-      await api.update(username, { profilePhotoUrl: fileUrl });
+      await api.update(username, { main_image: fileUrl });
 
-      setSrc(fileUrl);
+      let renderedUrl = fileUrl;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl });
+        if (viewUrl) renderedUrl = viewUrl;
+      } catch {
+        // Keep raw URL fallback.
+      }
+
+      setSrc(renderedUrl);
       localStorage.setItem(storageKey, fileUrl);
     } catch (err) {
       console.error("Upload failed:", err);
@@ -127,6 +174,11 @@ export default function EditableProfilePhoto({
           alt="Profile"
           className="h-full w-full object-cover"
           draggable={false}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            setSrc(fallbackSrc);
+            localStorage.removeItem(storageKey);
+          }}
         />
 
         {isUploading && (
