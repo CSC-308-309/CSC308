@@ -44,6 +44,12 @@ const ALLOWED = {
     maxBytes: 300 * 1024 * 1024,
     types: ["video/mp4", "video/webm", "audio/mpeg", "audio/mp4"],
   },
+
+    videoThumb: {
+    prefix: "public/video-thumbnails",
+    maxBytes: 2 * 1024 * 1024,
+    types: ["image/jpeg", "image/png", "image/webp"],
+  },
 };
 
 function extFromType(contentType) {
