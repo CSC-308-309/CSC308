@@ -5,9 +5,24 @@ import logoIcon from "../assets/logo.svg";
 const API_BASE = "melodious-aec4gpergpb0bsd6.westus3-01.azurewebsites.net";
 
 const GENRES = [
-  "Pop", "Rock", "Hip-Hop", "R&B", "Country", "Jazz", "Classical",
-  "Electronic", "Indie", "Metal", "Punk", "Folk", "Soul", "Reggae",
-  "Latin", "Blues", "K-Pop", "Other",
+  "Pop",
+  "Rock",
+  "Hip-Hop",
+  "R&B",
+  "Country",
+  "Jazz",
+  "Classical",
+  "Electronic",
+  "Indie",
+  "Metal",
+  "Punk",
+  "Folk",
+  "Soul",
+  "Reggae",
+  "Latin",
+  "Blues",
+  "K-Pop",
+  "Other",
 ];
 
 function parsePositiveInt(value) {
@@ -51,29 +66,43 @@ export default function ProfileSetup() {
     if (!name) err.name = "Name is required.";
     if (!profile.role) err.role = "Please select how you show up in music.";
     const age = parsePositiveInt(profile.age);
-    if (profile.age !== "" && (age === null || Number.isNaN(age))) err.age = "Please enter a valid whole number.";
-    if (profile.age !== "" && age !== null && age < 1) err.age = "Age must be at least 1.";
+    if (profile.age !== "" && (age === null || Number.isNaN(age)))
+      err.age = "Please enter a valid whole number.";
+    if (profile.age !== "" && age !== null && age < 1)
+      err.age = "Age must be at least 1.";
     if (profile.age === "") err.age = "Age is required.";
     if (!(profile.gender || "").trim()) err.gender = "Gender is required.";
     if (!profile.genre) err.genre = "Please select a genre.";
     const exp = parsePositiveInt(profile.experience);
-    if (profile.experience !== "" && (exp === null || Number.isNaN(exp))) err.experience = "Please enter a valid whole number (e.g. 0 or more).";
-    if (profile.experience === "") err.experience = "Years of experience is required.";
+    if (profile.experience !== "" && (exp === null || Number.isNaN(exp)))
+      err.experience = "Please enter a valid whole number (e.g. 0 or more).";
+    if (profile.experience === "")
+      err.experience = "Years of experience is required.";
     setFieldErrors((prev) => ({ ...prev, ...err }));
     return Object.keys(err).length === 0;
   }
 
   function validateStep2() {
     const err = {};
-    if (!(profile.profileImage || "").trim()) err.profileImage = "Please upload a profile photo.";
-    if (!(profile.concertImage || "").trim()) err.concertImage = "Please upload a concert image.";
-    if (!(profile.favoriteSong || "").trim()) err.favoriteSong = "Favorite song is required.";
-    if (!(profile.songDescription || "").trim()) err.songDescription = "Song description is required.";
+    if (!(profile.profileImage || "").trim())
+      err.profileImage = "Please upload a profile photo.";
+    if (!(profile.concertImage || "").trim())
+      err.concertImage = "Please upload a concert image.";
+    if (!(profile.favoriteSong || "").trim())
+      err.favoriteSong = "Favorite song is required.";
+    if (!(profile.songDescription || "").trim())
+      err.songDescription = "Song description is required.";
     setFieldErrors((prev) => ({ ...prev, ...err }));
     return Object.keys(err).length === 0;
   }
 
-  const handleFileChange = async ({ event, fieldName, kind, maxBytes, errorField }) => {
+  const handleFileChange = async ({
+    event,
+    fieldName,
+    kind,
+    maxBytes,
+    errorField,
+  }) => {
     const file = event.target?.files?.[0];
     if (!file) return;
     setFieldErrors((prev) => ({ ...prev, [errorField]: "" }));
@@ -125,7 +154,9 @@ export default function ProfileSetup() {
 
       if (!presignRes.ok) {
         const data = await presignRes.json().catch(() => ({}));
-        throw new Error(data.error || data.details || "Could not get upload URL");
+        throw new Error(
+          data.error || data.details || "Could not get upload URL",
+        );
       }
 
       const { uploadUrl, fileUrl, putHeaders } = await presignRes.json();
@@ -181,7 +212,8 @@ export default function ProfileSetup() {
         age: age != null && !Number.isNaN(age) ? age : null,
         gender: (profile.gender || "").trim(),
         genre: profile.genre,
-        experience: experience != null && !Number.isNaN(experience) ? experience : null,
+        experience:
+          experience != null && !Number.isNaN(experience) ? experience : null,
         profileImage: (profile.profileImage || "").trim(),
         concert_image: (profile.concertImage || "").trim(),
         favoriteSong: (profile.favoriteSong || "").trim(),
@@ -228,7 +260,11 @@ export default function ProfileSetup() {
                   onChange={(e) => updateField("name", e.target.value)}
                   aria-invalid={!!fieldErrors.name}
                 />
-                {fieldErrors.name && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.name}</p>}
+                {fieldErrors.name && (
+                  <p className="text-red-300 text-sm mt-0.5">
+                    {fieldErrors.name}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -245,7 +281,11 @@ export default function ProfileSetup() {
                   <option value="Listener">Listener</option>
                   <option value="Live Music Lover">Live Music Lover</option>
                 </select>
-                {fieldErrors.role && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.role}</p>}
+                {fieldErrors.role && (
+                  <p className="text-red-300 text-sm mt-0.5">
+                    {fieldErrors.role}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -257,7 +297,11 @@ export default function ProfileSetup() {
                   onChange={(e) => updateField("age", e.target.value)}
                   aria-invalid={!!fieldErrors.age}
                 />
-                {fieldErrors.age && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.age}</p>}
+                {fieldErrors.age && (
+                  <p className="text-red-300 text-sm mt-0.5">
+                    {fieldErrors.age}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -267,7 +311,11 @@ export default function ProfileSetup() {
                   onChange={(e) => updateField("gender", e.target.value)}
                   aria-invalid={!!fieldErrors.gender}
                 />
-                {fieldErrors.gender && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.gender}</p>}
+                {fieldErrors.gender && (
+                  <p className="text-red-300 text-sm mt-0.5">
+                    {fieldErrors.gender}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -279,10 +327,16 @@ export default function ProfileSetup() {
                 >
                   <option value="">Favorite genre? *</option>
                   {GENRES.map((g) => (
-                    <option key={g} value={g}>{g}</option>
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
                   ))}
                 </select>
-                {fieldErrors.genre && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.genre}</p>}
+                {fieldErrors.genre && (
+                  <p className="text-red-300 text-sm mt-0.5">
+                    {fieldErrors.genre}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -294,7 +348,11 @@ export default function ProfileSetup() {
                   onChange={(e) => updateField("experience", e.target.value)}
                   aria-invalid={!!fieldErrors.experience}
                 />
-                {fieldErrors.experience && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.experience}</p>}
+                {fieldErrors.experience && (
+                  <p className="text-red-300 text-sm mt-0.5">
+                    {fieldErrors.experience}
+                  </p>
+                )}
               </div>
 
               <button
@@ -309,7 +367,9 @@ export default function ProfileSetup() {
           {step === 2 && (
             <>
               <div>
-                <label className="block text-white text-sm mb-1">Profile photo *</label>
+                <label className="block text-white text-sm mb-1">
+                  Profile photo *
+                </label>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
@@ -328,12 +388,20 @@ export default function ProfileSetup() {
                 {profile.profileImage && (
                   <p className="text-green-200 text-sm mt-1">Photo added.</p>
                 )}
-                {fieldErrors.profileImage && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.profileImage}</p>}
-                {uploadingProfile && <p className="text-white/80 text-sm">Uploading…</p>}
+                {fieldErrors.profileImage && (
+                  <p className="text-red-300 text-sm mt-0.5">
+                    {fieldErrors.profileImage}
+                  </p>
+                )}
+                {uploadingProfile && (
+                  <p className="text-white/80 text-sm">Uploading…</p>
+                )}
               </div>
 
               <div>
-                <label className="block text-white text-sm mb-1">Concert image *</label>
+                <label className="block text-white text-sm mb-1">
+                  Concert image *
+                </label>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
@@ -352,8 +420,14 @@ export default function ProfileSetup() {
                 {profile.concertImage && (
                   <p className="text-green-200 text-sm mt-1">Photo added.</p>
                 )}
-                {fieldErrors.concertImage && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.concertImage}</p>}
-                {uploadingConcert && <p className="text-white/80 text-sm">Uploading…</p>}
+                {fieldErrors.concertImage && (
+                  <p className="text-red-300 text-sm mt-0.5">
+                    {fieldErrors.concertImage}
+                  </p>
+                )}
+                {uploadingConcert && (
+                  <p className="text-white/80 text-sm">Uploading…</p>
+                )}
               </div>
 
               <div>
@@ -363,7 +437,11 @@ export default function ProfileSetup() {
                   onChange={(e) => updateField("favoriteSong", e.target.value)}
                   aria-invalid={!!fieldErrors.favoriteSong}
                 />
-                {fieldErrors.favoriteSong && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.favoriteSong}</p>}
+                {fieldErrors.favoriteSong && (
+                  <p className="text-red-300 text-sm mt-0.5">
+                    {fieldErrors.favoriteSong}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -371,10 +449,16 @@ export default function ProfileSetup() {
                   placeholder="Describe what you like about this song *"
                   className="w-full p-2 rounded border h-24"
                   value={profile.songDescription}
-                  onChange={(e) => updateField("songDescription", e.target.value)}
+                  onChange={(e) =>
+                    updateField("songDescription", e.target.value)
+                  }
                   aria-invalid={!!fieldErrors.songDescription}
                 />
-                {fieldErrors.songDescription && <p className="text-red-300 text-sm mt-0.5">{fieldErrors.songDescription}</p>}
+                {fieldErrors.songDescription && (
+                  <p className="text-red-300 text-sm mt-0.5">
+                    {fieldErrors.songDescription}
+                  </p>
+                )}
               </div>
 
               {error && (

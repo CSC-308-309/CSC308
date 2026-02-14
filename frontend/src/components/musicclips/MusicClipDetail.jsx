@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+// src/components/musicclips/MusicClipDetail.jsx
+import React, { useEffect, useMemo, useState } from "react";
 import { X, ArrowLeft, Star } from "lucide-react";
+import { api } from "../../client";
 
 export default function MusicClipDetail({
   clip,
@@ -10,6 +12,90 @@ export default function MusicClipDetail({
 }) {
   const [selectedClip, setSelectedClip] = useState(clip);
   const [showDetail, setShowDetail] = useState(false);
+
+  const [playUrl, setPlayUrl] = useState("");
+  const [thumbUrl, setThumbUrl] = useState("");
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setSelectedClip(clip);
+    setShowDetail(false);
+  }, [clip, isOpen]);
+
+  const mediaKey = useMemo(() => {
+    if (!selectedClip) return "";
+    return (
+      selectedClip.mediaUrl ||
+      selectedClip.mediaKey ||
+      selectedClip.videoUrl ||
+      selectedClip.audioUrl ||
+      ""
+    );
+  }, [selectedClip]);
+
+  const thumbnailKey = useMemo(() => {
+    if (!selectedClip) return "";
+    return (
+      selectedClip.thumbnailUrl ||
+      selectedClip.thumbnailKey ||
+      selectedClip.thumbnail ||
+      ""
+    );
+  }, [selectedClip]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      setPlayUrl("");
+      if (!showDetail || !mediaKey) return;
+
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: mediaKey });
+        if (!cancelled) setPlayUrl(viewUrl || mediaKey);
+      } catch (e) {
+        if (!cancelled) setPlayUrl(mediaKey);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [showDetail, mediaKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      setThumbUrl("");
+      if (!thumbnailKey) return;
+
+      const isLocal =
+        thumbnailKey.startsWith("blob:") ||
+        thumbnailKey.startsWith("data:") ||
+        thumbnailKey.startsWith("/") ||
+        thumbnailKey.startsWith("http://") ||
+        thumbnailKey.startsWith("https://");
+
+      if (isLocal && !thumbnailKey.includes(".amazonaws.com/")) {
+        setThumbUrl(thumbnailKey);
+        return;
+      }
+
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl: thumbnailKey });
+        if (!cancelled) setThumbUrl(viewUrl || thumbnailKey);
+      } catch {
+        if (!cancelled) setThumbUrl(thumbnailKey);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [thumbnailKey]);
 
   if (!isOpen) return null;
 
@@ -30,10 +116,28 @@ export default function MusicClipDetail({
     }
   };
 
+  const renderThumbSrc = (clipItem) => {
+    return (
+      clipItem.thumbnailViewUrl ||
+      clipItem.thumbnailUrl ||
+      clipItem.thumbnail ||
+      ""
+    );
+  };
+
+  const isAudio =
+    selectedClip?.type === "audio" ||
+    (!!selectedClip?.audioUrl && !selectedClip?.videoUrl) ||
+    (selectedClip?.mediaMime || "").startsWith("audio/");
+
+  const isVideo =
+    selectedClip?.type === "video" ||
+    (!!selectedClip?.videoUrl && !selectedClip?.audioUrl) ||
+    (selectedClip?.mediaMime || "").startsWith("video/");
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       {!showDetail ? (
-        // Grid view of all clips
         <div className="bg-white rounded-xl w-[90%] max-w-5xl h-[85vh] overflow-hidden flex flex-col p-6">
           <div className="relative mb-6">
             <button
@@ -82,9 +186,13 @@ export default function MusicClipDetail({
                       </div>
                     ) : (
                       <img
-                        src={clipItem.thumbnail}
+                        src={renderThumbSrc(clipItem)}
                         alt={clipItem.title}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = clipItem.thumbnail || "";
+                        }}
                       />
                     )}
                   </div>
@@ -97,7 +205,6 @@ export default function MusicClipDetail({
           </div>
         </div>
       ) : (
-        // Detail view with media player
         <div className="bg-white rounded-xl w-[90%] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
@@ -116,7 +223,7 @@ export default function MusicClipDetail({
                 <Star
                   size={24}
                   className={`${
-                    selectedClip.starred
+                    selectedClip?.starred
                       ? "fill-yellow-500 text-yellow-500"
                       : "text-gray-400"
                   } transition-colors`}
@@ -135,41 +242,49 @@ export default function MusicClipDetail({
           <div className="flex flex-1 overflow-hidden">
             {/* Media Section */}
             <div className="flex-1 bg-black flex flex-col items-center justify-center p-8">
-              {selectedClip.video ? (
-                <video
-                  controls
-                  className="max-w-full max-h-full"
-                  src={URL.createObjectURL(selectedClip.video)}
-                >
-                  Your browser does not support the video tag.
-                </video>
-              ) : selectedClip.audio ? (
+              {mediaKey && (isVideo || (!isAudio && !isVideo)) ? (
+                playUrl ? (
+                  <video
+                    controls
+                    className="max-w-full max-h-full"
+                    src={playUrl}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <div className="text-white/80 text-sm">Loading...</div>
+                )
+              ) : mediaKey && isAudio ? (
                 <div className="w-full max-w-2xl">
                   <div className="bg-gray-900 rounded-lg p-8 mb-6">
                     <div className="text-center mb-6">
                       <div className="text-6xl mb-4">🎵</div>
                       <h3 className="text-white text-xl font-semibold">
-                        {selectedClip.title}
+                        {selectedClip?.title}
                       </h3>
-                      {selectedClip.description && (
+                      {selectedClip?.description && (
                         <p className="text-gray-400 text-sm mt-2">
                           {selectedClip.description}
                         </p>
                       )}
                     </div>
                   </div>
-                  <audio
-                    controls
-                    className="w-full"
-                    src={URL.createObjectURL(selectedClip.audio)}
-                  >
-                    Your browser does not support the audio tag.
-                  </audio>
+                  {playUrl ? (
+                    <audio controls className="w-full" src={playUrl}>
+                      Your browser does not support the audio tag.
+                    </audio>
+                  ) : (
+                    <div className="text-white/80 text-sm">Loading...</div>
+                  )}
                 </div>
               ) : (
                 <img
-                  src={selectedClip.thumbnail}
-                  alt={selectedClip.title}
+                  src={
+                    thumbUrl ||
+                    selectedClip?.thumbnailViewUrl ||
+                    selectedClip?.thumbnail
+                  }
+                  alt={selectedClip?.title}
                   className="max-w-full max-h-full object-contain"
                 />
               )}

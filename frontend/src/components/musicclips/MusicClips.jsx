@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+// src/components/musicclips/MusicClips.jsx
+import React, { useMemo, useState } from "react";
 import { Star, Plus } from "lucide-react";
 import NewMusicClip from "./NewMusicClip";
 import MusicClipDetail from "./MusicClipDetail";
 
-export default function MusicClips() {
+export default function MusicClips({ username }) {
   const [clips, setClips] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedClip, setSelectedClip] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   const toggleStar = (id) => {
-    setClips(
-      clips.map((clip) =>
+    setClips((prev) =>
+      prev.map((clip) =>
         clip.id === id ? { ...clip, starred: !clip.starred } : clip,
       ),
     );
@@ -21,15 +22,18 @@ export default function MusicClips() {
     const newClip = {
       id: Date.now(),
       title: clipData.title,
-      description: clipData.description,
-      audio: clipData.file.type.includes("audio") ? clipData.file : null,
-      video: clipData.file.type.includes("video") ? clipData.file : null,
-      type: clipData.file.type.includes("audio") ? "audio" : "video",
+      description: clipData.description || "",
+      type: clipData.type,
       starred: false,
-      thumbnail: clipData.fileThumbnail,
+
+      mediaUrl: clipData.mediaUrl,
+      mediaViewUrl: clipData.mediaViewUrl,
+
+      thumbnailUrl: clipData.thumbnailUrl || "",
+      thumbnailViewUrl: clipData.thumbnailViewUrl || "",
     };
 
-    setClips([newClip, ...clips]);
+    setClips((prev) => [newClip, ...prev]);
     setIsModalOpen(false);
   };
 
@@ -38,24 +42,20 @@ export default function MusicClips() {
     setIsDetailOpen(true);
   };
 
-  const getDisplayClips = () => {
-    // If no clips, show empty
-    if (clips.length === 0) {
-      return [];
-    }
-
-    // Prioritize starred clips
+  const displayClips = useMemo(() => {
+    if (clips.length === 0) return [];
     const starred = clips.filter((c) => c.starred);
-
-    if (starred.length > 0) {
-      return starred.slice(0, 3);
-    }
-
-    // Show the most recent 3 clips
+    if (starred.length > 0) return starred.slice(0, 3);
     return clips.slice(0, 3);
-  };
+  }, [clips]);
 
-  const displayClips = getDisplayClips();
+  const handleOpenModal = () => {
+    if (!username) {
+      alert("You must be logged in to upload a clip.");
+      return;
+    }
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="max-w-4xl mx-auto bg-gray-50 min-h-screen">
@@ -75,6 +75,7 @@ export default function MusicClips() {
                   toggleStar(clip.id);
                 }}
                 className="absolute top-3 right-3 z-10"
+                type="button"
               >
                 <Star
                   size={20}
@@ -91,9 +92,18 @@ export default function MusicClips() {
                 <div className="text-gray-700 font-semibold">🎵 Audio</div>
               ) : (
                 <img
-                  src={clip.thumbnail}
+                  src={
+                    clip.thumbnailViewUrl ||
+                    clip.thumbnailUrl ||
+                    clip.thumbnail ||
+                    ""
+                  }
                   alt={clip.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "";
+                  }}
                 />
               )}
             </div>
@@ -108,8 +118,9 @@ export default function MusicClips() {
         {/* Add New Button */}
         <div className="flex flex-col items-start">
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleOpenModal}
             className="bg-[#CCC2DC] rounded-xl p-4 hover:bg-[#A488D1] transition-colors flex items-center justify-center min-h-[180px] w-[180px] group"
+            type="button"
           >
             <Plus
               size={32}
@@ -126,6 +137,7 @@ export default function MusicClips() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveClip}
+        username={username}
       />
 
       <MusicClipDetail

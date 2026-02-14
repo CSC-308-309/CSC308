@@ -31,7 +31,10 @@ export default function Signup() {
       if (!res.ok) throw new Error(data.message || "Signup failed");
 
       if (data.username) {
-        localStorage.setItem("user", JSON.stringify({ username: data.username }));
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ username: data.username }),
+        );
       }
       navigate("/profilesetup");
     } catch (err) {

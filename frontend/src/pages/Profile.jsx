@@ -89,8 +89,7 @@ export default function Profile() {
           localStorage.setItem("profilePhotoUrl", dbUser.main_image);
         }
         // Keep cover separate from concert media.
-        const storedCover =
-          dbUser?.concert_image
+        const storedCover = dbUser?.concert_image;
         if (storedCover) {
           setCoverImageUrl(storedCover);
           localStorage.setItem("coverBannerUrl", storedCover);
@@ -155,7 +154,7 @@ export default function Profile() {
             <div className="col-span-12 lg:col-span-8 pr-5 space-y-10">
               {/* Concert Memories Section */}
               <section>
-                <ConcertMemories />
+                <ConcertMemories username={username} />
               </section>
 
               {/* Divider for clarity */}
@@ -163,7 +162,7 @@ export default function Profile() {
 
               {/* Music Clips Section */}
               <section>
-                <MusicClips />
+                <MusicClips username={username} />
               </section>
             </div>
 

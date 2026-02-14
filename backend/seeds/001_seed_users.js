@@ -1,8 +1,11 @@
-const { pool } = require("../index");
+import { pool } from "../db/index.js";
+import bcrypt from "bcrypt";
 
-const sampleProfiles = [
+const sampleUsers = [
   {
     username: "taylor_swift",
+    email: "taylor.swift@musicdate.com",
+    password: "password123",
     name: "Taylor Swift",
     role: "Vocalist",
     age: 34,
@@ -18,6 +21,8 @@ const sampleProfiles = [
   },
   {
     username: "ed_sheeran",
+    email: "ed.sheeran@musicdate.com",
+    password: "password123",
     name: "Ed Sheeran",
     role: "Guitarist",
     age: 32,
@@ -33,6 +38,8 @@ const sampleProfiles = [
   },
   {
     username: "billie_eilish",
+    email: "billie.eilish@musicdate.com",
+    password: "password123",
     name: "Billie Eilish",
     role: "Vocalist",
     age: 22,
@@ -48,6 +55,8 @@ const sampleProfiles = [
   },
   {
     username: "john_mayer",
+    email: "john.mayer@musicdate.com",
+    password: "password123",
     name: "John Mayer",
     role: "Guitarist",
     age: 46,
@@ -63,6 +72,8 @@ const sampleProfiles = [
   },
   {
     username: "ariana_grande",
+    email: "ariana.grande@musicdate.com",
+    password: "password123",
     name: "Ariana Grande",
     role: "Vocalist",
     age: 30,
@@ -78,6 +89,8 @@ const sampleProfiles = [
   },
   {
     username: "bruno_mars",
+    email: "bruno.mars@musicdate.com",
+    password: "password123",
     name: "Bruno Mars",
     role: "Vocalist",
     age: 38,
@@ -93,6 +106,8 @@ const sampleProfiles = [
   },
   {
     username: "adele_official",
+    email: "adele@musicdate.com",
+    password: "password123",
     name: "Adele",
     role: "Vocalist",
     age: 35,
@@ -108,6 +123,8 @@ const sampleProfiles = [
   },
   {
     username: "the_weeknd",
+    email: "the.weeknd@musicdate.com",
+    password: "password123",
     name: "The Weeknd",
     role: "Vocalist",
     age: 33,
@@ -123,47 +140,56 @@ const sampleProfiles = [
   },
 ];
 
-async function seedProfiles() {
+async function seedUsers() {
   try {
-    console.log("Starting to seed profiles...");
+    console.log("Seeding users table...");
 
-    for (const profile of sampleProfiles) {
+    await pool.query("TRUNCATE TABLE users RESTART IDENTITY CASCADE");
+    console.log("  Cleared existing users");
+
+    for (const user of sampleUsers) {
+      const passwordHash = await bcrypt.hash(user.password, 10);
+
       const query = `
-        INSERT INTO profiles (
-          username, name, role, age, gender, genre, experience,
-          main_image, concert_image, last_song, last_song_desc
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        RETURNING username
+        INSERT INTO users (
+          username, email, password_hash, name, role, age, gender, 
+          genre, experience, main_image, concert_image, last_song, last_song_desc
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        RETURNING id, username
       `;
 
       const values = [
-        profile.username,
-        profile.name,
-        profile.role,
-        profile.age,
-        profile.gender,
-        profile.genre,
-        profile.experience,
-        profile.main_image,
-        profile.concert_image,
-        profile.last_song,
-        profile.last_song_desc,
+        user.username,
+        user.email,
+        passwordHash,
+        user.name,
+        user.role,
+        user.age,
+        user.gender,
+        user.genre,
+        user.experience,
+        user.main_image,
+        user.concert_image,
+        user.last_song,
+        user.last_song_desc,
       ];
 
       const result = await pool.query(query, values);
-      console.log(`  Added: ${result.rows[0].name} (ID: ${result.rows[0].id})`);
+      console.log(
+        ` Added: ${user.name} (ID: ${result.rows[0].id}, Username: ${result.rows[0].username})`,
+      );
     }
 
-    console.log(`\n Successfully seeded ${sampleProfiles.length} profiles!`);
+    console.log(`Successfully seeded ${sampleUsers.length} users!`);
     process.exit(0);
   } catch (error) {
-    console.error("Error seeding profiles:", error);
+    console.error("Error seeding users:", error);
     process.exit(1);
   }
 }
 
 if (require.main === module) {
-  seedProfiles();
+  seedUsers();
 }
 
-module.exports = seedProfiles;
+module.exports = seedUsers;
