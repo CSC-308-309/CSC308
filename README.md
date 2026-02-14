@@ -10,6 +10,9 @@ Code linter/style checker:
 - Open VScode, click the extensions tab on the left, search "Prettier" and install the "Prettier- Code Checker" option
 - Search "ESLint" and install 
 
+# Deployment Link
+https://ashy-hill-04c3bda0f.6.azurestaticapps.net/
+
 # Product Specification
 https://docs.google.com/document/d/1cBSxzDnsi8fmFt1OEzrzvhNNLxf60j3GwNR_LEQkPOk/edit?usp=sharing
 
