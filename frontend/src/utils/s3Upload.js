@@ -45,6 +45,7 @@ export async function uploadViaPresign({
   try {
     const res = await api.presignView({ fileUrl });
     if (res?.viewUrl) viewUrl = res.viewUrl;
+  // eslint-disable-next-line no-empty
   } catch {}
 
   return { fileUrl, viewUrl };
