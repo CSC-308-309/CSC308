@@ -127,7 +127,7 @@ export default function EditableProfilePhoto({
         xhr.send(blob);
       });
 
-      await api.update(username, { main_image: fileUrl });
+      await api.update({ main_image: fileUrl });
 
       let renderedUrl = fileUrl;
       try {

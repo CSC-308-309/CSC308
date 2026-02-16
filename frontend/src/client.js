@@ -78,34 +78,66 @@ function withQuery(path, params = {}) {
   return `${path}?${qs}`;
 }
 
+// Helper: get the logged-in username from localStorage (single source of truth).
+export function getCurrentUsername() {
+  try {
+    const raw = localStorage.getItem("user");
+    if (!raw) return null;
+    const user = JSON.parse(raw);
+    return user?.username || null;
+  } catch {
+    return null;
+  }
+}
+
+// Helper: enforce presence of username when a route needs it.
+function requireUsername(username) {
+  if (!username) throw new Error("username is required");
+  return username;
+}
+
+// Helper: resolve username, falling back to the current user.
+function resolveUsername(username) {
+  return username ?? requireUsername(getCurrentUsername());
+}
+
 export const api = {
   // User/Profile routes
   listUsers: () => requestTypes.get("/users"),
   getByUsername: (username) =>
-    requestTypes.get(`/users/${encodeURIComponent(username)}`),
-  update: (username, data) =>
-    requestTypes.put(`/users/${encodeURIComponent(username)}`, data),
+    requestTypes.get(`/users/${encodeURIComponent(resolveUsername(username))}`),
+  update: (data, username) =>
+    requestTypes.put(
+      `/users/${encodeURIComponent(resolveUsername(username))}`,
+      data,
+    ),
   deleteUser: (username) =>
-    requestTypes.delete(`/users/${encodeURIComponent(username)}`),
+    requestTypes.delete(`/users/${encodeURIComponent(resolveUsername(username))}`),
   signup: (profile) => requestTypes.post("/auth/signup", profile),
   login: (credentials) => requestTypes.post("/auth/login", credentials),
 
   // Interaction routes
-  like: (username, targetUsername) =>
-    requestTypes.post(`/users/${encodeURIComponent(username)}/like`, {
-      targetUsername,
-    }),
-  dislike: (username, targetUsername) =>
-    requestTypes.post(`/users/${encodeURIComponent(username)}/dislike`, {
-      targetUsername,
-    }),
-  block: (username, targetUsername) =>
-    requestTypes.post(`/users/${encodeURIComponent(username)}/block`, {
-      targetUsername,
-    }),
+  like: (targetUsername, username) =>
+    requestTypes.post(
+      `/users/${encodeURIComponent(resolveUsername(username))}/like`,
+      { targetUsername: requireUsername(targetUsername) },
+    ),
+  dislike: (targetUsername, username) =>
+    requestTypes.post(
+      `/users/${encodeURIComponent(resolveUsername(username))}/dislike`,
+      { targetUsername: requireUsername(targetUsername) },
+    ),
+  block: (targetUsername, username) =>
+    requestTypes.post(
+      `/users/${encodeURIComponent(resolveUsername(username))}/block`,
+      { targetUsername: requireUsername(targetUsername) },
+    ),
 
   // Messaging routes
-  listChats: (params = {}) => requestTypes.get(withQuery("/chats", params)),
+  listChats: (params = {}) => {
+    const username = resolveUsername(params.username);
+    return requestTypes.get(withQuery("/chats", { ...params, username }));
+  },
   createChat: (data) => requestTypes.post("/chats", data),
   getChat: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}`),
   updateChat: (chatId, data) =>
@@ -152,13 +184,16 @@ export const api = {
   // fix their usage in the frontend to use listNotifications with username input
   //listMyNotifications: (params = {}) => requestTypes.get(withQuery('/notifications/me', params)),
   //getMyUnreadNotificationsCount: () => requestTypes.get('/notifications/me/unread-count'),
-  listNotifications: (username, params = {}) =>
+  listNotifications: (params = {}, username) =>
     requestTypes.get(
-      withQuery(`/notifications/${encodeURIComponent(username)}`, params),
+      withQuery(
+        `/notifications/${encodeURIComponent(resolveUsername(username))}`,
+        params,
+      ),
     ),
   getUnreadNotificationsCount: (username) =>
     requestTypes.get(
-      `/notifications/${encodeURIComponent(username)}/unreadCount`,
+      `/notifications/${encodeURIComponent(resolveUsername(username))}/unreadCount`,
     ),
   getNotification: (notificationId) =>
     requestTypes.get(`/notifications/id/${encodeURIComponent(notificationId)}`),
@@ -191,11 +226,11 @@ export const api = {
   //getUnreadNotificationsCount: (params = {}) => requestTypes.get(withQuery('/notifications/unread-count', params)),
   getNotificationPreferences: (username) =>
     requestTypes.get(
-      `/notifications/preferences/${encodeURIComponent(username)}`,
+      `/notifications/preferences/${encodeURIComponent(resolveUsername(username))}`,
     ),
-  updateNotificationPreferences: (username, data) =>
+  updateNotificationPreferences: (data, username) =>
     requestTypes.patch(
-      `/notifications/preferences/${encodeURIComponent(username)}`,
+      `/notifications/preferences/${encodeURIComponent(resolveUsername(username))}`,
       data,
     ),
 

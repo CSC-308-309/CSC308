@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import ChatList from "./ChatList";
 import ChatWindow from "./ChatWindow";
-import { api } from "../../client";
+import { api, getCurrentUsername } from "../../client";
 import NewChatModel from "./NewChatModel";
 import ParticipantsModel from "./ParticipantsModel";
 
@@ -17,14 +17,8 @@ export default function MessagesPanel() {
   const [participants, setParticipants] = useState([]);
   const [isLoadingParticipants, setIsLoadingParticipants] = useState(false);
 
-  const currentUser = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem("user") || "null");
-    } catch {
-      return null;
-    }
-  }, []);
-  const myUsername = currentUser?.username;
+  // Single source of truth for current username.
+  const myUsername = useMemo(() => getCurrentUsername(), []);
 
   function normalizeChat(c) {
     return {
@@ -85,7 +79,7 @@ export default function MessagesPanel() {
   async function refreshChats(selectChatId = null) {
     if (!myUsername) return;
 
-    const data = await api.listChats({ username: myUsername });
+    const data = await api.listChats();
     const listRaw = Array.isArray(data) ? data : data?.chats || [];
     const list = listRaw.map(normalizeChat);
 
@@ -122,7 +116,7 @@ export default function MessagesPanel() {
           );
         }
 
-        const data = await api.listChats({ username: myUsername });
+        const data = await api.listChats();
         const listRaw = Array.isArray(data) ? data : data?.chats || [];
         const list = listRaw.map(normalizeChat);
 
@@ -246,7 +240,7 @@ export default function MessagesPanel() {
       const createdMsg = normalizeMessage({
         ...created,
         sender_username: myUsername,
-        sender_name: currentUser?.username,
+        sender_name: myUsername,
       });
 
       setChatMessages((prev) => {

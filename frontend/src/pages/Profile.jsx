@@ -15,20 +15,9 @@ import ConcertMemories from "../components/ConcertMemories";
 import AboutSection from "../components/AboutSection"; //
 import YouMightKnowSection from "../components/YouMightKnowSection"; //
 import MusicClips from "../components/musicclips/MusicClips";
-import { api } from "../client";
+import { api, getCurrentUsername } from "../client";
 
 const PROFILE_STORAGE_KEY = "profileData";
-
-function getLoggedInUsername() {
-  try {
-    const raw = localStorage.getItem("user");
-    if (!raw) return "";
-    const parsed = JSON.parse(raw);
-    return parsed?.username || "";
-  } catch {
-    return "";
-  }
-}
 
 function mapDbUserToProfileData(dbUser = {}, current = {}) {
   return {
@@ -73,13 +62,13 @@ export default function Profile() {
   const [coverImageUrl, setCoverImageUrl] = useState("");
 
   useEffect(() => {
-    const activeUsername = getLoggedInUsername();
+    const activeUsername = getCurrentUsername() || "";
     setUsername(activeUsername);
     if (!activeUsername) return;
 
     const hydrateFromDb = async () => {
       try {
-        const dbUser = await api.getByUsername(activeUsername);
+        const dbUser = await api.getByUsername();
         const merged = mapDbUserToProfileData(dbUser, getInitialProfileData());
         setProfileData(merged);
         localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(merged));
@@ -108,7 +97,7 @@ export default function Profile() {
     if (!username) return;
 
     try {
-      await api.update(username, mapProfileDataToDbUpdate(data));
+      await api.update(mapProfileDataToDbUpdate(data));
     } catch (error) {
       console.error("Failed to save profile to DB:", error);
     }

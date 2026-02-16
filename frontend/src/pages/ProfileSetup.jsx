@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoIcon from "../assets/logo.svg";
+import { api, getCurrentUsername } from "../client";
 
 const API_BASE = "melodious-aec4gpergpb0bsd6.westus3-01.azurewebsites.net";
 
@@ -108,9 +109,7 @@ export default function ProfileSetup() {
     setFieldErrors((prev) => ({ ...prev, [errorField]: "" }));
     setError("");
 
-    const userJson = localStorage.getItem("user");
-    const user = userJson ? JSON.parse(userJson) : null;
-    const username = user?.username;
+    const username = getCurrentUsername();
     if (!username) {
       setError("Not logged in. Please sign in again.");
       return;
@@ -195,9 +194,7 @@ export default function ProfileSetup() {
     setError("");
 
     try {
-      const userJson = localStorage.getItem("user");
-      const user = userJson ? JSON.parse(userJson) : null;
-      const username = user?.username;
+      const username = getCurrentUsername();
       if (!username) {
         setError("Not logged in. Please sign in again.");
         return;

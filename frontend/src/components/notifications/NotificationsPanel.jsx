@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import groupNotifications from "./GroupNotifications";
 import NotificationSection from "./NotificationSection";
-import { api } from "../../client";
+import { api, getCurrentUsername } from "../../client";
 
-export default function NotificationsPanel({ username }) {
+export default function NotificationsPanel() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -12,18 +12,14 @@ export default function NotificationsPanel({ username }) {
     let cancelled = false;
 
     async function load() {
-      if (!username) {
-        setError(
-          "No username provided. Provide a `username` prop or enable a backend /client API wrapper for the current user.",
-        );
-        return;
-      }
+      const username = getCurrentUsername();
+      if (!username) return;
 
       setLoading(true);
       setError("");
 
       try {
-        const res = await api.listNotifications(username);
+        const res = await api.listNotifications();
         const items = Array.isArray(res) ? res : (res?.items ?? []);
 
         if (!cancelled) setNotifications(items);
@@ -38,7 +34,7 @@ export default function NotificationsPanel({ username }) {
     return () => {
       cancelled = true;
     };
-  }, [username]);
+  }, []);
 
   const grouped = useMemo(
     () => groupNotifications(notifications),
