@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import EditCoverPhotoButton from "./EditCoverPhotoButton";
 import defaultCover from "../assets/DefaultBanner.jpg";
 import { api } from "../client";
+import { uploadViaPresign } from "../utils/s3Upload";
 
 async function processImageToBlob(file, maxWidth) {
   const reader = new FileReader();
@@ -88,47 +89,19 @@ export default function CoverPhoto({
       previewUrl = URL.createObjectURL(blob);
       setSrc(previewUrl);
 
-      const contentType = "image/jpeg";
-
-      const { uploadUrl, fileUrl } = await api.presignUpload({
+      // Use teammate's upload helper
+      const blobFile = new File([blob], "cover.jpg", { type: "image/jpeg" });
+      const { fileUrl, viewUrl } = await uploadViaPresign({
         kind: "cover",
-        contentType,
-        fileSize: blob.size,
+        file: blobFile,
         userId: username,
+        contentTypeOverride: "image/jpeg",
       });
 
-      if (!uploadUrl) throw new Error("Backend did not return uploadUrl");
-
-      await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", uploadUrl, true);
-
-        xhr.setRequestHeader("Content-Type", contentType);
-
-        xhr.withCredentials = false;
-
-        xhr.onload = () => {
-          if (xhr.status === 200 || xhr.status === 204) {
-            resolve();
-          } else {
-            console.error("S3 response:", xhr.responseText);
-            reject(new Error(`S3 upload failed: ${xhr.status}`));
-          }
-        };
-
-        xhr.onerror = () => reject(new Error("Network error during upload"));
-        xhr.send(blob);
-      });
-
+      // Save URL to database
       await api.updateCoverPhoto(username, { url: fileUrl });
 
-      let renderedUrl = fileUrl;
-      try {
-        const { viewUrl } = await api.presignView({ fileUrl });
-        if (viewUrl) renderedUrl = viewUrl;
-      } catch {
-        // Keep raw URL fallback.
-      }
+      const renderedUrl = viewUrl || fileUrl;
 
       setSrc(renderedUrl);
       localStorage.setItem(storageKey, fileUrl);

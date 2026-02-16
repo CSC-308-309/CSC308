@@ -114,6 +114,11 @@ export const api = {
       `/users/${encodeURIComponent(resolveUsername(username))}`,
       data,
     ),
+  updateCoverPhoto: (username, data) =>
+    requestTypes.put(
+      `/users/${encodeURIComponent(resolveUsername(username))}/coverPhoto`,
+      data,
+    ),
   deleteUser: (username) =>
     requestTypes.delete(`/users/${encodeURIComponent(resolveUsername(username))}`),
   signup: (profile) => requestTypes.post("/auth/signup", profile),
