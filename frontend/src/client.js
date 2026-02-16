@@ -1,9 +1,9 @@
 // Creates a simple api client for interacting with backend
 // Simple wrapper
 
-// For now, just localhost URL
-// TODO: allow injection of env var
-const BASE_URL = "melodious-aec4gpergpb0bsd6.westus3-01.azurewebsites.net";
+// Base URL for API requests. Reads from VITE_BASE_URL env var or defaults to localhost.
+const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:8000";
+
 
 // async function request(path, options = {}) {
 //   const res = await fetch(`${BASE_URL}${path}`, {

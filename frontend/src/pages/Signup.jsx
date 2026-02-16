@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import logoIcon from "../assets/logo.svg";
+import { api } from "../client";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -18,24 +19,10 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      const res = await fetch(
-        "melodious-aec4gpergpb0bsd6.westus3-01.azurewebsites.net/auth/signup",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        },
-      );
+      const data = await api.signup({ email, password });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Signup failed");
-
-      if (data.username) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({ username: data.username }),
-        );
-      }
+      if (data.username)
+        localStorage.setItem("user", JSON.stringify({ username: data.username }));
       navigate("/profilesetup");
     } catch (err) {
       setError(err.message);

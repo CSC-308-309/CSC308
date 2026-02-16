@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoIcon from "../assets/logo.svg";
-import { api } from "../client";
+import { api, BASE_URL } from "../client";
 
-const API_BASE = "melodious-aec4gpergpb0bsd6.westus3-01.azurewebsites.net";
+const API_BASE = BASE_URL;
 
 const GENRES = [
   "Pop",
