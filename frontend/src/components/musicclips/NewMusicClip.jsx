@@ -1,54 +1,16 @@
 // src/components/musicclips/NewMusicClip.jsx
 import React, { useState } from "react";
 import ConcertIcon from "../../assets/concert.svg";
-import { uploadViaPresign } from "../../utils/s3Upload";
+import { useMediaUpload } from "../../hooks/useMediaUpload";
 
 export default function NewMusicClip({ isOpen, onClose, onSave, username }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
+  
+  const { uploadMedia, isUploading } = useMediaUpload(username, ConcertIcon);
 
   if (!isOpen) return null;
-
-  const generateVideoThumbnailBlob = (videoFile) => {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement("video");
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-
-      const objectUrl = URL.createObjectURL(videoFile);
-      video.src = objectUrl;
-      video.muted = true;
-      video.playsInline = true;
-
-      video.onloadedmetadata = () => {
-        const target = Math.min(1, video.duration ? video.duration / 2 : 1);
-        video.currentTime = target;
-      };
-
-      video.onerror = () => {
-        URL.revokeObjectURL(objectUrl);
-        reject(new Error("Failed to load video for thumbnail"));
-      };
-
-      video.onseeked = () => {
-        canvas.width = video.videoWidth || 640;
-        canvas.height = video.videoHeight || 360;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        canvas.toBlob(
-          (blob) => {
-            URL.revokeObjectURL(objectUrl);
-            if (!blob) return reject(new Error("Failed to create thumbnail blob"));
-            resolve(blob);
-          },
-          "image/jpeg",
-          0.8,
-        );
-      };
-    });
-  };
 
   const resetAndClose = () => {
     setTitle("");
@@ -61,48 +23,18 @@ export default function NewMusicClip({ isOpen, onClose, onSave, username }) {
     if (!title.trim() || !file) return;
 
     try {
-      if (!username) throw new Error("Missing username (used as userId)");
-      setIsUploading(true);
-
-      const main = await uploadViaPresign({
-        kind: "video",
-        file,
-        userId: username,
-      });
-
-      let thumb = { fileUrl: "", viewUrl: "" };
-
-      if (file.type.includes("video")) {
-        const thumbBlob = await generateVideoThumbnailBlob(file);
-        const thumbFile = new File([thumbBlob], "thumb.jpg", {
-          type: "image/jpeg",
-        });
-
-        thumb = await uploadViaPresign({
-          kind: "videoThumb",
-          file: thumbFile,
-          userId: username,
-        });
-      } else if (file.type.includes("audio")) {
-        thumb = { fileUrl: "", viewUrl: ConcertIcon };
-      }
+      const uploadResult = await uploadMedia({ file, kind: "video" });
 
       onSave({
         title: title.trim(),
         description: description.trim(),
-        type: file.type.includes("audio") ? "audio" : "video",
-        mediaUrl: main.fileUrl,
-        mediaViewUrl: main.viewUrl, // best-effort presigned
-        thumbnailUrl: thumb.fileUrl || "",
-        thumbnailViewUrl: thumb.viewUrl || ConcertIcon,
+        ...uploadResult,
       });
 
       resetAndClose();
     } catch (e) {
       console.error(e);
       alert(e.message || "Upload failed");
-    } finally {
-      setIsUploading(false);
     }
   };
 

@@ -1,3 +1,4 @@
+// src/utils/s3Upload.js
 import { api } from "../client";
 
 export async function putToSignedUrl({ uploadUrl, blobOrFile, contentType }) {
@@ -35,7 +36,9 @@ export async function uploadViaPresign({
     userId,
   });
 
-  if (!uploadUrl || !fileUrl) throw new Error("Backend did not return uploadUrl/fileUrl");
+  if (!uploadUrl || !fileUrl) {
+    throw new Error("Backend did not return uploadUrl/fileUrl");
+  }
 
   await putToSignedUrl({ uploadUrl, blobOrFile: file, contentType });
 
@@ -47,4 +50,31 @@ export async function uploadViaPresign({
   }
 
   return { fileUrl, viewUrl };
+}
+
+export async function resolveViewUrl(fileUrl) {
+  if (!fileUrl) return "";
+  
+  try {
+    const { viewUrl } = await api.presignView({ fileUrl });
+    return viewUrl || fileUrl;
+  } catch (err) {
+    console.error("Failed to resolve view URL:", err);
+    return fileUrl;
+  }
+}
+
+export function isLocalUrl(url) {
+  if (!url) return false;
+  return (
+    url.startsWith("blob:") ||
+    url.startsWith("data:") ||
+    url.startsWith("/") ||
+    (url.startsWith("http") && !url.includes(".amazonaws.com/"))
+  );
+}
+
+export async function smartResolveUrl(url) {
+  if (!url || isLocalUrl(url)) return url;
+  return resolveViewUrl(url);
 }

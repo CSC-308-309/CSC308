@@ -1,7 +1,7 @@
 // src/components/ConcertMemoryDetail.jsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { X, Heart, ArrowLeft, Star } from "lucide-react";
-import { api } from "../client";
+import { usePresignedUrl } from "../hooks/usePresignedUrl";
 
 export default function ConcertMemoryDetail({
   memory,
@@ -12,9 +12,6 @@ export default function ConcertMemoryDetail({
 }) {
   const [selectedMemory, setSelectedMemory] = useState(memory);
   const [showComments, setShowComments] = useState(false);
-
-  const [playUrl, setPlayUrl] = useState("");
-
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState([
     {
@@ -26,38 +23,15 @@ export default function ConcertMemoryDetail({
     },
   ]);
 
+  const mediaKey = selectedMemory?.mediaUrl || selectedMemory?.videoUrl || "";
+  
+  const playUrl = usePresignedUrl(mediaKey, showComments && !!mediaKey);
+
   useEffect(() => {
     if (!isOpen) return;
     setSelectedMemory(memory);
     setShowComments(false);
-    setPlayUrl("");
   }, [isOpen, memory]);
-
-  const mediaKey = useMemo(() => {
-    if (!selectedMemory) return "";
-    return selectedMemory.mediaUrl || selectedMemory.videoUrl || "";
-  }, [selectedMemory]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const run = async () => {
-      setPlayUrl("");
-      if (!showComments || !mediaKey) return;
-
-      try {
-        const { viewUrl } = await api.presignView({ fileUrl: mediaKey });
-        if (!cancelled) setPlayUrl(viewUrl || mediaKey);
-      } catch {
-        if (!cancelled) setPlayUrl(mediaKey);
-      }
-    };
-
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [showComments, mediaKey]);
 
   if (!isOpen) return null;
 
@@ -129,7 +103,6 @@ export default function ConcertMemoryDetail({
                   onClick={() => handleMemoryClick(mem)}
                 >
                   <div className="bg-purple-100 rounded-xl w-full aspect-square overflow-hidden relative">
-                    {/* Star Button */}
                     <button
                       onClick={(e) => handleToggleStar(mem.id, e)}
                       className="absolute top-3 right-3 z-10"
@@ -218,7 +191,6 @@ export default function ConcertMemoryDetail({
 
             {/* Comments Section */}
             <div className="w-96 border-l flex flex-col">
-              {/* User info */}
               <div className="p-4 border-b">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center">
@@ -238,7 +210,6 @@ export default function ConcertMemoryDetail({
                 )}
               </div>
 
-              {/* Comments list */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {comments.map((comment) => (
                   <div key={comment.id} className="flex gap-3">
@@ -262,7 +233,6 @@ export default function ConcertMemoryDetail({
                 ))}
               </div>
 
-              {/* Comment input */}
               <div className="p-4 border-t">
                 <div className="flex gap-2">
                   <input

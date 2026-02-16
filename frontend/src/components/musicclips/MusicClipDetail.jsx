@@ -1,7 +1,7 @@
 // src/components/musicclips/MusicClipDetail.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { X, ArrowLeft, Star } from "lucide-react";
-import { api } from "../../client";
+import { usePresignedUrl } from "../../hooks/usePresignedUrl";
 
 export default function MusicClipDetail({
   clip,
@@ -13,15 +13,11 @@ export default function MusicClipDetail({
   const [selectedClip, setSelectedClip] = useState(clip);
   const [showDetail, setShowDetail] = useState(false);
 
-  const [playUrl, setPlayUrl] = useState("");
-  const [thumbUrl, setThumbUrl] = useState("");
-
   useEffect(() => {
     if (!isOpen) return;
     setSelectedClip(clip);
     setShowDetail(false);
   }, [clip, isOpen]);
-
 
   const mediaKey = useMemo(() => {
     if (!selectedClip) return "";
@@ -44,59 +40,8 @@ export default function MusicClipDetail({
     );
   }, [selectedClip]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const run = async () => {
-      setPlayUrl("");
-      if (!showDetail || !mediaKey) return;
-
-      try {
-        const { viewUrl } = await api.presignView({ fileUrl: mediaKey });
-        if (!cancelled) setPlayUrl(viewUrl || mediaKey);
-      } catch (e) {
-        if (!cancelled) setPlayUrl(mediaKey);
-      }
-    };
-
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [showDetail, mediaKey]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const run = async () => {
-      setThumbUrl("");
-      if (!thumbnailKey) return;
-
-      const isLocal =
-        thumbnailKey.startsWith("blob:") ||
-        thumbnailKey.startsWith("data:") ||
-        thumbnailKey.startsWith("/") ||
-        thumbnailKey.startsWith("http://") ||
-        thumbnailKey.startsWith("https://");
-
-      if (isLocal && !thumbnailKey.includes(".amazonaws.com/")) {
-        setThumbUrl(thumbnailKey);
-        return;
-      }
-
-      try {
-        const { viewUrl } = await api.presignView({ fileUrl: thumbnailKey });
-        if (!cancelled) setThumbUrl(viewUrl || thumbnailKey);
-      } catch {
-        if (!cancelled) setThumbUrl(thumbnailKey);
-      }
-    };
-
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [thumbnailKey]);
+  const playUrl = usePresignedUrl(mediaKey, showDetail && !!mediaKey);
+  const thumbUrl = usePresignedUrl(thumbnailKey, !!thumbnailKey);
 
   if (!isOpen) return null;
 
@@ -166,7 +111,6 @@ export default function MusicClipDetail({
                   onClick={() => handleClipClick(clipItem)}
                 >
                   <div className="bg-purple-100 rounded-xl w-full aspect-square overflow-hidden relative">
-                    {/* Star Button */}
                     <button
                       onClick={(e) => handleToggleStar(clipItem.id, e)}
                       className="absolute top-3 right-3 z-10"
@@ -216,7 +160,6 @@ export default function MusicClipDetail({
               <ArrowLeft size={24} />
             </button>
             <div className="flex items-center gap-3">
-              {/* Star Button in Detail View */}
               <button
                 onClick={(e) => handleToggleStar(selectedClip.id, e)}
                 className="text-gray-500 hover:text-yellow-500"

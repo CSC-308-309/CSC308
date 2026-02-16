@@ -1,42 +1,10 @@
 // src/components/ProfilePhoto.jsx
-import { useRef, useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import defaultPhoto from "../assets/DefaultProfilePhoto.png";
 import { api } from "../client";
-
-// crop + resize
-async function processImageToBlobSquare(file, size) {
-  const reader = new FileReader();
-  const fileData = await new Promise((resolve) => {
-    reader.onload = () => resolve(reader.result);
-    reader.readAsDataURL(file);
-  });
-
-  const img = new Image();
-  img.src = fileData;
-  await new Promise((resolve, reject) => {
-    img.onload = resolve;
-    img.onerror = () => reject(new Error("Image load failed"));
-  });
-
-  const side = Math.min(img.width, img.height);
-  const sx = (img.width - side) / 2;
-  const sy = (img.height - side) / 2;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-
-  const ctx = canvas.getContext("2d");
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
-
-  const blob = await new Promise((resolve) => {
-    canvas.toBlob((b) => resolve(b), "image/jpeg", 0.92);
-  });
-
-  if (!blob) throw new Error("Image processing failed");
-  return blob;
-}
+import { uploadViaPresign } from "../utils/s3Upload";
+import { processImageToSquare, isImageFile } from "../utils/imageProcessing";
+import { usePresignedImage } from "../hooks/usePresignedImage";
 
 export default function EditableProfilePhoto({
   storageKey = "profilePhotoUrl",
@@ -47,54 +15,16 @@ export default function EditableProfilePhoto({
 }) {
   const uploadSize = Math.max(size * 2, 512);
   const inputRef = useRef(null);
-  const [src, setSrc] = useState(fallbackSrc);
+  const { src, setSrc, handleError } = usePresignedImage(
+    storageKey,
+    initialSrc,
+    fallbackSrc
+  );
   const [isUploading, setIsUploading] = useState(false);
-
-  const resolveViewUrl = async (rawUrl) => {
-    if (!rawUrl) return "";
-    try {
-      const result = await api.presignViewUrl(rawUrl);
-      return result?.viewUrl || rawUrl;
-    } catch (err) {
-      console.error("Failed to resolve image view URL:", err);
-      return rawUrl;
-    }
-  };
-
-  useEffect(() => {
-    const hydrateSignedSrc = async () => {
-      const saved = localStorage.getItem(storageKey);
-      if (!saved) return;
-      try {
-        const { viewUrl } = await api.presignView({ fileUrl: saved });
-        if (viewUrl) setSrc(viewUrl);
-      } catch {
-        setSrc(saved);
-      }
-    };
-    hydrateSignedSrc();
-  }, [storageKey]);
-
-  useEffect(() => {
-    const hydrateInitialSrc = async () => {
-      if (!initialSrc) return;
-      try {
-        const { viewUrl } = await api.presignView({ fileUrl: initialSrc });
-        if (viewUrl) {
-          setSrc(viewUrl);
-          return;
-        }
-      } catch {
-        // Fallback to raw URL below.
-      }
-      setSrc(initialSrc);
-    };
-    hydrateInitialSrc();
-  }, [initialSrc]);
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
-    if (!file?.type?.startsWith("image/")) return;
+    if (!isImageFile(file)) return;
 
     let previewUrl = null;
 
@@ -102,52 +32,21 @@ export default function EditableProfilePhoto({
       if (!username) throw new Error("Missing username (used as userId)");
       setIsUploading(true);
 
-      const blob = await processImageToBlobSquare(file, uploadSize);
+      const blob = await processImageToSquare(file, uploadSize);
 
       previewUrl = URL.createObjectURL(blob);
       setSrc(previewUrl);
 
-      const contentType = "image/jpeg";
-
-      const { uploadUrl, fileUrl } = await api.presignUpload({
+      const { fileUrl, viewUrl } = await uploadViaPresign({
         kind: "profile",
-        contentType,
-        fileSize: blob.size,
+        contentType: "image/jpeg",
+        file: blob,
         userId: username,
-      });
-
-      if (!uploadUrl) throw new Error("Backend did not return uploadUrl");
-
-      await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", uploadUrl, true);
-
-        xhr.setRequestHeader("Content-Type", contentType);
-        xhr.withCredentials = false;
-
-        xhr.onload = () => {
-          if (xhr.status === 200 || xhr.status === 204) resolve();
-          else {
-            console.error("S3 response:", xhr.responseText);
-            reject(new Error(`S3 upload failed: ${xhr.status}`));
-          }
-        };
-
-        xhr.onerror = () => reject(new Error("Network error during upload"));
-        xhr.send(blob);
       });
 
       await api.update(username, { main_image: fileUrl });
 
-      let renderedUrl = fileUrl;
-      try {
-        const { viewUrl } = await api.presignView({ fileUrl });
-        if (viewUrl) renderedUrl = viewUrl;
-      } catch {
-        // Keep raw URL fallback.
-      }
-
-      setSrc(renderedUrl);
+      setSrc(viewUrl);
       localStorage.setItem(storageKey, fileUrl);
     } catch (err) {
       console.error("Upload failed:", err);
@@ -174,11 +73,7 @@ export default function EditableProfilePhoto({
           alt="Profile"
           className="h-full w-full object-cover"
           draggable={false}
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            setSrc(fallbackSrc);
-            localStorage.removeItem(storageKey);
-          }}
+          onError={handleError}
         />
 
         {isUploading && (
