@@ -15,7 +15,7 @@ import ConcertMemories from "../components/ConcertMemories";
 import AboutSection from "../components/AboutSection"; //
 import YouMightKnowSection from "../components/YouMightKnowSection"; //
 import MusicClips from "../components/musicclips/MusicClips";
-import { api, getCurrentUsername } from "../client";
+import { api } from "../client";
 
 const PROFILE_STORAGE_KEY = "profileData";
 
@@ -62,7 +62,7 @@ export default function Profile() {
   const [coverImageUrl, setCoverImageUrl] = useState("");
 
   useEffect(() => {
-    const activeUsername = getCurrentUsername() || "";
+    const activeUsername = api.currentUsername() || "";
     setUsername(activeUsername);
     if (!activeUsername) return;
 

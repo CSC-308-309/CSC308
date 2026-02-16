@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { api, getCurrentUsername } from "../client.js";
+import { api } from "../client.js";
 import ProfileCard from "./ProfileCard";
 import SwipeButtons from "./SwipeButtons";
 
@@ -9,7 +9,7 @@ export default function ProfilesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   // Pull current username from the API helper (localStorage under the hood).
-  const [currentUser] = useState(() => getCurrentUsername() || "");
+  const [currentUser] = useState(() => api.currentUsername() || "");
 
   useEffect(() => {
     const fetchProfiles = async () => {

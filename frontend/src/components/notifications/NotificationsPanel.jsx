@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import groupNotifications from "./GroupNotifications";
 import NotificationSection from "./NotificationSection";
-import { api, getCurrentUsername } from "../../client";
+import { api } from "../../client";
 
 export default function NotificationsPanel() {
   const [notifications, setNotifications] = useState([]);
@@ -12,8 +12,6 @@ export default function NotificationsPanel() {
     let cancelled = false;
 
     async function load() {
-      const username = getCurrentUsername();
-      if (!username) return;
 
       setLoading(true);
       setError("");

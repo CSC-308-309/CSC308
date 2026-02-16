@@ -102,6 +102,9 @@ function resolveUsername(username) {
 }
 
 export const api = {
+  // Current user helper (centralized).
+  currentUsername: () => getCurrentUsername(),
+
   // User/Profile routes
   listUsers: () => requestTypes.get("/users"),
   getByUsername: (username) =>
@@ -115,6 +118,13 @@ export const api = {
     requestTypes.delete(`/users/${encodeURIComponent(resolveUsername(username))}`),
   signup: (profile) => requestTypes.post("/auth/signup", profile),
   login: (credentials) => requestTypes.post("/auth/login", credentials),
+
+  // Profile setup (server expects username in body)
+  updateProfile: (profileData = {}) =>
+    requestTypes.post("/profile", {
+      ...profileData,
+      username: resolveUsername(profileData.username),
+    }),
 
   // Interaction routes
   like: (targetUsername, username) =>
