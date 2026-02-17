@@ -174,18 +174,9 @@ export const api = {
       {},
     ),
 
-  markAllNotificationsRead: (data = {}) =>
-    requestTypes.post("/notifications/readAll", data),
-  archiveNotification: (notificationId) =>
-    requestTypes.post(
-      `/notifications/${encodeURIComponent(notificationId)}/archive`,
-      {},
-    ),
-  unarchiveNotification: (notificationId) =>
-    requestTypes.post(
-      `/notifications/${encodeURIComponent(notificationId)}/unarchive`,
-      {},
-    ),
+  //markAllNotificationsRead: (data = {}) => requestTypes.post("/notifications/readAll", data),
+  //archiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/archive`,{},),
+  //unarchiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unarchive`,{},),
   deleteNotification: (notificationId) =>
     requestTypes.delete(`/notifications/${encodeURIComponent(notificationId)}`),
   //getUnreadNotificationsCount: (params = {}) => requestTypes.get(withQuery('/notifications/unread-count', params)),
