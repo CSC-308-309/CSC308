@@ -232,6 +232,23 @@ export function createApp({ db }) {
     }
   });
 
+  // List interactions for a user (used to filter already-swiped profiles)
+  app.get("/users/:username/interactions", async (req, res) => {
+    try {
+      const username = req.params.username;
+      const user = await db.Profile.getUserByUsername(username);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const interactions = await db.Interactions.listUserInteractions(username);
+      res.json(interactions);
+    } catch (err) {
+      console.error("Error in list interactions route:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   //// MESSAGE ROUTES ////
   // Fetch chat history
   // app.get("messages/:conversationId", async (req, res) => {

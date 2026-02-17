@@ -76,4 +76,30 @@ export const InteractionsModel = {
       throw error;
     }
   },
+
+  // List all interactions initiated by a user.
+  // This powers the frontend filter so swiped profiles don't reappear after refresh.
+  async listUserInteractions(username) {
+    const query = `
+      SELECT
+        i.id,
+        u1.username AS username,
+        u2.username AS target_username,
+        i.interaction_type,
+        i.created_at
+      FROM interactions i
+      JOIN users u1 ON u1.id = i.user_id
+      JOIN users u2 ON u2.id = i.target_user_id
+      WHERE u1.username = $1
+      ORDER BY i.created_at DESC
+    `;
+
+    try {
+      const { rows } = await pool.query(query, [username]);
+      return rows;
+    } catch (error) {
+      console.error("Error in listUserInteractions:", error);
+      throw error;
+    }
+  },
 };

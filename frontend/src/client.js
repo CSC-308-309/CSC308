@@ -148,6 +148,12 @@ export const api = {
       { targetUsername: requireUsername(targetUsername) },
     ),
 
+  // Interaction history (used to filter out already-swiped profiles)
+  listUserInteractions: (username) =>
+    requestTypes.get(
+      `/users/${encodeURIComponent(resolveUsername(username))}/interactions`,
+    ),
+
   // Messaging routes
   listChats: (params = {}) => {
     const username = resolveUsername(params.username);

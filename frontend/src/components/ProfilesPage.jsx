@@ -14,11 +14,29 @@ export default function ProfilesPage() {
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const data = await api.listUsers();
-        const normalizedCurrentUser = currentUser.toLowerCase();
+        // Fetch profiles and prior interactions in parallel.
+        // Interactions are used to hide already-swiped profiles after refresh.
+        const [data, interactions] = await Promise.all([
+          api.listUsers(),
+          currentUser ? api.listUserInteractions(currentUser) : Promise.resolve([]),
+        ]);
+
+        const normalizedCurrentUser = (currentUser || "").toLowerCase();
+
+        // Build a set of usernames the current user has already interacted with.
+        const interactedUsernames = new Set(
+          (interactions || [])
+            .map((interaction) => interaction?.target_username)
+            .filter(Boolean)
+            .map((username) => username.toLowerCase()),
+        );
+
         const filteredProfiles = (data || []).filter((profile) => {
           const username = (profile?.username || "").toLowerCase();
-          return username && username !== normalizedCurrentUser;
+          if (!username) return false;
+          if (username === normalizedCurrentUser) return false;
+          if (interactedUsernames.has(username)) return false;
+          return true;
         });
         setProfiles(filteredProfiles);
         setCurrentIndex(0);
