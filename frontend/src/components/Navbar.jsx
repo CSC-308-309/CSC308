@@ -22,25 +22,11 @@ export default function Navbar() {
   const { unreadCount, refreshUnreadCount, setUnreadCount } =
     useNotifications();
 
-  function getUsername() {
-    try {
-      const raw = localStorage.getItem("user");
-      if (!raw) return null;
-      const user = JSON.parse(raw);
-      return user?.username || null;
-    } catch {
-      return null;
-    }
-  }
-
   useEffect(() => {
     if (!loggedIn) {
       setUnreadCount(0);
       return;
     }
-
-    const username = getUsername();
-    if (!username) return;
 
     refreshUnreadCount();
 
