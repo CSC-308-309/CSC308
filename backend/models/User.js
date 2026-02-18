@@ -83,16 +83,20 @@ export const UsersModel = {
       username,
       email,
       passwordHash,
-      username,
-      "User",
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
+      username, // name
+      "User", // role
+      null, // age
+      null, // gender
+      null, // genre
+      null, // experience
+      null, // main_image
+      null, // concert_image
+      null, // last_song
+      null, // last_song_desc
+      null, // profile_picture
+      null, // cover_photo
+      null, // concert_images
+      null, // music_clips
     ];
 
     try {

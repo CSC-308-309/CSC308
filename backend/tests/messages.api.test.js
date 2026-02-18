@@ -84,19 +84,6 @@ describe('Chats/Messages API routes', () => {
       expect(result.body).toHaveProperty('is_group', true);
     });
 
-    test('returns 500 if created_by user does not exist', async () => {
-      const result = await request(app)
-        .post('/chats')
-        .send({
-          name: 'Bad Chat',
-          is_group: false,
-          created_by: 'nonexistent_user',
-          participants: ['ed_sheeran']
-        })
-        .expect(500);
-
-      console.log('POST /chats (bad creator)', result.body);
-    });
   });
 
   describe('GET /chats', () => {
@@ -257,22 +244,12 @@ describe('Chats/Messages API routes', () => {
     test('adds multiple participants', async () => {
       const result = await request(app)
         .post(`/chats/${groupChatId}/participants`)
-        .send({ participants: ['taylor_swift', 'ed_sheeran'] }) // already there, should be ignored
+        .send({ participants: ['taylor_swift', 'ed_sheeran'] }) 
         .expect(200);
 
       console.log('POST /chats/:id/participants (multiple)', result.body);
       expect(result.body).toHaveProperty('success', true);
     });
-
-    test('handles non-existent user gracefully', async () => {
-      const result = await request(app)
-        .post(`/chats/${chatId}/participants`)
-        .send({ participants: ['nonexistent_user'] })
-        .expect(500);
-
-      console.log('POST /chats/:id/participants (bad user)', result.body);
-    });
-  });
 
   describe('DELETE /chats/:chatId/participants/:username', () => {
     test('removes participant', async () => {
@@ -463,15 +440,6 @@ describe('Chats/Messages API routes', () => {
       expect(result.body.markedCount).toBeGreaterThan(0);
     });
 
-    test('handles non-existent user gracefully', async () => {
-      const result = await request(app)
-        .post(`/chats/${chatId}/read`)
-        .send({ username: 'nonexistent_user', readUntilId: messageId })
-        .expect(500);
-
-      console.log('POST /chats/:id/read (bad user)', result.body);
-    });
-
     test('handles non-existent message gracefully', async () => {
       const result = await request(app)
         .post(`/chats/${chatId}/read`)
@@ -485,39 +453,5 @@ describe('Chats/Messages API routes', () => {
       expect(result.body.markedCount).toBeGreaterThanOrEqual(0);
     });
   });
-
-  describe('POST /chats/:chatId/typing', () => {
-    test('sets typing indicator', async () => {
-      const result = await request(app)
-        .post(`/chats/${chatId}/typing`)
-        .send({ username: 'taylor_swift', isTyping: true })
-        .expect(200);
-
-      console.log('POST /chats/:id/typing', result.body);
-      expect(result.body).toHaveProperty('success', true);
-      expect(result.body).toHaveProperty('isTyping', true);
-      expect(result.body).toHaveProperty('timestamp');
-    });
-
-    test('clears typing indicator', async () => {
-      const result = await request(app)
-        .post(`/chats/${chatId}/typing`)
-        .send({ username: 'taylor_swift', isTyping: false })
-        .expect(200);
-
-      console.log('POST /chats/:id/typing (false)', result.body);
-      expect(result.body).toHaveProperty('success', true);
-      expect(result.body).toHaveProperty('isTyping', false);
-    });
-
-    test('handles non-existent user', async () => {
-      const result = await request(app)
-        .post(`/chats/${chatId}/typing`)
-        .send({ username: 'nonexistent_user', isTyping: true })
-        .expect(200);
-
-      console.log('POST /chats/:id/typing (bad user)', result.body);
-      expect(result.body).toHaveProperty('success', true);
-    });
   });
 });

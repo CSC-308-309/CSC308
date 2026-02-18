@@ -56,8 +56,14 @@ export const MessagesModel = {
                 RETURNING user_id
             `;
 
-      for (const participant of participants) {
-        await pool.query(participantQuery, [chat.id, participant]);
+      // Always add the chat creator as a participant
+      await pool.query(participantQuery, [chat.id, created_by]);
+
+      // Add additional participants if provided
+      if (participants && participants.length > 0) {
+        for (const participant of participants) {
+          await pool.query(participantQuery, [chat.id, participant]);
+        }
       }
 
       await pool.query("COMMIT");
@@ -168,14 +174,23 @@ export const MessagesModel = {
 
       const query = `
                 INSERT INTO chat_members (chat_id, user_id)
-                VALUES ($1, (SELECT id FROM users WHERE username = $2))
+                VALUES ($1, $2)
                 ON CONFLICT (chat_id, user_id) DO NOTHING
                 RETURNING user_id
             `;
 
       const addedParticipants = [];
       for (const participant of participants) {
-        const result = await pool.query(query, [chatId, participant]);
+        // Check if user exists first
+        const userCheckQuery = `SELECT id FROM users WHERE username = $1`;
+        const userResult = await pool.query(userCheckQuery, [participant]);
+        
+        if (userResult.rows.length === 0) {
+          continue; // Skip non-existent users
+        }
+        
+        const userId = userResult.rows[0].id;
+        const result = await pool.query(query, [chatId, userId]);
         if (result.rows.length > 0) {
           addedParticipants.push(result.rows[0]);
         }
@@ -266,15 +281,25 @@ export const MessagesModel = {
     try {
       await pool.query("BEGIN");
 
+      // Check if sender exists
+      const userCheckQuery = `SELECT id FROM users WHERE username = $1`;
+      const userResult = await pool.query(userCheckQuery, [sender_username]);
+      
+      if (userResult.rows.length === 0) {
+        throw new Error("User not found");
+      }
+      
+      const senderId = userResult.rows[0].id;
+
       // Insert message
       const messageQuery = `
                 INSERT INTO messages (chat_id, sent_by, content)
-                VALUES ($1, (SELECT id FROM users WHERE username = $2), $3)
+                VALUES ($1, $2, $3)
                 RETURNING id, chat_id, sent_by, content, created_at
             `;
       const messageResult = await pool.query(messageQuery, [
         chatId,
-        sender_username,
+        senderId,
         content,
       ]);
       const message = messageResult.rows[0];

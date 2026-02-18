@@ -8,7 +8,7 @@ export function createApp({ db }) {
   // When frontend uses credentials: "include", origin cannot be "*" — must be exact origin
   app.use(
     cors({
-      origin: "http://localhost:5173",
+      origin: ["http://localhost:5173", "http://localhost:5177"],
       credentials: true,
     }),
   );
