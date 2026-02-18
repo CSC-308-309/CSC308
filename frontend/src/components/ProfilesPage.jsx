@@ -3,18 +3,35 @@ import { api } from "../client.js";
 import ProfileCard from "./ProfileCard";
 import SwipeButtons from "./SwipeButtons";
 
+function getCurrentUsername() {
+  try {
+    const rawUser = localStorage.getItem("user");
+    if (!rawUser) return "";
+    const parsedUser = JSON.parse(rawUser);
+    return (parsedUser?.username || "").trim();
+  } catch {
+    return "";
+  }
+}
+
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentUser] = useState(null); // obtained from auth or local storage
+  const [currentUser] = useState(getCurrentUsername);
 
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
         const data = await api.listUsers();
-        setProfiles(data);
+        const normalizedCurrentUser = currentUser.toLowerCase();
+        const filteredProfiles = (data || []).filter((profile) => {
+          const username = (profile?.username || "").toLowerCase();
+          return username && username !== normalizedCurrentUser;
+        });
+        setProfiles(filteredProfiles);
+        setCurrentIndex(0);
       } catch (err) {
         console.error("Error fetching profiles:", err);
         setError("Failed to load profiles. Please try again later.");
@@ -24,7 +41,7 @@ export default function ProfilesPage() {
     };
 
     fetchProfiles();
-  }, []);
+  }, [currentUser]);
 
   const handleSwipe = async (direction) => {
     const targetProfile = profiles[currentIndex];

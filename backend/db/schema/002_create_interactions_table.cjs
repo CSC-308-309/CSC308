@@ -26,6 +26,8 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.sequelize.query('DROP TABLE IF EXISTS interactions CASCADE');
+    await queryInterface.sequelize.query(
+      "DROP TABLE IF EXISTS interactions CASCADE",
+    );
   },
 };

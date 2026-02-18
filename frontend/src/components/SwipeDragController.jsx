@@ -1,5 +1,10 @@
-/* eslint-disable no-undef */
-import { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
+ import {
+  useState,
+  useEffect,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 
 const SWIPE_THRESHOLD = 100;
 const ROTATION_FACTOR = 20;

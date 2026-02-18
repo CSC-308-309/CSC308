@@ -86,18 +86,18 @@ erDiagram
     users ||--o{ messages : "1:N (sender)"
     users ||--o{ notifications : "1:N"
     users ||--o{ chats : "1:N (creator)"
-    
+
     chats ||--o{ chat_participants : "1:N"
     chats ||--o{ messages : "1:N"
-    
+
     chat_participants }o--|| users : "N:1"
     chat_participants }o--|| chats : "N:1"
-    
+
     messages }o--|| chats : "N:1"
     messages }o--|| users : "N:1"
-    
+
     notifications }o--|| users : "N:1"
-    
+
     interactions }o--|| users : "N:1 (actor)"
     interactions }o--|| users : "N:1 (target)"
 ```
@@ -105,37 +105,44 @@ erDiagram
 ## Table Details
 
 ### users
+
 - **Purpose**: Authentication and basic user data
 - **Primary Key**: username (3-30 chars, alphanumeric + underscores)
 - **Constraints**: Unique email, username format validation
 - **Fields**: username, email, password_hash, phone, timestamps
 
-### profiles  
+### profiles
+
 - **Purpose**: Extended user profile information
 - **Primary Key**: username (1:1 with users table)
 - **Fields**: name, role, age, gender, genre, experience, images, music preferences
 
 ### interactions
+
 - **Purpose**: User-to-user interactions (like, dislike, block)
 - **Fields**: interaction_type, actor_username, target_username
 - **Types**: 'like', 'dislike', 'block'
 
 ### chats
+
 - **Purpose**: Conversation containers
 - **Types**: 'dm' (direct message) or 'group'
 - **Fields**: name, avatar_url, created_by
 
 ### chat_participants
+
 - **Purpose**: Many-to-many relationship between users and chats
 - **Fields**: chat_id, username, joined_at
 - **Constraints**: Unique (chat_id, username) combination
 
 ### messages
+
 - **Purpose**: Individual messages within chats
 - **Fields**: text, client_message_id, created_at, edited_at
 - **Features**: Edit support, client message ID for deduplication
 
 ### notifications
+
 - **Purpose**: User notifications system
 - **Fields**: type, title, content, data (JSONB), read/archived status
 - **Features**: Flexible data storage, read/unread tracking

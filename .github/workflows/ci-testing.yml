@@ -13,6 +13,10 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run lint
-      - run: npm test
+      - run: npm run lint --workspace=frontend
+      - run: npm run test --workspace=express-backend
       - run: npm run build --workspace=frontend
+
+# Please review the above code
+# it has been merged, but i will change it based on any feedback
+# this is the first part of the CI/CD assignment, make sure you understand it!

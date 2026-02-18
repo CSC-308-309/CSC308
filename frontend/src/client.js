@@ -3,7 +3,7 @@
 
 // For now, just localhost URL
 // TODO: allow injection of env var
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "melodious-aec4gpergpb0bsd6.westus3-01.azurewebsites.net";
 
 // async function request(path, options = {}) {
 //   const res = await fetch(`${BASE_URL}${path}`, {
@@ -149,12 +149,12 @@ export const api = {
 
   // Notification routes
   // NOTE: these two are not valid routes, we don't want to list all notifs in the database
-  //        fix their usage in the frontend to use listNotifications with username input
+  // fix their usage in the frontend to use listNotifications with username input
   //listMyNotifications: (params = {}) => requestTypes.get(withQuery('/notifications/me', params)),
   //getMyUnreadNotificationsCount: () => requestTypes.get('/notifications/me/unread-count'),
-  listNotifications: (username) =>
+  listNotifications: (username, params = {}) =>
     requestTypes.get(
-      withQuery(`/notifications/${encodeURIComponent(username)}`),
+      withQuery(`/notifications/${encodeURIComponent(username)}`, params),
     ),
   getUnreadNotificationsCount: (username) =>
     requestTypes.get(
@@ -173,6 +173,7 @@ export const api = {
       `/notifications/${encodeURIComponent(notificationId)}/unread`,
       {},
     ),
+
   markAllNotificationsRead: (data = {}) =>
     requestTypes.post("/notifications/readAll", data),
   archiveNotification: (notificationId) =>
@@ -204,6 +205,11 @@ export const api = {
   //Photo Storage routes
   presignUpload: (uploadParams) =>
     requestTypes.put("/media/presign", uploadParams),
+  presignView: (viewParams) =>
+    requestTypes.put("/media/presign-view", viewParams),
+  // Backward-compatible helper used by existing components.
+  presignViewUrl: (fileUrl) =>
+    requestTypes.put("/media/presign-view", { fileUrl }),
 };
 
 export { BASE_URL };

@@ -1,21 +1,23 @@
 // models/media.js
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from "uuid";
 
-
 function env(name) {
   const v = process.env[name];
-  if (!v || !String(v).trim()) throw new Error(`Missing environment variable: ${name}`);
+  if (!v || !String(v).trim())
+    throw new Error(`Missing environment variable: ${name}`);
   return String(v).trim();
 }
-
 
 function makeS3Client() {
   const region = env("AWS_REGION");
   const accessKeyId = env("AWS_ACCESS_KEY_ID");
   const secretAccessKey = env("AWS_SECRET_ACCESS_KEY");
-
 
   const sessionTokenRaw = process.env.AWS_SESSION_TOKEN;
   const sessionToken =
@@ -23,15 +25,12 @@ function makeS3Client() {
       ? String(sessionTokenRaw).trim()
       : undefined;
 
-
   const credentials = sessionToken
     ? { accessKeyId, secretAccessKey, sessionToken }
     : { accessKeyId, secretAccessKey };
 
-
   return new S3Client({ region, credentials });
 }
-
 
 const ALLOWED = {
   cover: {
@@ -49,8 +48,13 @@ const ALLOWED = {
     maxBytes: 300 * 1024 * 1024,
     types: ["video/mp4", "video/webm", "audio/mpeg", "audio/mp4"],
   },
-};
 
+  videoThumb: {
+    prefix: "public/video-thumbnails",
+    maxBytes: 2 * 1024 * 1024,
+    types: ["image/jpeg", "image/png", "image/webp"],
+  },
+};
 
 function extFromType(contentType) {
   const map = {
@@ -65,28 +69,38 @@ function extFromType(contentType) {
   return map[contentType] || "bin";
 }
 
+function toS3Key(input = "") {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+  if (!raw.startsWith("http://") && !raw.startsWith("https://")) return raw;
+
+  try {
+    const parsed = new URL(raw);
+    const pathname = parsed.pathname || "";
+    return decodeURIComponent(pathname.replace(/^\/+/, ""));
+  } catch {
+    return "";
+  }
+}
 
 export async function presignUpload(req, res) {
   try {
     const { kind, contentType, fileSize, userId } = req.body;
 
-
     const rule = ALLOWED[kind];
     if (!rule) return res.status(400).json({ error: "Invalid kind" });
-    if (!rule.types.includes(contentType)) return res.status(400).json({ error: "Invalid contentType" });
-    if (fileSize > rule.maxBytes) return res.status(400).json({ error: "File too large" });
+    if (!rule.types.includes(contentType))
+      return res.status(400).json({ error: "Invalid contentType" });
+    if (fileSize > rule.maxBytes)
+      return res.status(400).json({ error: "File too large" });
     if (!userId) return res.status(400).json({ error: "userId required" });
-
 
     const bucket = env("S3_BUCKET");
     const region = env("AWS_REGION");
 
-
     const key = `${rule.prefix}/${userId}/${uuidv4()}.${extFromType(contentType)}`;
 
-
     const s3 = makeS3Client();
-
 
     const command = new PutObjectCommand({
       Bucket: bucket,
@@ -94,18 +108,44 @@ export async function presignUpload(req, res) {
       ContentType: contentType,
     });
 
-
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
 
-
     const fileUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
-
 
     return res.json({ uploadUrl, fileUrl, key });
   } catch (e) {
     console.error("Presign PUT error:", e);
     return res.status(500).json({
       error: "Failed to create upload URL",
+      details: e?.message || String(e),
+    });
+  }
+}
+
+export async function presignView(req, res) {
+  try {
+    const { fileUrl, key, expiresIn } = req.body || {};
+    const objectKey = toS3Key(key || fileUrl);
+    if (!objectKey)
+      return res.status(400).json({ error: "fileUrl or key required" });
+
+    const bucket = env("S3_BUCKET");
+    const s3 = makeS3Client();
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: objectKey,
+    });
+
+    const ttl = Number.isInteger(expiresIn) ? expiresIn : 3600;
+    const viewUrl = await getSignedUrl(s3, command, {
+      expiresIn: Math.max(60, Math.min(ttl, 7 * 24 * 3600)),
+    });
+
+    return res.json({ viewUrl, key: objectKey });
+  } catch (e) {
+    console.error("Presign GET error:", e);
+    return res.status(500).json({
+      error: "Failed to create view URL",
       details: e?.message || String(e),
     });
   }

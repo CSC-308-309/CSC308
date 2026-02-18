@@ -1,17 +1,111 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import ChatList from "./ChatList";
 import ChatWindow from "./ChatWindow";
 import { api } from "../../client";
+import NewChatModel from "./NewChatModel";
+import ParticipantsModel from "./ParticipantsModel";
 
 export default function MessagesPanel() {
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
-
-  // storing messages per chatId loaded from API
+  const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState({});
   const [isLoadingChats, setIsLoadingChats] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [error, setError] = useState(null);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const [participants, setParticipants] = useState([]);
+  const [isLoadingParticipants, setIsLoadingParticipants] = useState(false);
+
+  const currentUser = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  }, []);
+  const myUsername = currentUser?.username;
+
+  function normalizeChat(c) {
+    return {
+      id: c.id,
+      name: c.name || "(Unnamed chat)",
+      lastMessage: c.last_message_content || "",
+      time: c.last_message_at
+        ? new Date(c.last_message_at).toLocaleString()
+        : "",
+      avatarUrl: c.group_photo_url || null,
+      ...c,
+    };
+  }
+
+  const normalizeMessage = useCallback(
+    (m) => {
+      return {
+        id: m.id,
+        sender: m.sender_name || m.sender_username || "Unknown",
+        text: m.content ?? "",
+        isOwnMessage: !!myUsername && m.sender_username === myUsername,
+        ...m,
+      };
+    },
+    [myUsername],
+  );
+
+  async function handleSelectChat(chat) {
+    setSelectedChat(chat);
+
+    try {
+      const fresh = await api.getChat(chat.id);
+      setSelectedChat((prev) => (prev ? { ...prev, ...fresh } : prev));
+    } catch (e) {
+      setError(e?.message || "Failed to get chat details");
+    }
+  }
+
+  async function openChatInfo() {
+    if (!selectedChat?.id) return;
+
+    try {
+      setError(null);
+      setIsLoadingParticipants(true);
+      setIsInfoOpen(true);
+
+      const data = await api.listChatParticipants(selectedChat.id);
+      const list = Array.isArray(data) ? data : data?.participants || [];
+
+      setParticipants(list);
+    } catch (e) {
+      setError(e?.message || "Failed to load participants");
+    } finally {
+      setIsLoadingParticipants(false);
+    }
+  }
+
+  async function refreshChats(selectChatId = null) {
+    if (!myUsername) return;
+
+    const data = await api.listChats({ username: myUsername });
+    const listRaw = Array.isArray(data) ? data : data?.chats || [];
+    const list = listRaw.map(normalizeChat);
+
+    setChats(list);
+
+    if (selectChatId) {
+      setSelectedChat(
+        list.find((c) => String(c.id) === String(selectChatId)) ||
+          list[0] ||
+          null,
+      );
+    } else {
+      setSelectedChat((prev) => {
+        if (!prev) return list[0] || null;
+        return (
+          list.find((c) => String(c.id) === String(prev.id)) || list[0] || null
+        );
+      });
+    }
+  }
 
   // loading chats
   useEffect(() => {
@@ -19,9 +113,18 @@ export default function MessagesPanel() {
 
     async function loadChats() {
       try {
+        setError(null);
         setIsLoadingChats(true);
-        const data = await api.listChats();
-        const list = Array.isArray(data) ? data : data?.chats || [];
+
+        if (!myUsername) {
+          throw new Error(
+            "You are not logged in (missing user in localStorage).",
+          );
+        }
+
+        const data = await api.listChats({ username: myUsername });
+        const listRaw = Array.isArray(data) ? data : data?.chats || [];
+        const list = listRaw.map(normalizeChat);
 
         if (!isMounted) return;
 
@@ -29,7 +132,9 @@ export default function MessagesPanel() {
         setSelectedChat(list[0] || null);
       } catch (e) {
         if (!isMounted) return;
-        setError(e.message || "Failed to load chats");
+        setError(e?.message || "Failed to load chats");
+        setChats([]);
+        setSelectedChat(null);
       } finally {
         if (isMounted) setIsLoadingChats(false);
       }
@@ -39,66 +144,156 @@ export default function MessagesPanel() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [myUsername]);
+
+  // hydrates participants list into chats that don't have them
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydrateParticipants() {
+      if (!chats.length) return;
+
+      const missing = chats.filter((c) => !Array.isArray(c.participants));
+      if (!missing.length) return;
+
+      try {
+        const results = await Promise.allSettled(
+          missing.map(async (chat) => {
+            const data = await api.listChatParticipants(chat.id);
+            const usernames = (Array.isArray(data) ? data : []).map(
+              (p) => p.username,
+            );
+            return { chatId: chat.id, participants: usernames };
+          }),
+        );
+
+        if (cancelled) return;
+
+        setChats((prev) =>
+          prev.map((chat) => {
+            const found = results.find((r) => r.chatId === chat.id);
+            return found ? { ...chat, participants: found.participants } : chat;
+          }),
+        );
+      } catch (e) {
+        setError(e?.message || "Failed to load chat participants");
+      }
+    }
+
+    hydrateParticipants();
+    return () => {
+      cancelled = true;
+    };
+  }, [chats]);
 
   // loads messages whenever selectedChat changes
   useEffect(() => {
     let isMounted = true;
+
     async function loadMessages(chatId) {
       try {
+        setError(null);
         setIsLoadingMessages(true);
+
         const data = await api.listMessages(chatId);
-        const msgs = Array.isArray(data) ? data : data?.messages || [];
+        const raw = Array.isArray(data) ? data : data?.messages || [];
+        const msgs = raw.map(normalizeMessage);
 
         if (!isMounted) return;
 
         setChatMessages((prev) => ({ ...prev, [chatId]: msgs }));
       } catch (e) {
         if (!isMounted) return;
-        setError(e.message || "Failed to load messages");
+        setError(e?.message || "Failed to load messages");
       } finally {
         if (isMounted) setIsLoadingMessages(false);
       }
     }
 
     if (selectedChat?.id) loadMessages(selectedChat.id);
+
     return () => {
       isMounted = false;
     };
-  }, [selectedChat?.id]);
+  }, [selectedChat?.id, normalizeMessage]);
 
   async function handleSendMessage(chatId, messageText) {
-    try {
-      const optimistic = {
-        id: `temp-${Date.now()}`,
-        sender: "You",
-        text: messageText,
-        isOwnMessage: true,
-      };
+    if (!myUsername) {
+      setError("You are not logged in (missing username).");
+      return;
+    }
 
+    const optimistic = {
+      id: `temp-${Date.now()}`,
+      sender: "You",
+      text: messageText,
+      isOwnMessage: true,
+    };
+
+    setChatMessages((prev) => ({
+      ...prev,
+      [chatId]: [...(prev[chatId] || []), optimistic],
+    }));
+
+    try {
+      setError(null);
+
+      const created = await api.sendMessage(chatId, {
+        sender_username: myUsername,
+        content: messageText,
+      });
+
+      const createdMsg = normalizeMessage({
+        ...created,
+        sender_username: myUsername,
+        sender_name: currentUser?.username,
+      });
+
+      setChatMessages((prev) => {
+        const existing = prev[chatId] || [];
+        const withoutTemp = existing.filter((m) => m.id !== optimistic.id);
+        return { ...prev, [chatId]: [...withoutTemp, createdMsg] };
+      });
+
+      setChats((prev) =>
+        prev.map((c) =>
+          c.id === chatId
+            ? {
+                ...c,
+                lastMessage: messageText,
+                time: new Date().toLocaleString(),
+              }
+            : c,
+        ),
+      );
+    } catch (e) {
+      setError(e?.message || "Failed to send message");
       setChatMessages((prev) => ({
         ...prev,
-        [chatId]: [...(prev[chatId] || []), optimistic],
+        [chatId]: (prev[chatId] || []).filter((m) => m.id !== optimistic.id),
       }));
+    }
+  }
 
-      const created = await api.sendMessage(chatId, { text: messageText });
+  async function handleCreateChat(payload) {
+    try {
+      setError(null);
 
-      if (created) {
-        setChatMessages((prev) => {
-          const existing = prev[chatId] || [];
-          const withoutTemp = existing.filter((m) => m.id !== optimistic.id);
-          const createdMsg = created.message || created;
-          return { ...prev, [chatId]: [...withoutTemp, createdMsg] };
-        });
+      if (!myUsername) {
+        throw new Error("You’re not logged in (missing username).");
+      }
+
+      const created = await api.createChat(payload);
+      await refreshChats(created?.id);
+
+      if (created?.id) {
+        setChatMessages((prev) => ({
+          ...prev,
+          [created.id]: prev[created.id] || [],
+        }));
       }
     } catch (e) {
-      setError(e.message || "Failed to send message");
-      setChatMessages((prev) => ({
-        ...prev,
-        [chatId]: (prev[chatId] || []).filter(
-          (m) => !String(m.id).startsWith("temp-"),
-        ),
-      }));
+      setError(e?.message || "Failed to create chat");
     }
   }
 
@@ -111,10 +306,11 @@ export default function MessagesPanel() {
       <ChatList
         chats={chats}
         selectedChat={selectedChat}
-        setSelectedChat={setSelectedChat}
+        setSelectedChat={handleSelectChat}
+        onNewChat={() => setIsNewChatOpen(true)}
       />
 
-      <div className="flex-1">
+      <div className="flex-1 relative">
         {isLoadingChats && (
           <div className="p-6 text-sm text-gray-500">Loading chats...</div>
         )}
@@ -128,6 +324,7 @@ export default function MessagesPanel() {
             chat={selectedChat}
             messages={chatMessages[selectedChat.id] || []}
             onSendMessage={handleSendMessage}
+            onOpenInfo={openChatInfo}
           />
         )}
 
@@ -137,6 +334,21 @@ export default function MessagesPanel() {
           </div>
         )}
       </div>
+
+      <NewChatModel
+        isOpen={isNewChatOpen}
+        onClose={() => setIsNewChatOpen(false)}
+        onCreate={handleCreateChat}
+        api={api}
+        myUsername={myUsername}
+      />
+
+      <ParticipantsModel
+        isOpen={isInfoOpen}
+        onClose={() => setIsInfoOpen(false)}
+        title={isLoadingParticipants ? "Loading..." : "Participants"}
+        participants={participants}
+      />
     </div>
   );
 }
