@@ -10,10 +10,12 @@ export default function NotificationItem({
   postText,
   actionVariant = "read",
   initialIsRead = false,
+  onDelete,
 }) {
   const [isRead, setIsRead] = useState(Boolean(initialIsRead));
   const [isSyncedBack, setIsSyncedBack] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const { refreshUnreadCount } = useNotifications();
 
@@ -23,7 +25,7 @@ export default function NotificationItem({
   }, [actionVariant, isSyncedBack, isRead]);
 
   const handleClick = async () => {
-    if (!id || loading) return;
+    if (!id || loading || deleting) return;
 
     setLoading(true);
     try {
@@ -56,6 +58,30 @@ export default function NotificationItem({
     }
   };
 
+  const handleDelete = async () => {
+    if (!id || loading || deleting) return;
+
+    const ok = window.confirm("Delete this notification?");
+    if (!ok) return;
+
+    console.log("Deleting notification id:", id);
+
+    setDeleting(true);
+    try {
+      await api.deleteNotification(id);
+
+      if (typeof onDelete === "function") {
+        onDelete(id);
+      }
+
+      await refreshUnreadCount();
+    } catch (err) {
+      console.error("Delete notification failed:", err);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="flex items-start justify-between py-2">
       <div className="flex items-start space-x-3">
@@ -74,23 +100,38 @@ export default function NotificationItem({
         </div>
       </div>
 
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className={`px-3 py-1 rounded-md text-sm transition ${
-          loading
-            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-            : actionVariant === "sync"
-              ? isSyncedBack
-                ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
-                : "bg-purple-300 hover:bg-purple-400"
-              : isRead
-                ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
-                : "bg-purple-300 hover:bg-purple-400"
-        }`}
-      >
-        {loading ? "..." : buttonText}
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleClick}
+          disabled={loading || deleting}
+          className={`px-3 py-1 rounded-md text-sm transition ${
+            loading || deleting
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : actionVariant === "sync"
+                ? isSyncedBack
+                  ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
+                  : "bg-purple-300 hover:bg-purple-400"
+                : isRead
+                  ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
+                  : "bg-purple-300 hover:bg-purple-400"
+          }`}
+        >
+          {loading ? "..." : buttonText}
+        </button>
+
+        <button
+          onClick={handleDelete}
+          disabled={loading || deleting}
+          className={`px-3 py-1 rounded-md text-sm transition ${
+            loading || deleting
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-red-100 text-red-700 hover:bg-red-200"
+          }`}
+          title="Delete notification"
+        >
+          {deleting ? "..." : "Delete"}
+        </button>
+      </div>
     </div>
   );
 }

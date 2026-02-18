@@ -16,6 +16,11 @@ export default function MessageBubble({ message }) {
         {!isOwn && (
           <div className="text-sm font-semibold text-gray-600 mb-1">
             {message.sender}
+            {message.senderUsername && (
+              <span className="ml-2 text-xs font-normal text-gray-500">
+                @{message.senderUsername}
+              </span>
+            )}
           </div>
         )}
 

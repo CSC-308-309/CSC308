@@ -8,6 +8,11 @@ export default function NotificationsPanel({ username }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  async function handleDelete(notificationId) {
+    setNotifications(prev =>
+      prev.filter(n => String(n.id) !== String(notificationId)));
+  }
+
   useEffect(() => {
     let cancelled = false;
 
@@ -70,16 +75,16 @@ export default function NotificationsPanel({ username }) {
       ) : (
         <>
           {grouped.new.length > 0 && (
-            <NotificationSection title="New" items={grouped.new} />
+            <NotificationSection title="New" items={grouped.new} onDelete={handleDelete} />
           )}
           {grouped.week.length > 0 && (
-            <NotificationSection title="This Week" items={grouped.week} />
+            <NotificationSection title="This Week" items={grouped.week} onDelete={handleDelete} />
           )}
           {grouped.month.length > 0 && (
-            <NotificationSection title="This Month" items={grouped.month} />
+            <NotificationSection title="This Month" items={grouped.month} onDelete={handleDelete} />
           )}
           {grouped.older.length > 0 && (
-            <NotificationSection title="Older" items={grouped.older} />
+            <NotificationSection title="Older" items={grouped.older} onDelete={handleDelete} />
           )}
         </>
       )}

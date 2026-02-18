@@ -153,6 +153,7 @@ export function createApp({ db }) {
   // Get presigned URL for S3 upload
   app.put("/media/presign", presignUpload);
   app.put("/media/presign-view", presignView);
+  app.post("/media/presign-view", presignView);
 
   //// INTERACTION ROUTES ////
   // Like another user
