@@ -12,7 +12,7 @@ describe('Chats/Messages API routes', () => {
   let groupMessageId;
 
   beforeAll(async () => {
-    // Create a 1-on-1 test chat
+    // Create a test personal chat
     const result = await request(app)
       .post('/chats')
       .send({
@@ -52,7 +52,7 @@ describe('Chats/Messages API routes', () => {
   });
 
   describe('POST /chats', () => {
-    test('creates a 1-on-1 chat', async () => {
+    test('creates a chat', async () => {
       const result = await request(app)
         .post('/chats')
         .send({
@@ -63,7 +63,7 @@ describe('Chats/Messages API routes', () => {
         })
         .expect(201);
 
-      console.log('POST /chats (1-on-1)', result.body);
+      console.log('POST /chats ', result.body);
       expect(result.body).toHaveProperty('id');
       expect(result.body).toHaveProperty('is_group', false);
     });

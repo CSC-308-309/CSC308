@@ -10,28 +10,32 @@ export default function NewConcertMemory({ isOpen, onClose, onSave }) {
 
   const generateThumbnail = (videoFile) => {
     return new Promise((resolve) => {
-      const videoElement = document.createElement('video');
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      
-      videoElement.preload = 'metadata';
+      const videoElement = document.createElement("video");
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      videoElement.preload = "metadata";
       videoElement.src = URL.createObjectURL(videoFile);
-      
+
       videoElement.onloadedmetadata = () => {
         // Seek to 1 second into the video (or 0 if video is shorter)
         videoElement.currentTime = Math.min(1, videoElement.duration / 2);
       };
-      
+
       videoElement.onseeked = () => {
         canvas.width = videoElement.videoWidth;
         canvas.height = videoElement.videoHeight;
         context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-        
+
         // Convert canvas to blob
-        canvas.toBlob((blob) => {
-          URL.revokeObjectURL(videoElement.src);
-          resolve(URL.createObjectURL(blob));
-        }, 'image/jpeg', 0.8);
+        canvas.toBlob(
+          (blob) => {
+            URL.revokeObjectURL(videoElement.src);
+            resolve(URL.createObjectURL(blob));
+          },
+          "image/jpeg",
+          0.8,
+        );
       };
     });
   };
@@ -69,15 +73,11 @@ export default function NewConcertMemory({ isOpen, onClose, onSave }) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className={`w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-purple-200 focus:outline-none ${
-            submitted && !title.trim()
-              ? "border-red-500"
-              : "border-gray-300"
+            submitted && !title.trim() ? "border-red-500" : "border-gray-300"
           }`}
         />
         {submitted && !title.trim() && (
-          <p className="text-xs text-red-500 mt-1">
-            Title is required.
-          </p>
+          <p className="text-xs text-red-500 mt-1">Title is required.</p>
         )}
 
         {/* Video Upload */}
@@ -93,9 +93,7 @@ export default function NewConcertMemory({ isOpen, onClose, onSave }) {
           }`}
         />
         {submitted && !video && (
-          <p className="text-xs text-red-500 mt-1">
-            Please upload a video.
-          </p>
+          <p className="text-xs text-red-500 mt-1">Please upload a video.</p>
         )}
 
         {/* Description */}

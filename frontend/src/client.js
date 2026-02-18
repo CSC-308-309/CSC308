@@ -3,115 +3,207 @@
 
 // For now, just localhost URL
 // TODO: allow injection of env var
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = "http://localhost:8000";
+
+// async function request(path, options = {}) {
+//   const res = await fetch(`${BASE_URL}${path}`, {
+//     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+//     ...options,
+//   });
+//   const body = await res.json().catch(() => null);
+//   if (!res.ok) {
+//     const message = body && body.error ? body.error : res.statusText;
+//     const error = new Error(message || 'Request failed');
+//     error.status = res.status;
+//     error.body = body;
+//     throw error;
+//   }
+//   return body;
+// }
 
 async function request(path, options = {}) {
-  const token = localStorage.getItem('token');
-
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: {'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(options.headers || {})},
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     ...options,
   });
-  
-  const body = await res.json().catch(() => null);
+
+  const contentType = res.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+
+  const body = isJson
+    ? await res.json().catch(() => null)
+    : await res.text().catch(() => "");
+
   if (!res.ok) {
-    const message = body && body.error ? body.error : res.statusText;
-    const error = new Error(message || 'Request failed');
+    const message =
+      body && typeof body === "object" && body.details
+        ? `${body.error}: ${body.details}`
+        : body && typeof body === "object" && body.error
+          ? body.error
+          : typeof body === "string" && body.trim()
+            ? body
+            : res.statusText;
+
+    const error = new Error(message || "Request failed");
     error.status = res.status;
     error.body = body;
     throw error;
   }
+
   return body;
 }
 
 const requestTypes = {
-    get: (path) => request(path, { method: 'GET' }),
-    post: (path, data) => request(path, { method: 'POST', body: JSON.stringify(data) }),
-    put: (path, data) => request(path, { method: 'PUT', body: JSON.stringify(data) }),
-    delete: (path) => request(path, { method: 'DELETE' }),
+  get: (path) => request(path, { method: "GET" }),
+  post: (path, data) =>
+    request(path, { method: "POST", body: JSON.stringify(data) }),
+  put: (path, data) =>
+    request(path, { method: "PUT", body: JSON.stringify(data) }),
+  delete: (path) => request(path, { method: "DELETE" }),
 
-    // patch helper for partial updates (useful for message edits, chat settings, etc.)
-    patch: (path, data) => request(path, { method: 'PATCH', body: JSON.stringify(data) }),
-}
+  // patch helper for partial updates (useful for message edits, chat settings, etc.)
+  patch: (path, data) =>
+    request(path, { method: "PATCH", body: JSON.stringify(data) }),
+};
 
 // small helper for adding query params to GET routes (specifically for discreet pagination)
 function withQuery(path, params = {}) {
-    const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '');
-    if (entries.length === 0) return path;
-    const qs = new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString();
-    return `${path}?${qs}`;
+  const entries = Object.entries(params).filter(
+    ([, v]) => v !== undefined && v !== null && v !== "",
+  );
+  if (entries.length === 0) return path;
+  const qs = new URLSearchParams(
+    entries.map(([k, v]) => [k, String(v)]),
+  ).toString();
+  return `${path}?${qs}`;
 }
 
 export const api = {
-    // User/Profile routes
-    listUsers: () => requestTypes.get('/users'),
-    getByUsername: (username) => requestTypes.get(`/users/${encodeURIComponent(username)}`),
-    update: (username, data) => requestTypes.put(`/users/${encodeURIComponent(username)}`, data),
-    deleteUser: (username) => requestTypes.delete(`/users/${encodeURIComponent(username)}`),
-    signup: (profile) => requestTypes.post('/auth/signup', profile),
-    login: (credentials) => requestTypes.post('/auth/login', credentials),
-    
-    // Interaction routes
-    like: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/like`, { targetUsername }),
-    dislike: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/dislike`, { targetUsername }),
-    block: (username, targetUsername) => requestTypes.post(`/users/${encodeURIComponent(username)}/block`, { targetUsername }),
+  // User/Profile routes
+  listUsers: () => requestTypes.get("/users"),
+  getByUsername: (username) =>
+    requestTypes.get(`/users/${encodeURIComponent(username)}`),
+  update: (username, data) =>
+    requestTypes.put(`/users/${encodeURIComponent(username)}`, data),
+  deleteUser: (username) =>
+    requestTypes.delete(`/users/${encodeURIComponent(username)}`),
+  signup: (profile) => requestTypes.post("/auth/signup", profile),
+  login: (credentials) => requestTypes.post("/auth/login", credentials),
 
-    // Messaging routes
-    listChats: (params = {}) => requestTypes.get(withQuery('/chats', params)),
-    createChat: (data) => requestTypes.post('/chats', data),
-    getChat: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}`),
-    updateChat: (chatId, data) => requestTypes.patch(`/chats/${encodeURIComponent(chatId)}`, data),
-    deleteChat: (chatId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}`),
-    listChatParticipants: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/participants`),
-    addChatParticipants: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/participants`, data),
-    removeChatParticipant: (chatId, username) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/participants/${encodeURIComponent(username)}`),
-    listMessages: (chatId, params = {}) => requestTypes.get(withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params)),
-    getMessage: (chatId, messageId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
-    sendMessage: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/messages`, data),
-    updateMessage: (chatId, messageId, data) => requestTypes.patch(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`, data),
-    deleteMessage: (chatId, messageId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
-    markChatRead: (chatId, data = {}) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/read`, data),
-    setTyping: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/typing`, data),
+  // Interaction routes
+  like: (username, targetUsername) =>
+    requestTypes.post(`/users/${encodeURIComponent(username)}/like`, {
+      targetUsername,
+    }),
+  dislike: (username, targetUsername) =>
+    requestTypes.post(`/users/${encodeURIComponent(username)}/dislike`, {
+      targetUsername,
+    }),
+  block: (username, targetUsername) =>
+    requestTypes.post(`/users/${encodeURIComponent(username)}/block`, {
+      targetUsername,
+    }),
 
-    // Messaging routes
-    listChats: (params = {}) => requestTypes.get(withQuery('/chats', params)),
-    createChat: (data) => requestTypes.post('/chats', data),
-    getChat: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}`),
-    updateChat: (chatId, data) => requestTypes.patch(`/chats/${encodeURIComponent(chatId)}`, data),
-    deleteChat: (chatId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}`),
-    listChatParticipants: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/participants`),
-    addChatParticipants: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/participants`, data),
-    removeChatParticipant: (chatId, username) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/participants/${encodeURIComponent(username)}`),
-    listMessages: (chatId, params = {}) => requestTypes.get(withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params)),
-    getMessage: (chatId, messageId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
-    sendMessage: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/messages`, data),
-    updateMessage: (chatId, messageId, data) => requestTypes.patch(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`, data),
-    deleteMessage: (chatId, messageId) => requestTypes.delete(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`),
-    markChatRead: (chatId, data = {}) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/read`, data),
-    setTyping: (chatId, data) => requestTypes.post(`/chats/${encodeURIComponent(chatId)}/typing`, data),
+  // Messaging routes
+  listChats: (params = {}) => requestTypes.get(withQuery("/chats", params)),
+  createChat: (data) => requestTypes.post("/chats", data),
+  getChat: (chatId) => requestTypes.get(`/chats/${encodeURIComponent(chatId)}`),
+  updateChat: (chatId, data) =>
+    requestTypes.patch(`/chats/${encodeURIComponent(chatId)}`, data),
+  deleteChat: (chatId) =>
+    requestTypes.delete(`/chats/${encodeURIComponent(chatId)}`),
+  listChatParticipants: (chatId) =>
+    requestTypes.get(`/chats/${encodeURIComponent(chatId)}/participants`),
+  addChatParticipants: (chatId, data) =>
+    requestTypes.post(
+      `/chats/${encodeURIComponent(chatId)}/participants`,
+      data,
+    ),
+  removeChatParticipant: (chatId, username) =>
+    requestTypes.delete(
+      `/chats/${encodeURIComponent(chatId)}/participants/${encodeURIComponent(username)}`,
+    ),
+  listMessages: (chatId, params = {}) =>
+    requestTypes.get(
+      withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params),
+    ),
+  getMessage: (chatId, messageId) =>
+    requestTypes.get(
+      `/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`,
+    ),
+  sendMessage: (chatId, data) =>
+    requestTypes.post(`/chats/${encodeURIComponent(chatId)}/messages`, data),
+  updateMessage: (chatId, messageId, data) =>
+    requestTypes.patch(
+      `/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`,
+      data,
+    ),
+  deleteMessage: (chatId, messageId) =>
+    requestTypes.delete(
+      `/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`,
+    ),
+  markChatRead: (chatId, data = {}) =>
+    requestTypes.post(`/chats/${encodeURIComponent(chatId)}/read`, data),
+  setTyping: (chatId, data) =>
+    requestTypes.post(`/chats/${encodeURIComponent(chatId)}/typing`, data),
 
-    // Notification routes
-    // NOTE: these two are not valid routes, we don't want to list all notifs in the database
-    //        fix their usage in the frontend to use listNotifications with username input
-    //listMyNotifications: (params = {}) => requestTypes.get(withQuery('/notifications/me', params)),
-    //getMyUnreadNotificationsCount: () => requestTypes.get('/notifications/me/unread-count'),
-    listNotifications: (username) => requestTypes.get(withQuery(`/notifications/${encodeURIComponent(username)}`)),
-    getUnreadNotificationsCount: (username) => requestTypes.get(`/notifications/${encodeURIComponent(username)}/unreadCount`),
-    getNotification: (notificationId) => requestTypes.get(`/notifications/id/${encodeURIComponent(notificationId)}`),
-    createNotification: (data) => requestTypes.post('/notifications', data),
-    markNotificationRead: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/read`, {}),
-    markNotificationUnread: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unread`, {}),
-    markAllNotificationsRead: (data = {}) => requestTypes.post('/notifications/readAll', data),
-    archiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/archive`, {}),
-    unarchiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unarchive`, {}),
-    deleteNotification: (notificationId) => requestTypes.delete(`/notifications/${encodeURIComponent(notificationId)}`),
-    //getUnreadNotificationsCount: (params = {}) => requestTypes.get(withQuery('/notifications/unread-count', params)),
-    getNotificationPreferences: (username) => requestTypes.get(`/notifications/preferences/${encodeURIComponent(username)}`),
-    updateNotificationPreferences: (username, data) => requestTypes.patch(`/notifications/preferences/${encodeURIComponent(username)}`, data),
+  // Notification routes
+  // NOTE: these two are not valid routes, we don't want to list all notifs in the database
+  //        fix their usage in the frontend to use listNotifications with username input
+  //listMyNotifications: (params = {}) => requestTypes.get(withQuery('/notifications/me', params)),
+  //getMyUnreadNotificationsCount: () => requestTypes.get('/notifications/me/unread-count'),
+  listNotifications: (username) =>
+    requestTypes.get(
+      withQuery(`/notifications/${encodeURIComponent(username)}`),
+    ),
+  getUnreadNotificationsCount: (username) =>
+    requestTypes.get(
+      `/notifications/${encodeURIComponent(username)}/unreadCount`,
+    ),
+  getNotification: (notificationId) =>
+    requestTypes.get(`/notifications/id/${encodeURIComponent(notificationId)}`),
+  createNotification: (data) => requestTypes.post("/notifications", data),
+  markNotificationRead: (notificationId) =>
+    requestTypes.post(
+      `/notifications/${encodeURIComponent(notificationId)}/read`,
+      {},
+    ),
+  markNotificationUnread: (notificationId) =>
+    requestTypes.post(
+      `/notifications/${encodeURIComponent(notificationId)}/unread`,
+      {},
+    ),
+  markAllNotificationsRead: (data = {}) =>
+    requestTypes.post("/notifications/readAll", data),
+  archiveNotification: (notificationId) =>
+    requestTypes.post(
+      `/notifications/${encodeURIComponent(notificationId)}/archive`,
+      {},
+    ),
+  unarchiveNotification: (notificationId) =>
+    requestTypes.post(
+      `/notifications/${encodeURIComponent(notificationId)}/unarchive`,
+      {},
+    ),
+  deleteNotification: (notificationId) =>
+    requestTypes.delete(`/notifications/${encodeURIComponent(notificationId)}`),
+  //getUnreadNotificationsCount: (params = {}) => requestTypes.get(withQuery('/notifications/unread-count', params)),
+  getNotificationPreferences: (username) =>
+    requestTypes.get(
+      `/notifications/preferences/${encodeURIComponent(username)}`,
+    ),
+  updateNotificationPreferences: (username, data) =>
+    requestTypes.patch(
+      `/notifications/preferences/${encodeURIComponent(username)}`,
+      data,
+    ),
 
-    // Event routes
-    listEvents: () => requestTypes.get('/events'),
+  // Event routes
+  listEvents: () => requestTypes.get("/events"),
 
-  }
+  //Photo Storage routes
+  presignUpload: (uploadParams) =>
+    requestTypes.put("/media/presign", uploadParams),
+};
 
 export { BASE_URL };

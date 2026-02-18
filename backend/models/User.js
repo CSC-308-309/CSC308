@@ -65,8 +65,6 @@ validateUsernameFormat(username) {
     if (await this.checkUsernameExists(username)) {
       throw new Error('Username already exists');
     }
-
-    console.log("inSIDE CREATE USER FILEEEEE")
     
     const query = `
       INSERT INTO users (

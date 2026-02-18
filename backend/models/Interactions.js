@@ -16,6 +16,9 @@ export const InteractionsModel = {
     const values = [username, targetUsername];
     try {
         const result = await pool.query(query, values);
+        if (!result.rows || result.rows.length === 0) {
+          throw new Error('Failed to create interaction: No user found or query failed');
+        }
         return { 
           success: true, 
           message: `User ${username} liked user ${targetUsername}`,
@@ -41,6 +44,9 @@ export const InteractionsModel = {
     const values = [username, targetUsername];
     try {
         const result = await pool.query(query, values);
+        if (!result.rows || result.rows.length === 0) {
+          throw new Error('Failed to create interaction: No user found or query failed');
+        }
         return { 
           success: true, 
           message: `User ${username} disliked user ${targetUsername}`,
@@ -66,6 +72,9 @@ export const InteractionsModel = {
     const values = [username, targetUsername];
     try {
         const result = await pool.query(query, values);
+        if (!result.rows || result.rows.length === 0) {
+          throw new Error('Failed to create interaction: No user found or query failed');
+        }
         return { 
           success: true, 
           message: `User ${username} blocked user ${targetUsername}`,

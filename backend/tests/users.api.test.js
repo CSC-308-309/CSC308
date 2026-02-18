@@ -17,7 +17,7 @@ describe('Users API routes', () => {
     expect(Array.isArray(result.body)).toBe(true);
   });
 
-  test('GET /users/:username returns a user (using existing seed data)', async () => {
+  test('GET /users/:username returns a user', async () => {
     const result = await request(app).get('/users/taylor_swift').expect(200);
     console.log('GET /users/taylor_swift', result.body);
     expect(result.body).toHaveProperty('username', 'taylor_swift');
@@ -30,7 +30,7 @@ describe('Users API routes', () => {
     expect(result.text).toBe('User not found');
   });
 
-  test('PUT /users/:username updates user fields (using existing seed data)', async () => {
+  test('PUT /users/:username updates user fields', async () => {
     const result = await request(app)
       .put('/users/ed_sheeran')
       .send({ name: 'Ed Sheeran (Updated)' })
@@ -44,7 +44,7 @@ describe('Users API routes', () => {
     expect(check.body).toHaveProperty('name', 'Ed Sheeran (Updated)');
   });
 
-  test('DELETE /users/:username deletes the user (using existing seed data)', async () => {
+  test('DELETE /users/:username deletes the user', async () => {
     // First, create a temporary user to delete safely
     const tempUser = {
       username: `temp_user_${Date.now()}`,

@@ -1,5 +1,5 @@
-import Navbar from '../components/Navbar';
-import NotificationsPanel from '../components/notifications/NotificationsPanel';
+import Navbar from "../components/Navbar";
+import NotificationsPanel from "../components/notifications/NotificationsPanel";
 
 export default function Notifications() {
   const user = JSON.parse(localStorage.getItem("user") || "null");

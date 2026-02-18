@@ -9,5 +9,4 @@ export const dbModels = {
   Interactions: InteractionsModel,
   Messages: MessagesModel,
   Notifications: NotificationsModel,
-  // add them here as well
 };

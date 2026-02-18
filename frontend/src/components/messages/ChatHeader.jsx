@@ -1,8 +1,12 @@
 export default function ChatHeader({ chat }) {
-  
   // supports avatar transition
-  const avatarUrl = chat.avatarUrl || chat.avatar || chat.profilePicture || chat.avatarColor;
-  const hasImage = typeof avatarUrl === "string" && (avatarUrl.startsWith("http") || avatarUrl.startsWith("/") || avatarUrl.startsWith("data:"));
+  const avatarUrl =
+    chat.avatarUrl || chat.avatar || chat.profilePicture || chat.avatarColor;
+  const hasImage =
+    typeof avatarUrl === "string" &&
+    (avatarUrl.startsWith("http") ||
+      avatarUrl.startsWith("/") ||
+      avatarUrl.startsWith("data:"));
 
   return (
     <div className="px-6 py-4 border-b bg-white flex items-center gap-3">

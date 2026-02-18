@@ -1,44 +1,39 @@
-import { useState, useEffect } from 'react';
-import ChatList from './ChatList';
-import ChatWindow from './ChatWindow';
-import { api } from '../../client';
+import { useState, useEffect } from "react";
+import ChatList from "./ChatList";
+import ChatWindow from "./ChatWindow";
+import { api } from "../../client";
 
 export default function MessagesPanel() {
-    const [chats, setChats] = useState([]);
-    const [selectedChat, setSelectedChat] = useState(null);
+  const [chats, setChats] = useState([]);
+  const [selectedChat, setSelectedChat] = useState(null);
 
-    // storing messages per chatId loaded from API
-    const [chatMessages, setChatMessages] = useState({});
-    const [isLoadingChats, setIsLoadingChats] = useState(true);
-    const [isLoadingMessages, setIsLoadingMessages] = useState(false);
-    const [error, setError] = useState(null);
+  // storing messages per chatId loaded from API
+  const [chatMessages, setChatMessages] = useState({});
+  const [isLoadingChats, setIsLoadingChats] = useState(true);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [error, setError] = useState(null);
 
-    // loading chats 
-    useEffect(() => {
-      let isMounted = true;
+  // loading chats
+  useEffect(() => {
+    let isMounted = true;
 
-      async function loadChats() {
-        try {
-          setIsLoadingChats(true);
-          const data = await api.listChats();
-          const list = Array.isArray(data) ? data : (data?.chats || []);
+    async function loadChats() {
+      try {
+        setIsLoadingChats(true);
+        const data = await api.listChats();
+        const list = Array.isArray(data) ? data : data?.chats || [];
 
-          if (!isMounted) return;
+        if (!isMounted) return;
 
-          setChats(list);
-          setSelectedChat(list[0] || null);
-        } 
-        
-        catch (e) {
-          if (!isMounted) return;
-          setError(e.message || 'Failed to load chats');
-        } 
-        
-        finally {
-          if (!isMounted) return;
-          setIsLoadingChats(false);
-        }
+        setChats(list);
+        setSelectedChat(list[0] || null);
+      } catch (e) {
+        if (!isMounted) return;
+        setError(e.message || "Failed to load chats");
+      } finally {
+        if (isMounted) setIsLoadingChats(false);
       }
+    }
 
     loadChats();
     return () => {
@@ -53,21 +48,16 @@ export default function MessagesPanel() {
       try {
         setIsLoadingMessages(true);
         const data = await api.listMessages(chatId);
-        const msgs = Array.isArray(data) ? data : (data?.messages || []);
-        
+        const msgs = Array.isArray(data) ? data : data?.messages || [];
+
         if (!isMounted) return;
 
-        setChatMessages(prev => ({ ...prev, [chatId]: msgs }));
-      } 
-      
-      catch (e) {
+        setChatMessages((prev) => ({ ...prev, [chatId]: msgs }));
+      } catch (e) {
         if (!isMounted) return;
-        setError(e.message || 'Failed to load messages');
-      } 
-      
-      finally {
-        if (!isMounted) return;
-        setIsLoadingMessages(false);
+        setError(e.message || "Failed to load messages");
+      } finally {
+        if (isMounted) setIsLoadingMessages(false);
       }
     }
 
@@ -78,47 +68,43 @@ export default function MessagesPanel() {
   }, [selectedChat?.id]);
 
   async function handleSendMessage(chatId, messageText) {
-      try {
-        const optimistic = {
-          id: `temp-${Date.now()}`,
-          sender: 'You',
-          text: messageText,
-          isOwnMessage: true,
-        };
+    try {
+      const optimistic = {
+        id: `temp-${Date.now()}`,
+        sender: "You",
+        text: messageText,
+        isOwnMessage: true,
+      };
 
-        setChatMessages(prev => ({
-          ...prev,
-          [chatId]: [ ...(prev[chatId] || []), optimistic ],
-        }));
+      setChatMessages((prev) => ({
+        ...prev,
+        [chatId]: [...(prev[chatId] || []), optimistic],
+      }));
 
-        const created = await api.sendMessage(chatId, { text: messageText });
+      const created = await api.sendMessage(chatId, { text: messageText });
 
-        if (created) {
-          setChatMessages(prev => {
-            const existing = prev[chatId] || [];
-            const withoutTemp = existing.filter(m => m.id !== optimistic.id);
-            const createdMsg = created.message || created;
-            return { ...prev, [chatId]: [...withoutTemp, createdMsg] };
-          });
-        }
-    }
-    
-    catch (e) {
-        setError(e.message || 'Failed to send message');
-        setChatMessages(prev => ({
-          ...prev,
-          [chatId]: (prev[chatId] || []).filter(m => !String(m.id).startsWith('temp-')),
-        }));
+      if (created) {
+        setChatMessages((prev) => {
+          const existing = prev[chatId] || [];
+          const withoutTemp = existing.filter((m) => m.id !== optimistic.id);
+          const createdMsg = created.message || created;
+          return { ...prev, [chatId]: [...withoutTemp, createdMsg] };
+        });
       }
+    } catch (e) {
+      setError(e.message || "Failed to send message");
+      setChatMessages((prev) => ({
+        ...prev,
+        [chatId]: (prev[chatId] || []).filter(
+          (m) => !String(m.id).startsWith("temp-"),
+        ),
+      }));
+    }
   }
 
   if (error) {
-      return (
-        <div className="p-4 text-sm text-red-600">
-          {error}
-        </div>
-      );
-    }
+    return <div className="p-4 text-sm text-red-600">{error}</div>;
+  }
 
   return (
     <div className="flex h-full border rounded-xl overflow-hidden bg-white">
