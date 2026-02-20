@@ -1,6 +1,8 @@
 # Getting Started
 !!! PLEASE NOTE !!!
-DO NOT UPLOAD EXCESSIVE PHOTOS OR VIDEOS (in quantity or size) AS WE CANNOT AFFORD FOR THESE TO BE SAVED IN THE S3 BUCKET.
+DO NOT UPLOAD EXCESSIVE PHOTOS OR VIDEOS (in quantity or size) AS WE CANNOT FINANCIALLY AFFORD FOR THESE TO BE SAVED IN THE S3 BUCKET.
+As much as we wish the opposite was true, our bank accounts are not unlimited to support a greater version of S3.
+Do not try and test this unless you want to pay for it yourself. 
 Thank you for your cooperation.
 
 ## As a user
