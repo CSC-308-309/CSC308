@@ -53,6 +53,7 @@ export default function MusicClipDetail({
       try {
         const { viewUrl } = await api.presignView({ fileUrl: mediaKey });
         if (!cancelled) setPlayUrl(viewUrl || mediaKey);
+      // eslint-disable-next-line no-unused-vars
       } catch (e) {
         if (!cancelled) setPlayUrl(mediaKey);
       }

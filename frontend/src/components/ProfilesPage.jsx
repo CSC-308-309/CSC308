@@ -3,23 +3,13 @@ import { api } from "../client.js";
 import ProfileCard from "./ProfileCard";
 import SwipeButtons from "./SwipeButtons";
 
-function getCurrentUsername() {
-  try {
-    const rawUser = localStorage.getItem("user");
-    if (!rawUser) return "";
-    const parsedUser = JSON.parse(rawUser);
-    return (parsedUser?.username || "").trim();
-  } catch {
-    return "";
-  }
-}
-
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentUser] = useState(getCurrentUsername);
+  // Pull current username from the API helper (localStorage under the hood).
+  const [currentUser] = useState(() => api.currentUsername() || "");
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -51,9 +41,9 @@ export default function ProfilesPage() {
     try {
       if (!currentUser) throw new Error("You must be logged in to interact");
       if (direction === "right") {
-        await api.like(currentUser, targetProfile.username);
+        await api.like(targetProfile.username);
       } else if (direction === "left") {
-        await api.dislike(currentUser, targetProfile.username);
+        await api.dislike(targetProfile.username);
       }
     } catch (err) {
       console.error(`Failed to record ${direction} swipe:`, err);

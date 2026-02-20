@@ -14,6 +14,21 @@ export function createApp({ db }) {
   );
   app.use(express.json());
 
+  // Helper: validate both current and target users exist for interactions
+  async function validateUserInteraction(username, targetUsername) {
+    const current = await db.Profile.getUserByUsername(username);
+    if (!current) {
+      return { error: true, status: 404, message: "User not found", username };
+    }
+
+    const target = await db.Profile.getUserByUsername(targetUsername);
+    if (!target) {
+      return { error: true, status: 400, message: "Target user does not exist", targetUsername };
+    }
+
+    return { error: false, current, target };
+  }
+
   // basic test
   app.get("/", (req, res) => res.send("Hello World!"));
 
@@ -139,14 +154,19 @@ export function createApp({ db }) {
 
   // Push image URL to database
   app.put("/users/:username/coverPhoto", async (req, res) => {
-    const updatedUser = await db.Profile.updateCoverPhoto(
-      req.params.username,
-      req.body,
-    );
-    if (updatedUser) {
-      res.json(updatedUser);
-    } else {
-      res.status(404).send("User not found");
+    try {
+      const updatedUser = await db.Profile.updateCoverPhoto(
+        req.params.username,
+        req.body,
+      );
+      if (updatedUser) {
+        res.json(updatedUser);
+      } else {
+        res.status(404).json({ error: "User not found" });
+      }
+    } catch (err) {
+      console.error("Error updating cover photo:", err);
+      res.status(500).json({ error: "Failed to update cover photo" });
     }
   });
 
@@ -159,18 +179,10 @@ export function createApp({ db }) {
   // Like another user
   app.post("/users/:username/like", async (req, res) => {
     try {
-      const actor = await db.User.getUserByUsername(req.params.username);
-      if (!actor)
-        return res
-          .status(404)
-          .json({ error: "User not found", username: req.params.username });
-
-      const target = await db.User.getUserByUsername(req.body.targetUsername);
-      if (!target)
-        return res.status(400).json({
-          error: "Target user does not exist",
-          targetUsername: req.body.targetUsername,
-        });
+      const validation = await validateUserInteraction(req.params.username, req.body.targetUsername);
+      if (validation.error) {
+        return res.status(validation.status).json({ error: validation.message });
+      }
 
       const result = await db.Interactions.likeUser(
         req.params.username,
@@ -186,18 +198,10 @@ export function createApp({ db }) {
   // Dislike another user
   app.post("/users/:username/dislike", async (req, res) => {
     try {
-      const actor = await db.User.getUserByUsername(req.params.username);
-      if (!actor)
-        return res
-          .status(404)
-          .json({ error: "User not found", username: req.params.username });
-
-      const target = await db.User.getUserByUsername(req.body.targetUsername);
-      if (!target)
-        return res.status(400).json({
-          error: "Target user does not exist",
-          targetUsername: req.body.targetUsername,
-        });
+      const validation = await validateUserInteraction(req.params.username, req.body.targetUsername);
+      if (validation.error) {
+        return res.status(validation.status).json({ error: validation.message });
+      }
 
       const result = await db.Interactions.dislikeUser(
         req.params.username,
@@ -213,18 +217,10 @@ export function createApp({ db }) {
   // Block another user
   app.post("/users/:username/block", async (req, res) => {
     try {
-      const actor = await db.User.getUserByUsername(req.params.username);
-      if (!actor)
-        return res
-          .status(404)
-          .json({ error: "User not found", username: req.params.username });
-
-      const target = await db.User.getUserByUsername(req.body.targetUsername);
-      if (!target)
-        return res.status(400).json({
-          error: "Target user does not exist",
-          targetUsername: req.body.targetUsername,
-        });
+      const validation = await validateUserInteraction(req.params.username, req.body.targetUsername);
+      if (validation.error) {
+        return res.status(validation.status).json({ error: validation.message });
+      }
 
       const result = await db.Interactions.blockUser(
         req.params.username,

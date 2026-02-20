@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoIcon from "../assets/logo.svg";
+import { api, BASE_URL } from "../client";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = BASE_URL;
 
 const GENRES = [
   "Pop",
@@ -108,9 +109,7 @@ export default function ProfileSetup() {
     setFieldErrors((prev) => ({ ...prev, [errorField]: "" }));
     setError("");
 
-    const userJson = localStorage.getItem("user");
-    const user = userJson ? JSON.parse(userJson) : null;
-    const username = user?.username;
+    const username = api.currentUsername();
     if (!username) {
       setError("Not logged in. Please sign in again.");
       return;
@@ -195,18 +194,9 @@ export default function ProfileSetup() {
     setError("");
 
     try {
-      const userJson = localStorage.getItem("user");
-      const user = userJson ? JSON.parse(userJson) : null;
-      const username = user?.username;
-      if (!username) {
-        setError("Not logged in. Please sign in again.");
-        return;
-      }
-
       const age = parsePositiveInt(profile.age);
       const experience = parsePositiveInt(profile.experience);
       const payload = {
-        username,
         name: (profile.name || "").trim(),
         role: profile.role,
         age: age != null && !Number.isNaN(age) ? age : null,
@@ -220,17 +210,9 @@ export default function ProfileSetup() {
         songDescription: (profile.songDescription || "").trim(),
       };
 
-      const res = await fetch(`${API_BASE}/profile`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
+      const res = await api.updateProfile(payload);
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Failed to create profile");
-      }
+      if (!res) throw new Error("Failed to create profile");
 
       navigate("/");
     } catch (err) {

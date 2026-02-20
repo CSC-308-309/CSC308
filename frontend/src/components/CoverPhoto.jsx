@@ -99,26 +99,27 @@ export default function CoverPhoto({
 
       if (!uploadUrl) throw new Error("Backend did not return uploadUrl");
 
-      await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", uploadUrl, true);
+            await new Promise((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              xhr.open("PUT", uploadUrl, true);
 
-        xhr.setRequestHeader("Content-Type", contentType);
+              xhr.setRequestHeader("Content-Type", contentType);
 
-        xhr.withCredentials = false;
+              xhr.withCredentials = false;
 
-        xhr.onload = () => {
-          if (xhr.status === 200 || xhr.status === 204) {
-            resolve();
-          } else {
-            console.error("S3 response:", xhr.responseText);
-            reject(new Error(`S3 upload failed: ${xhr.status}`));
-          }
-        };
+              xhr.onload = () => {
+                if (xhr.status === 200 || xhr.status === 204) {
+                  resolve();
+                } else {
+                  console.error("S3 response:", xhr.responseText);
+                  reject(new Error(`S3 upload failed: ${xhr.status}`));
+                }
+              };
 
-        xhr.onerror = () => reject(new Error("Network error during upload"));
-        xhr.send(blob);
-      });
+              xhr.onerror = () => reject(new Error("Network error during upload"));
+              xhr.send(blob);
+            });
+
 
       await api.updateCoverPhoto(username, { url: fileUrl });
 

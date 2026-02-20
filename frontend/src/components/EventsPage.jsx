@@ -154,7 +154,7 @@ export default function EventsPage() {
   ]; */
 
   return (
-    <div className="max-w-[1200px] bg-[#ECE6F0] mx-auto rounded-lg p-2 mb-4 m-4 sm: p-6 md:p-8 flex flex-col">
+    <div className="max-w-[1200px] bg-[#ECE6F0] mx-auto rounded-lg p-2 m-4 sm:p-6 md:p-8 flex flex-col">
       <div className="flex-shrink-0">
         {/* Header with Tabs and Search */}
         <div className="flex flex-col md:flex-row items-center md:justify-between gap-4 mb-4">

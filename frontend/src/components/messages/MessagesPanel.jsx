@@ -17,14 +17,8 @@ export default function MessagesPanel() {
   const [participants, setParticipants] = useState([]);
   const [isLoadingParticipants, setIsLoadingParticipants] = useState(false);
 
-  const currentUser = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem("user") || "null");
-    } catch {
-      return null;
-    }
-  }, []);
-  const myUsername = currentUser?.username;
+  // Single source of truth for current username.
+  const myUsername = useMemo(() => api.currentUsername(), []);
 
   function normalizeChat(c) {
     return {
@@ -87,7 +81,7 @@ export default function MessagesPanel() {
   async function refreshChats(selectChatId = null) {
     if (!myUsername) return;
 
-    const data = await api.listChats({ username: myUsername });
+    const data = await api.listChats();
     const listRaw = Array.isArray(data) ? data : data?.chats || [];
     const list = listRaw.map(normalizeChat);
 
@@ -124,7 +118,7 @@ export default function MessagesPanel() {
           );
         }
 
-        const data = await api.listChats({ username: myUsername });
+        const data = await api.listChats();
         const listRaw = Array.isArray(data) ? data : data?.chats || [];
         const list = listRaw.map(normalizeChat);
 
@@ -301,7 +295,7 @@ if (chat.name === "grammys") {
       const createdMsg = normalizeMessage({
         ...created,
         sender_username: myUsername,
-        sender_name: currentUser?.username,
+        sender_name: myUsername,
       });
 
       setChatMessages((prev) => {

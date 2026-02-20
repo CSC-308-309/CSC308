@@ -50,16 +50,6 @@ export default function EditableProfilePhoto({
   const [src, setSrc] = useState(fallbackSrc);
   const [isUploading, setIsUploading] = useState(false);
 
-  const resolveViewUrl = async (rawUrl) => {
-    if (!rawUrl) return "";
-    try {
-      const result = await api.presignViewUrl(rawUrl);
-      return result?.viewUrl || rawUrl;
-    } catch (err) {
-      console.error("Failed to resolve image view URL:", err);
-      return rawUrl;
-    }
-  };
 
   useEffect(() => {
     const hydrateSignedSrc = async () => {
@@ -137,7 +127,8 @@ export default function EditableProfilePhoto({
         xhr.send(blob);
       });
 
-      await api.update(username, { main_image: fileUrl });
+      // Save URL to database
+      await api.update({ main_image: fileUrl });
 
       let renderedUrl = fileUrl;
       try {

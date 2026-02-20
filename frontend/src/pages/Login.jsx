@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import logoIcon from "../assets/logo.svg";
+import { api } from "../client";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,22 +19,10 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed");
-      }
+      const data = await api.login({ email, password });
 
       localStorage.setItem("token", data.token);
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
+      if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
       navigate("/profile");
     } catch (err) {
       setError(err.message);

@@ -13,8 +13,8 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run lint
-      - run: npm test
+      - run: npm run lint --workspace=frontend
+      - run: npm run test --workspace=express-backend
       - run: npm run build --workspace=frontend
 
 # Please review the above code
