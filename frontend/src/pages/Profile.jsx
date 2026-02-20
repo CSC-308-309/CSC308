@@ -6,10 +6,7 @@ import EditProfilePhoto from "../components/ProfilePhoto";
 import TopProfileCard from "../components/TopProfileCard";
 import AboutCard from "../components/AboutCard";
 import YouMightKnowCard from "../components/YouMightKnowCard";
-import BioSection, {
-  DEFAULT_PROFILE,
-  getInitialProfileData,
-} from "../components/BioSection";
+import BioSection, { getInitialProfileData } from "../components/BioSection";
 import EditBioButton from "../components/EditBioButton";
 import ConcertMemories from "../components/ConcertMemories";
 import AboutSection from "../components/AboutSection"; //
