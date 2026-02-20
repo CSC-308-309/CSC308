@@ -210,7 +210,7 @@ export default function ProfileSetup() {
         songDescription: (profile.songDescription || "").trim(),
       };
 
-      const res = await api.updateProfile(payload);
+      const res = await api.update(payload);
 
       if (!res) throw new Error("Failed to create profile");
 
