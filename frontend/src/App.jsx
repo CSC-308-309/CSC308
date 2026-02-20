@@ -9,23 +9,10 @@ import Signup from "./pages/Signup";
 import { NotificationsProvider } from "./components/notifications/NotificationsContext";
 import ProfileSetup from "./pages/ProfileSetup";
 
-function getUsernameFromStorage() {
-  try {
-    const raw = localStorage.getItem("user");
-    if (!raw) return null;
-    const user = JSON.parse(raw);
-    return user?.username || null;
-  } catch {
-    return null;
-  }
-}
-
 function App() {
-  const username = getUsernameFromStorage();
-
   return (
     <div className="font-sans">
-      <NotificationsProvider username={username}>
+      <NotificationsProvider>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />

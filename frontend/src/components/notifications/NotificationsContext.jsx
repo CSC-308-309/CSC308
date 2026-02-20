@@ -3,18 +3,17 @@ import { api } from "../../client";
 
 const NotificationsContext = createContext(null);
 
-export function NotificationsProvider({ username, children }) {
+export function NotificationsProvider({ children }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const refreshUnreadCount = useCallback(async () => {
-    if (!username) return;
     try {
-      const res = await api.getUnreadNotificationsCount(username);
+      const res = await api.getUnreadNotificationsCount();
       setUnreadCount(res?.unreadCount ?? 0);
     } catch (e) {
       console.error("Failed to refresh unread count:", e);
     }
-  }, [username]);
+  }, []);
 
   useEffect(() => {
     refreshUnreadCount();

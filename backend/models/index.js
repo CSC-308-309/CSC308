@@ -1,4 +1,5 @@
 import { UsersModel } from "./User.js";
+import { ProfileModel } from "./Profile.js";
 import { InteractionsModel } from "./Interactions.js";
 import { MessagesModel } from "./Messages.js";
 import { NotificationsModel } from "./Notifications.js";
@@ -6,6 +7,7 @@ import { NotificationsModel } from "./Notifications.js";
 
 export const dbModels = {
   User: UsersModel,
+  Profile: ProfileModel,
   Interactions: InteractionsModel,
   Messages: MessagesModel,
   Notifications: NotificationsModel,
