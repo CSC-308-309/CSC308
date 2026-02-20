@@ -61,12 +61,12 @@ export default function Navbar() {
 
       {/* Main Nav */}
       <div className="flex-1 py-4">
-        <Link to="/">
-          <NavItem icon={<Home />} label="Home" />
-        </Link>
 
         {loggedIn && (
           <>
+            <Link to="/">
+              <NavItem icon={<Home />} label="Home" />
+            </Link>
             <Link to="/profile">
               <NavItem icon={<User />} label="Profile" />
             </Link>
@@ -91,6 +91,7 @@ export default function Navbar() {
 
         {!loggedIn && (
           <>
+            
             <Link to="/login">
               <NavItem icon={<LogIn />} label="Login" />
             </Link>
