@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import EditCoverPhotoButton from "./EditCoverPhotoButton";
 import defaultCover from "../assets/DefaultBanner.jpg";
 import { api } from "../client";
-import { uploadViaPresign } from "../utils/s3Upload";
 
 async function processImageToBlob(file, maxWidth) {
   const reader = new FileReader();
@@ -89,19 +88,48 @@ export default function CoverPhoto({
       previewUrl = URL.createObjectURL(blob);
       setSrc(previewUrl);
 
-      // Use teammate's upload helper
-      const blobFile = new File([blob], "cover.jpg", { type: "image/jpeg" });
-      const { fileUrl, viewUrl } = await uploadViaPresign({
+      const contentType = "image/jpeg";
+
+      const { uploadUrl, fileUrl } = await api.presignUpload({
         kind: "cover",
-        file: blobFile,
+        contentType,
+        fileSize: blob.size,
         userId: username,
-        contentTypeOverride: "image/jpeg",
       });
 
-      // Save URL to database
+      if (!uploadUrl) throw new Error("Backend did not return uploadUrl");
+
+            await new Promise((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              xhr.open("PUT", uploadUrl, true);
+
+              xhr.setRequestHeader("Content-Type", contentType);
+
+              xhr.withCredentials = false;
+
+              xhr.onload = () => {
+                if (xhr.status === 200 || xhr.status === 204) {
+                  resolve();
+                } else {
+                  console.error("S3 response:", xhr.responseText);
+                  reject(new Error(`S3 upload failed: ${xhr.status}`));
+                }
+              };
+
+              xhr.onerror = () => reject(new Error("Network error during upload"));
+              xhr.send(blob);
+            });
+
+
       await api.updateCoverPhoto(username, { url: fileUrl });
 
-      const renderedUrl = viewUrl || fileUrl;
+      let renderedUrl = fileUrl;
+      try {
+        const { viewUrl } = await api.presignView({ fileUrl });
+        if (viewUrl) renderedUrl = viewUrl;
+      } catch {
+        // Keep raw URL fallback.
+      }
 
       setSrc(renderedUrl);
       localStorage.setItem(storageKey, fileUrl);
