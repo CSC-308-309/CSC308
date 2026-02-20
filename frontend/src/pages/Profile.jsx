@@ -18,6 +18,12 @@ import MusicClips from "../components/musicclips/MusicClips";
 import { api } from "../client";
 
 const PROFILE_STORAGE_KEY = "profileData";
+const PROFILE_PHOTO_STORAGE_KEY = "profilePhotoUrl";
+const COVER_PHOTO_STORAGE_KEY = "coverBannerUrl";
+
+function buildUserStorageKey(baseKey, username) {
+  return username ? `${baseKey}:${username}` : baseKey;
+}
 
 function mapDbUserToProfileData(dbUser = {}, current = {}) {
   return {
@@ -56,8 +62,13 @@ function mapProfileDataToDbUpdate(profileData = {}) {
 }
 
 export default function Profile() {
-  const [profileData, setProfileData] = useState(getInitialProfileData);
-  const [username, setUsername] = useState("");
+  const initialUsername = api.currentUsername() || "";
+  const [username, setUsername] = useState(initialUsername);
+  const [profileData, setProfileData] = useState(() =>
+    getInitialProfileData(
+      buildUserStorageKey(PROFILE_STORAGE_KEY, initialUsername),
+    ),
+  );
   const [profileImageUrl, setProfileImageUrl] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState("");
 
@@ -66,22 +77,42 @@ export default function Profile() {
     setUsername(activeUsername);
     if (!activeUsername) return;
 
+    setProfileData(
+      getInitialProfileData(
+        buildUserStorageKey(PROFILE_STORAGE_KEY, activeUsername),
+      ),
+    );
+
     const hydrateFromDb = async () => {
       try {
         const dbUser = await api.getByUsername();
-        const merged = mapDbUserToProfileData(dbUser, getInitialProfileData());
+        const merged = mapDbUserToProfileData(
+          dbUser,
+          getInitialProfileData(
+            buildUserStorageKey(PROFILE_STORAGE_KEY, activeUsername),
+          ),
+        );
         setProfileData(merged);
-        localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(merged));
+        localStorage.setItem(
+          buildUserStorageKey(PROFILE_STORAGE_KEY, activeUsername),
+          JSON.stringify(merged),
+        );
 
         if (dbUser?.main_image) {
           setProfileImageUrl(dbUser.main_image);
-          localStorage.setItem("profilePhotoUrl", dbUser.main_image);
+          localStorage.setItem(
+            buildUserStorageKey(PROFILE_PHOTO_STORAGE_KEY, activeUsername),
+            dbUser.main_image,
+          );
         }
         // Keep cover separate from concert media.
         const storedCover = dbUser?.concert_image;
         if (storedCover) {
           setCoverImageUrl(storedCover);
-          localStorage.setItem("coverBannerUrl", storedCover);
+          localStorage.setItem(
+            buildUserStorageKey(COVER_PHOTO_STORAGE_KEY, activeUsername),
+            storedCover,
+          );
         }
       } catch (error) {
         console.error("Failed to load profile from DB:", error);
@@ -113,12 +144,23 @@ export default function Profile() {
         <div className="mx-auto justify-center p-6 w-[1160px]">
           <TopProfileCard>
             <div className="relative">
-              <CoverPhoto username={username} initialSrc={coverImageUrl} />
+              <CoverPhoto
+                username={username}
+                initialSrc={coverImageUrl}
+                storageKey={buildUserStorageKey(
+                  COVER_PHOTO_STORAGE_KEY,
+                  username,
+                )}
+              />
 
               <div className="absolute left-14 -bottom-[68px] z-20">
                 <EditProfilePhoto
                   username={username}
                   initialSrc={profileImageUrl}
+                  storageKey={buildUserStorageKey(
+                    PROFILE_PHOTO_STORAGE_KEY,
+                    username,
+                  )}
                 />
               </div>
 
@@ -126,6 +168,10 @@ export default function Profile() {
                 <EditBioButton
                   profileData={profileData}
                   onSave={handleProfileSave}
+                  storageKey={buildUserStorageKey(
+                    PROFILE_STORAGE_KEY,
+                    username,
+                  )}
                   className="w-[170px] h-[40px]"
                 />
               </div>

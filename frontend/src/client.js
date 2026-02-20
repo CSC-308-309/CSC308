@@ -124,13 +124,6 @@ export const api = {
   signup: (profile) => requestTypes.post("/auth/signup", profile),
   login: (credentials) => requestTypes.post("/auth/login", credentials),
 
-  // Profile setup (server expects username in body)
-  updateProfile: (profileData = {}) =>
-    requestTypes.post("/profile", {
-      ...profileData,
-      username: resolveUsername(profileData.username),
-    }),
-
   // Interaction routes
   like: (targetUsername, username) =>
     requestTypes.post(
