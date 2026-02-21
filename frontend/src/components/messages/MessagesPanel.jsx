@@ -101,6 +101,30 @@ export default function MessagesPanel() {
     }
   }
 
+  const refreshMessages = useCallback(
+    async (chatId, options = {}) => {
+      if (!chatId) return;
+
+      const { silent = false } = options;
+
+      try {
+        if (!silent) setError(null);
+        if (!silent) setIsLoadingMessages(true);
+
+        const data = await api.listMessages(chatId);
+        const raw = Array.isArray(data) ? data : data?.messages || [];
+        const msgs = raw.map(normalizeMessage);
+
+        setChatMessages((prev) => ({ ...prev, [chatId]: msgs }));
+      } catch (e) {
+        if (!silent) setError(e?.message || "Failed to load messages");
+      } finally {
+        if (!silent) setIsLoadingMessages(false);
+      }
+    },
+    [normalizeMessage],
+  );
+
   // loading chats
   useEffect(() => {
     let isMounted = true;
@@ -185,23 +209,8 @@ export default function MessagesPanel() {
     let isMounted = true;
 
     async function loadMessages(chatId) {
-      try {
-        setError(null);
-        setIsLoadingMessages(true);
-
-        const data = await api.listMessages(chatId);
-        const raw = Array.isArray(data) ? data : data?.messages || [];
-        const msgs = raw.map(normalizeMessage);
-
-        if (!isMounted) return;
-
-        setChatMessages((prev) => ({ ...prev, [chatId]: msgs }));
-      } catch (e) {
-        if (!isMounted) return;
-        setError(e?.message || "Failed to load messages");
-      } finally {
-        if (isMounted) setIsLoadingMessages(false);
-      }
+      if (!isMounted) return;
+      await refreshMessages(chatId);
     }
 
     if (selectedChat?.id) loadMessages(selectedChat.id);
@@ -209,7 +218,23 @@ export default function MessagesPanel() {
     return () => {
       isMounted = false;
     };
-  }, [selectedChat?.id, normalizeMessage]);
+  }, [selectedChat?.id, refreshMessages]);
+
+  useEffect(() => {
+    if (!myUsername) return;
+
+    // Poll to keep chats and active messages in sync.
+    const timer = setInterval(() => {
+      refreshChats();
+      if (selectedChat?.id) {
+        refreshMessages(selectedChat.id, { silent: true });
+      }
+    }, 60_000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [myUsername, refreshChats, refreshMessages, selectedChat?.id]);
 
   async function handleSendMessage(chatId, messageText) {
     if (!myUsername) {
