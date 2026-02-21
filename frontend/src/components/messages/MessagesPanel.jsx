@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import ChatList from "./ChatList";
 import ChatWindow from "./ChatWindow";
 import { api } from "../../client";
@@ -18,7 +18,7 @@ export default function MessagesPanel() {
   const [isLoadingParticipants, setIsLoadingParticipants] = useState(false);
 
   // Single source of truth for current username.
-  const myUsername = useMemo(() => api.currentUsername(), []);
+  const myUsername = api.currentUsername();
 
   function normalizeChat(c) {
     return {
