@@ -24,11 +24,10 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!loggedIn) {
-      // setUnreadCount(0);
       return;
     }
 
-    // refreshUnreadCount();
+    refreshUnreadCount();
 
     const timer = setInterval(() => {
       refreshUnreadCount();
@@ -41,7 +40,6 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    // setUnreadCount(0);
     navigate("/login");
   };
 
