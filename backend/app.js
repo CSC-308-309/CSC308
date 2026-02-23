@@ -6,12 +6,20 @@ export function createApp({ db }) {
   const app = express();
 
   // When frontend uses credentials: "include", origin cannot be "*" — must be exact origin
-  app.use(
-    cors({
-      origin: "http://localhost:5173",
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://ashy-hill-04c3bda0f.6.azurestaticapps.net/",
+  ];
+
+  app.use(cors({
+      origin: (origin, cb) => {
+        if (!origin) return cb(null, true);
+        return cb(null, allowedOrigins.includes(origin));
+        cur
+      },
       credentials: true,
-    }),
-  );
+  }));
+
   app.use(express.json());
 
   // Helper: validate both current and target users exist for interactions
