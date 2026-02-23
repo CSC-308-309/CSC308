@@ -17,8 +17,8 @@ export function createApp({ db }) {
         return cb(null, allowedOrigins.includes(origin));
       },
       credentials: true,
-  }));
-
+    }),
+  );
   app.use(express.json());
 
   // Helper: validate both current and target users exist for interactions
