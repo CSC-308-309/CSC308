@@ -32,6 +32,8 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: ./frontend
+        env:
+          VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy

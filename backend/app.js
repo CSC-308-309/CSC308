@@ -8,14 +8,13 @@ export function createApp({ db }) {
   // When frontend uses credentials: "include", origin cannot be "*" — must be exact origin
   const allowedOrigins = [
     "http://localhost:5173",
-    "https://ashy-hill-04c3bda0f.6.azurestaticapps.net/",
+    "https://ashy-hill-04c3bda0f.6.azurestaticapps.net",
   ];
 
   app.use(cors({
       origin: (origin, cb) => {
         if (!origin) return cb(null, true);
         return cb(null, allowedOrigins.includes(origin));
-        cur
       },
       credentials: true,
   }));
