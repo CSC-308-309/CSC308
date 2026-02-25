@@ -233,6 +233,11 @@ export const api = {
       data,
     ),
 
+  // Settings Routes!
+  updateUsername: (data) => requestTypes.patch("/users/username", data),
+  updateEmail: (data) => requestTypes.patch("/users/email", data),
+  updatePassword: (data) => requestTypes.patch("/users/password", data),
+
   // Event routes
   listEvents: () => requestTypes.get("/events"),
 

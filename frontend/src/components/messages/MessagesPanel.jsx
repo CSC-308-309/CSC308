@@ -68,7 +68,22 @@ export default function MessagesPanel() {
       setIsInfoOpen(true);
 
       const data = await api.listChatParticipants(selectedChat.id);
-      const list = Array.isArray(data) ? data : data?.participants || [];
+      let list = Array.isArray(data) ? data : data?.participants || [];
+      list = await Promise.all(
+        list.map(async (p) => {
+          if (!p.avatar) return p;
+
+          try {
+            const resp = await api.presignView({
+              fileUrl: p.avatar,
+              expiresIn: 3600,
+            });
+            return { ...p, avatar: resp?.viewUrl || null };
+          } catch {
+            return { ...p, avatar: null };
+          }
+        })
+      );
 
       setParticipants(list);
     } catch (e) {
@@ -89,16 +104,12 @@ export default function MessagesPanel() {
 
     if (selectChatId) {
       setSelectedChat(
-        list.find((c) => String(c.id) === String(selectChatId)) ||
-          list[0] ||
-          null,
+        list.find((c) => String(c.id) === String(selectChatId)) || null
       );
     } else {
       setSelectedChat((prev) => {
-        if (!prev) return list[0] || null;
-        return (
-          list.find((c) => String(c.id) === String(prev.id)) || list[0] || null
-        );
+        if (!prev) return null;
+        return list.find((c) => String(c.id) === String(prev.id)) || null;
       });
     }
   }
@@ -125,7 +136,7 @@ export default function MessagesPanel() {
         if (!isMounted) return;
 
         setChats(list);
-        setSelectedChat(list[0] || null);
+        setSelectedChat(null);
       } catch (e) {
         if (!isMounted) return;
         setError(e?.message || "Failed to load chats");
@@ -365,7 +376,22 @@ if (chat.name === "grammys") {
         )}
 
         {!isLoadingChats && !selectedChat && (
-          <div className="p-6 text-sm text-gray-500">No chats yet.</div>
+          <div className="h-full flex items-center justify-center p-10">
+            <div className="text-center max-w-md">
+              <div className="text-xl font-semibold text-gray-700 mb-2">
+                Messages
+              </div>
+              <div className="text-sm text-gray-500 mb-6">
+                Click a conversation on the left, or start a new one.
+              </div>
+              <button
+                onClick={() => setIsNewChatOpen(true)}
+                className="bg-melodious-purple text-white rounded-xl px-4 py-2"
+              >
+                New conversation
+              </button>
+            </div>
+          </div>
         )}
 
         {!isLoadingChats && selectedChat && (
