@@ -1,5 +1,5 @@
-import Navbar from '../components/Navbar';
-import MessagesPanel from '../components/messages/MessagesPanel';
+import Navbar from "../components/Navbar";
+import MessagesPanel from "../components/messages/MessagesPanel";
 
 export default function Messages() {
   return (

@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import logoIcon from "../assets/logo.svg";
+import { api } from "../client";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -14,41 +15,31 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed");
-      }
+      const data = await api.login({ email, password });
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
+      if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
       navigate("/profile");
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative bg-[#7E5179]">
-      <button
+      {/* <button
         onClick={handleClose}
         className="absolute top-6 left-6 text-white hover:text-black transition"
         aria-label="Close"
       >
         <X size={35} />
-      </button>
+      </button> */}
 
       <div className="absolute top-12 left-1/2 transform -translate-x-1/2 flex items-center gap-3">
         <img src={logoIcon} alt="Mic" className="w-16 h-16" />

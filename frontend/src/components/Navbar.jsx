@@ -13,37 +13,22 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import logoIcon from "../assets/logo.svg";
 import { isLoggedIn, logout } from "../utils/auth";
-import { useNotifications } from "../components/notifications/NotificationsContext";
+import { useNotifications } from "./notifications/useNotifications";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const loggedIn = isLoggedIn();
 
-  const { unreadCount, refreshUnreadCount, setUnreadCount } = useNotifications();
-
-  function getUsername() {
-    try {
-      const raw = localStorage.getItem("user");
-      if (!raw) return null;
-      const user = JSON.parse(raw);
-      return user?.username || null;
-    } 
-    
-    catch {
-      return null;
-    }
-  }
+  const { unreadCount, refreshUnreadCount, setUnreadCount } =
+    useNotifications();
 
   useEffect(() => {
     if (!loggedIn) {
-      setUnreadCount(0);
+      // setUnreadCount(0);
       return;
     }
 
-    const username = getUsername();
-    if (!username) return;
-
-    refreshUnreadCount();
+    // refreshUnreadCount();
 
     const timer = setInterval(() => {
       refreshUnreadCount();
@@ -56,7 +41,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    setUnreadCount(0);
+    // setUnreadCount(0);
     navigate("/login");
   };
 
@@ -76,12 +61,12 @@ export default function Navbar() {
 
       {/* Main Nav */}
       <div className="flex-1 py-4">
-        <Link to="/">
-          <NavItem icon={<Home />} label="Home" />
-        </Link>
 
         {loggedIn && (
           <>
+            <Link to="/">
+              <NavItem icon={<Home />} label="Home" />
+            </Link>
             <Link to="/profile">
               <NavItem icon={<User />} label="Profile" />
             </Link>
@@ -91,7 +76,11 @@ export default function Navbar() {
             </Link>
 
             <Link to="/notifications">
-              <NavItem icon={<Bell />} label="Notifications" badge={unreadCount} />
+              <NavItem
+                icon={<Bell />}
+                label="Notifications"
+                badge={unreadCount}
+              />
             </Link>
 
             <Link to="/events">
@@ -102,6 +91,7 @@ export default function Navbar() {
 
         {!loggedIn && (
           <>
+            
             <Link to="/login">
               <NavItem icon={<LogIn />} label="Login" />
             </Link>

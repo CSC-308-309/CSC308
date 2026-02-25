@@ -1,27 +1,134 @@
 // src/pages/Profile.jsx
-import { useEffect, useState } from 'react';
-import { api } from '../client.js';
-import Navbar from '../components/Navbar';
-import CoverPhoto from '../components/CoverPhoto';
-import EditProfilePhoto from '../components/ProfilePhoto';
-import TopProfileCard from '../components/TopProfileCard';
-import AboutCard from '../components/AboutCard';
-import YouMightKnowCard from '../components/YouMightKnowCard';
-import BioSection, {
-  DEFAULT_PROFILE,
-  getInitialProfileData,
-} from '../components/BioSection';
-import EditBioButton from '../components/EditBioButton';
-import ConcertMemories from '../components/ConcertMemories';
-import AboutSection from '../components/AboutSection'; //
-import YouMightKnowSection from '../components/YouMightKnowSection'; //
-import MusicClips from '../components/musicclips/MusicClips';
+import { useEffect, useState } from "react";
+import Navbar from "../components/Navbar";
+import CoverPhoto from "../components/CoverPhoto";
+import EditProfilePhoto from "../components/ProfilePhoto";
+import TopProfileCard from "../components/TopProfileCard";
+import AboutCard from "../components/AboutCard";
+import YouMightKnowCard from "../components/YouMightKnowCard";
+import BioSection, { getInitialProfileData } from "../components/BioSection";
+import EditBioButton from "../components/EditBioButton";
+import ConcertMemories from "../components/ConcertMemories";
+import AboutSection from "../components/AboutSection"; //
+import YouMightKnowSection from "../components/YouMightKnowSection"; //
+import MusicClips from "../components/musicclips/MusicClips";
+import { api } from "../client";
+
+const PROFILE_STORAGE_KEY = "profileData";
+const PROFILE_PHOTO_STORAGE_KEY = "profilePhotoUrl";
+const COVER_PHOTO_STORAGE_KEY = "coverBannerUrl";
+
+function buildUserStorageKey(baseKey, username) {
+  return username ? `${baseKey}:${username}` : baseKey;
+}
+
+function mapDbUserToProfileData(dbUser = {}, current = {}) {
+  return {
+    ...current,
+    name: dbUser.name ?? current.name ?? "",
+    age:
+      dbUser.age != null && dbUser.age !== ""
+        ? String(dbUser.age)
+        : (current.age ?? ""),
+    username: dbUser.username ?? current.username ?? "",
+    role: dbUser.role ?? current.role ?? "",
+    artistgenre: dbUser.genre ?? current.artistgenre ?? "",
+    yearsofexperience:
+      dbUser.experience != null && dbUser.experience !== ""
+        ? String(dbUser.experience)
+        : (current.yearsofexperience ?? ""),
+    bio: dbUser.last_song_desc ?? current.bio ?? "",
+  };
+}
+
+function mapProfileDataToDbUpdate(profileData = {}) {
+  const toNullableInt = (value) => {
+    if (value == null || value === "") return null;
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
+  };
+
+  return {
+    name: (profileData.name || "").trim(),
+    age: toNullableInt(profileData.age),
+    role: (profileData.role || "").trim(),
+    genre: (profileData.artistgenre || "").trim(),
+    experience: toNullableInt(profileData.yearsofexperience),
+    last_song_desc: (profileData.bio || "").trim(),
+  };
+}
 
 export default function Profile() {
-  const [profileData, setProfileData] = useState(getInitialProfileData);
+  const initialUsername = api.currentUsername() || "";
+  const [username, setUsername] = useState(initialUsername);
+  const [profileData, setProfileData] = useState(() =>
+    getInitialProfileData(
+      buildUserStorageKey(PROFILE_STORAGE_KEY, initialUsername),
+    ),
+  );
+  const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [coverImageUrl, setCoverImageUrl] = useState("");
 
-  const handleProfileSave = (data) => {
+  useEffect(() => {
+    const activeUsername = api.currentUsername() || "";
+    setUsername(activeUsername);
+    if (!activeUsername) return;
+
+    setProfileData(
+      getInitialProfileData(
+        buildUserStorageKey(PROFILE_STORAGE_KEY, activeUsername),
+      ),
+    );
+
+    const hydrateFromDb = async () => {
+      try {
+        const dbUser = await api.getByUsername();
+        const merged = mapDbUserToProfileData(
+          dbUser,
+          getInitialProfileData(
+            buildUserStorageKey(PROFILE_STORAGE_KEY, activeUsername),
+          ),
+        );
+        setProfileData(merged);
+        localStorage.setItem(
+          buildUserStorageKey(PROFILE_STORAGE_KEY, activeUsername),
+          JSON.stringify(merged),
+        );
+
+        if (dbUser?.main_image) {
+          setProfileImageUrl(dbUser.main_image);
+          localStorage.setItem(
+            buildUserStorageKey(PROFILE_PHOTO_STORAGE_KEY, activeUsername),
+            dbUser.main_image,
+          );
+        }
+        // Keep cover separate from concert media.
+        const storedCover = dbUser?.concert_image;
+        if (storedCover) {
+          setCoverImageUrl(storedCover);
+          localStorage.setItem(
+            buildUserStorageKey(COVER_PHOTO_STORAGE_KEY, activeUsername),
+            storedCover,
+          );
+        }
+      } catch (error) {
+        console.error("Failed to load profile from DB:", error);
+      }
+    };
+
+    hydrateFromDb();
+  }, []);
+
+  const handleProfileSave = async (data) => {
     setProfileData(data);
+
+    if (!username) return;
+
+    try {
+      await api.update(mapProfileDataToDbUpdate(data));
+    } catch (error) {
+      console.error("Failed to save profile to DB:", error);
+    }
   };
 
   return (
@@ -34,16 +141,34 @@ export default function Profile() {
         <div className="mx-auto justify-center p-6 w-[1160px]">
           <TopProfileCard>
             <div className="relative">
-              <CoverPhoto username="testuser"/>
+              <CoverPhoto
+                username={username}
+                initialSrc={coverImageUrl}
+                storageKey={buildUserStorageKey(
+                  COVER_PHOTO_STORAGE_KEY,
+                  username,
+                )}
+              />
 
               <div className="absolute left-14 -bottom-[68px] z-20">
-                <EditProfilePhoto username="testuser"/>
+                <EditProfilePhoto
+                  username={username}
+                  initialSrc={profileImageUrl}
+                  storageKey={buildUserStorageKey(
+                    PROFILE_PHOTO_STORAGE_KEY,
+                    username,
+                  )}
+                />
               </div>
 
               <div className="absolute right-12 top-[260px] z-30">
                 <EditBioButton
                   profileData={profileData}
                   onSave={handleProfileSave}
+                  storageKey={buildUserStorageKey(
+                    PROFILE_STORAGE_KEY,
+                    username,
+                  )}
                   className="w-[170px] h-[40px]"
                 />
               </div>
@@ -59,10 +184,9 @@ export default function Profile() {
 
           <div className="grid grid-cols-12 mt-5 w-[1160px]">
             <div className="col-span-12 lg:col-span-8 pr-5 space-y-10">
-  
               {/* Concert Memories Section */}
               <section>
-                <ConcertMemories />
+                <ConcertMemories username={username} />
               </section>
 
               {/* Divider for clarity */}
@@ -70,10 +194,9 @@ export default function Profile() {
 
               {/* Music Clips Section */}
               <section>
-                <MusicClips />
+                <MusicClips username={username} />
               </section>
             </div>
-
 
             <div className="col-span-12 lg:col-span-4 ml-auto space-y-5">
               <AboutCard>

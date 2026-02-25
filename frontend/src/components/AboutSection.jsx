@@ -1,11 +1,12 @@
 // src/components/AboutSection.jsx
 import StarIcon from "../assets/TopInterestsIcon.png";
 import UserMusicIcon from "../assets/TopArtistIcon.png";
-import MusicNoteIcon from "../assets/favoriteGenresIcon.png";
+import MusicNoteIcon from "../assets/FavoriteGenresIcon.png";
 import PlaylistIcon from "../assets/PlaylistLinkIcon.png";
 import LocationIcon from "../assets/MeetupLocationsIcon.png";
 import ClockIcon from "../assets/AvailabilityIcon.png";
 
+//fixed import
 export default function AboutSection({ profileData = {} }) {
   const {
     topInterests = "",
@@ -28,9 +29,7 @@ export default function AboutSection({ profileData = {} }) {
 
   const renderPlaylistValue = () => {
     if (!playlistLink) {
-      return (
-        <span className="text-sm text-gray-400">Add a playlist link</span>
-      );
+      return <span className="text-sm text-gray-400">Add a playlist link</span>;
     }
 
     const label =
@@ -68,9 +67,7 @@ export default function AboutSection({ profileData = {} }) {
 
   const Row = ({ icon, label, children }) => (
     <div className="py-3 flex items-start">
-      <div className="mt-0.5 w-7 flex justify-center">
-        {icon}
-      </div>
+      <div className="mt-0.5 w-7 flex justify-center">{icon}</div>
       <div className="flex-1 ml-3">
         <p className="text-sm font-medium text-gray-800">{label}</p>
         {children}
@@ -87,10 +84,7 @@ export default function AboutSection({ profileData = {} }) {
           icon={<img src={StarIcon} alt="" className="w-6 h-6" />}
           label="Top Interests"
         >
-          {renderChipRow(
-            interestChips,
-            "Add interests (comma-separated)."
-          )}
+          {renderChipRow(interestChips, "Add interests (comma-separated).")}
         </Row>
 
         <Row
@@ -99,7 +93,7 @@ export default function AboutSection({ profileData = {} }) {
         >
           {renderChipRow(
             artistChips,
-            "Add your favorite artists (comma-separated)."
+            "Add your favorite artists (comma-separated).",
           )}
         </Row>
 
@@ -109,7 +103,7 @@ export default function AboutSection({ profileData = {} }) {
         >
           {renderChipRow(
             genreChips,
-            "Add your favorite genres (comma-separated)."
+            "Add your favorite genres (comma-separated).",
           )}
         </Row>
 

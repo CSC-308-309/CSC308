@@ -1,8 +1,11 @@
-export default function ChatHeader({ chat }) {
-  
-  // supports avatar transition
-  const avatarUrl = chat.avatarUrl || chat.avatar || chat.profilePicture || chat.avatarColor;
-  const hasImage = typeof avatarUrl === "string" && (avatarUrl.startsWith("http") || avatarUrl.startsWith("/") || avatarUrl.startsWith("data:"));
+export default function ChatHeader({ chat, onInfo }) {
+  const avatarUrl =
+    chat.avatarUrl || chat.avatar || chat.profilePicture || chat.avatarColor;
+  const hasImage =
+    typeof avatarUrl === "string" &&
+    (avatarUrl.startsWith("http") ||
+      avatarUrl.startsWith("/") ||
+      avatarUrl.startsWith("data:"));
 
   return (
     <div className="px-6 py-4 border-b bg-white flex items-center gap-3">
@@ -18,7 +21,24 @@ export default function ChatHeader({ chat }) {
         )}
       </div>
 
-      <h2 className="font-semibold text-lg text-gray-700">{chat.name}</h2>
+      <div className="flex flex-col">
+        <h2 className="font-semibold text-lg text-gray-700">
+          {chat.displayName || chat.name}
+        </h2>
+        {chat.displayHandle && (
+          <div className="text-xs text-gray-500">{chat.displayHandle}</div>
+        )}
+      </div>
+
+      <div className="flex-1" />
+
+      <button
+        onClick={onInfo}
+        className="px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-sm text-gray-700"
+        title="Chat info"
+      >
+        Info
+      </button>
     </div>
   );
 }

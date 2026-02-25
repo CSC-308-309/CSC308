@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { api } from "../../client";
-import { useNotifications } from "./NotificationsContext";
+import { useNotifications } from "./useNotifications";
 
 export default function NotificationItem({
   id,
@@ -8,16 +8,16 @@ export default function NotificationItem({
   message,
   time,
   postText,
-  actionVariant = "read", 
+  actionVariant = "read",
   initialIsRead = false,
-}) 
-
-{
+  onDelete,
+}) {
   const [isRead, setIsRead] = useState(Boolean(initialIsRead));
   const [isSyncedBack, setIsSyncedBack] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const { refreshUnreadCount, setUnreadCount, unreadCount } = useNotifications();
+  const { refreshUnreadCount } = useNotifications();
 
   const buttonText = useMemo(() => {
     if (actionVariant === "sync") return isSyncedBack ? "Synced" : "Sync Back";
@@ -25,52 +25,60 @@ export default function NotificationItem({
   }, [actionVariant, isSyncedBack, isRead]);
 
   const handleClick = async () => {
-    if (!id || loading) return;
+    if (!id || loading || deleting) return;
 
     setLoading(true);
     try {
-      const wasUnread = !isRead;
-
       if (actionVariant === "sync") {
-        
         // will give sync a different function once username is fixed in api route
         if (!isSyncedBack) {
           await api.markNotificationRead(id);
           setIsSyncedBack(true);
           setIsRead(true);
-        } 
-        
-        else {
+        } else {
           await api.markNotificationUnread(id);
           setIsSyncedBack(false);
           setIsRead(false);
         }
-      } 
-      
-      else {
+      } else {
         if (!isRead) {
           await api.markNotificationRead(id);
           setIsRead(true);
-        } 
-        
-        else {
+        } else {
           await api.markNotificationUnread(id);
           setIsRead(false);
         }
       }
 
-      const nowUnread = actionVariant === "sync"
-        ? (isSyncedBack ? true : false) 
-        : isRead; 
-
       await refreshUnreadCount();
-
     } catch (err) {
       console.error("Notification action failed:", err);
-    } 
-    
-    finally {
+    } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id || loading || deleting) return;
+
+    const ok = window.confirm("Delete this notification?");
+    if (!ok) return;
+
+    console.log("Deleting notification id:", id);
+
+    setDeleting(true);
+    try {
+      await api.deleteNotification(id);
+
+      if (typeof onDelete === "function") {
+        onDelete(id);
+      }
+
+      await refreshUnreadCount();
+    } catch (err) {
+      console.error("Delete notification failed:", err);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -92,23 +100,38 @@ export default function NotificationItem({
         </div>
       </div>
 
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className={`px-3 py-1 rounded-md text-sm transition ${
-          loading
-            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-            : actionVariant === "sync"
-            ? isSyncedBack
-              ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
-              : "bg-purple-300 hover:bg-purple-400"
-            : isRead
-            ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
-            : "bg-purple-300 hover:bg-purple-400"
-        }`}
-      >
-        {loading ? "..." : buttonText}
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleClick}
+          disabled={loading || deleting}
+          className={`px-3 py-1 rounded-md text-sm transition ${
+            loading || deleting
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : actionVariant === "sync"
+                ? isSyncedBack
+                  ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
+                  : "bg-purple-300 hover:bg-purple-400"
+                : isRead
+                  ? "bg-purple-200 text-purple-900 hover:bg-purple-300"
+                  : "bg-purple-300 hover:bg-purple-400"
+          }`}
+        >
+          {loading ? "..." : buttonText}
+        </button>
+
+        <button
+          onClick={handleDelete}
+          disabled={loading || deleting}
+          className={`px-3 py-1 rounded-md text-sm transition ${
+            loading || deleting
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-red-100 text-red-700 hover:bg-red-200"
+          }`}
+          title="Delete notification"
+        >
+          {deleting ? "..." : "Delete"}
+        </button>
+      </div>
     </div>
   );
 }

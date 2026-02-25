@@ -1,12 +1,12 @@
 // models/User.js
-import {pool} from '../db/index.js';
-import bcrypt from 'bcrypt';
+import { pool } from "../db/index.js";
+import bcrypt from "bcrypt";
 
 // Username validation regex: alphanumeric + underscores, 3-30 chars
 const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,30}$/;
 
 export const UsersModel = {
-validateUsernameFormat(username) {
+  validateUsernameFormat(username) {
     if (!username) return false;
     return USERNAME_REGEX.test(username);
   },
@@ -16,12 +16,12 @@ validateUsernameFormat(username) {
       SELECT username FROM users WHERE username = $1
       LIMIT 1
     `;
-    
+
     try {
       const { rows } = await pool.query(query, [username]);
       return rows.length > 0;
     } catch (error) {
-      console.error('Error in UsersModel.checkUsernameExists:', error);
+      console.error("Error in UsersModel.checkUsernameExists:", error);
       throw error;
     }
   },
@@ -34,40 +34,43 @@ validateUsernameFormat(username) {
       SELECT username, password_hash FROM users WHERE username = $1
     `;
     const values = [username];
-    
+
     try {
       const { rows } = await pool.query(query, values);
       if (rows.length === 0) {
-        return null; 
+        return null;
       }
-      
+
       const user = rows[0];
-      const isValidPassword = await bcrypt.compare(password, user.password_hash);
-      
+      const isValidPassword = await bcrypt.compare(
+        password,
+        user.password_hash,
+      );
+
       if (!isValidPassword) {
-        return null; 
+        return null;
       }
-      
+
       return {
-        username: user.username
+        username: user.username,
       };
     } catch (error) {
-      console.error('Error in Users.validateUser:', error);
+      console.error("Error in Users.validateUser:", error);
       throw error;
     }
   },
 
   async createUser(email, passwordHash, username) {
     if (!this.validateUsernameFormat(username)) {
-      throw new Error('Invalid username format');
+      throw new Error("Invalid username format");
     }
 
     if (await this.checkUsernameExists(username)) {
-      throw new Error('Username already exists');
+      throw new Error("Username already exists");
     }
 
-    console.log("inSIDE CREATE USER FILEEEEE")
-    
+    console.log("inSIDE CREATE USER FILEEEEE");
+
     const query = `
       INSERT INTO users (
         username, email, password_hash, name, role, age, gender, genre, experience,
@@ -77,15 +80,26 @@ validateUsernameFormat(username) {
     `;
 
     const values = [
-      username, email, passwordHash, username, 'User',
-      null, null, null, null, null, null, null, null
+      username,
+      email,
+      passwordHash,
+      username,
+      "User",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     ];
 
     try {
       const result = await pool.query(query, values);
       return result.rows[0];
     } catch (error) {
-      console.error('Error in Users.createUser:', error);
+      console.error("Error in Users.createUser:", error);
       throw error;
     }
   },
@@ -97,12 +111,12 @@ validateUsernameFormat(username) {
       FROM users
       WHERE email = $1
     `;
-    
+
     try {
       const { rows } = await pool.query(query, [email]);
       return rows[0] || null;
     } catch (error) {
-      console.error('Error in UsersModel.findUserByEmail:', error);
+      console.error("Error in UsersModel.findUserByEmail:", error);
       throw error;
     }
   },
@@ -114,12 +128,12 @@ validateUsernameFormat(username) {
       FROM users
       ORDER BY created_at DESC
     `;
-    
+
     try {
       const { rows } = await pool.query(query);
       return rows;
     } catch (error) {
-      console.error('Error in UsersModel.listUsers:', error);
+      console.error("Error in UsersModel.listUsers:", error);
       throw error;
     }
   },
@@ -131,20 +145,30 @@ validateUsernameFormat(username) {
       FROM users
       WHERE username = $1
     `;
-    
+
     try {
       const { rows } = await pool.query(query, [username]);
       return rows[0] || null;
     } catch (error) {
-      console.error('Error in UsersModel.getUserByUsername:', error);
+      console.error("Error in UsersModel.getUserByUsername:", error);
       throw error;
     }
   },
 
   async updateUser(username, updateData) {
-    const allowedFields = ['name', 'role', 'age', 'gender', 'genre', 'experience', 
-                          'main_image', 'concert_image', 'last_song', 'last_song_desc'];
-    
+    const allowedFields = [
+      "name",
+      "role",
+      "age",
+      "gender",
+      "genre",
+      "experience",
+      "main_image",
+      "concert_image",
+      "last_song",
+      "last_song_desc",
+    ];
+
     const updateFields = [];
     const values = [];
     let paramCount = 1;
@@ -165,7 +189,7 @@ validateUsernameFormat(username) {
 
     const query = `
       UPDATE users 
-      SET ${updateFields.join(', ')}
+      SET ${updateFields.join(", ")}
       WHERE username = $${paramCount}
       RETURNING id, username, email, name, role, age, gender, genre, experience,
                 main_image, concert_image, last_song, last_song_desc, updated_at
@@ -175,7 +199,7 @@ validateUsernameFormat(username) {
       const { rows } = await pool.query(query, values);
       return rows[0] || null;
     } catch (error) {
-      console.error('Error in UsersModel.updateUser:', error);
+      console.error("Error in UsersModel.updateUser:", error);
       throw error;
     }
   },
@@ -185,12 +209,12 @@ validateUsernameFormat(username) {
       DELETE FROM users WHERE username = $1
       RETURNING id
     `;
-    
+
     try {
       const { rows } = await pool.query(query, [username]);
       return rows.length > 0;
     } catch (error) {
-      console.error('Error in UsersModel.deleteUser:', error);
+      console.error("Error in UsersModel.deleteUser:", error);
       throw error;
     }
   },
@@ -203,7 +227,7 @@ validateUsernameFormat(username) {
       const { rows } = await pool.query(query, [username]);
       return rows[0]?.notification_preferences || {};
     } catch (error) {
-      console.error('Error in UsersModel.getNotificationPreferences:', error);
+      console.error("Error in UsersModel.getNotificationPreferences:", error);
       throw error;
     }
   },
@@ -219,8 +243,11 @@ validateUsernameFormat(username) {
       const { rows } = await pool.query(query, [preferences, username]);
       return rows[0]?.notification_preferences || null;
     } catch (error) {
-      console.error('Error in UsersModel.updateNotificationPreferences:', error);
+      console.error(
+        "Error in UsersModel.updateNotificationPreferences:",
+        error,
+      );
       throw error;
     }
-  }
+  },
 };

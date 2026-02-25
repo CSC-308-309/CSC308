@@ -62,9 +62,15 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.sequelize.query('DROP TABLE IF EXISTS messages_read CASCADE');
-    await queryInterface.sequelize.query('DROP TABLE IF EXISTS messages CASCADE');
-    await queryInterface.sequelize.query('DROP TABLE IF EXISTS chat_members CASCADE');
-    await queryInterface.sequelize.query('DROP TABLE IF EXISTS chats CASCADE');
+    await queryInterface.sequelize.query(
+      "DROP TABLE IF EXISTS messages_read CASCADE",
+    );
+    await queryInterface.sequelize.query(
+      "DROP TABLE IF EXISTS messages CASCADE",
+    );
+    await queryInterface.sequelize.query(
+      "DROP TABLE IF EXISTS chat_members CASCADE",
+    );
+    await queryInterface.sequelize.query("DROP TABLE IF EXISTS chats CASCADE");
   },
 };

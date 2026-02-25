@@ -5,8 +5,7 @@ const isValidPlaylistLink = (link = "") => {
   const trimmed = link.trim();
   if (!trimmed) return true;
   return (
-    trimmed.includes("music.apple.com") ||
-    trimmed.includes("open.spotify.com")
+    trimmed.includes("music.apple.com") || trimmed.includes("open.spotify.com")
   );
 };
 
