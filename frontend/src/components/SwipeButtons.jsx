@@ -1,12 +1,7 @@
-import { X, Check, Heart } from "lucide-react";
+import { X, Heart } from "lucide-react";
 import undo from "../assets/undo.svg";
 
-export default function SwipeButtons({
-  onUndo,
-  onReject,
-  onAccept,
-  onSuperLike,
-}) {
+export default function SwipeButtons({ onUndo, onReject, onAccept }) {
   return (
     <div className="flex gap-4 justify-center">
       <ActionButton
@@ -24,18 +19,11 @@ export default function SwipeButtons({
         onClick={onReject}
       />
       <ActionButton
-        icon={<Check className="w-7 h-7 text-[#0F7A15]" />}
-        bgColor="bg-green-300"
-        hoverColor="hover:bg-green-400"
-        size="large"
-        onClick={onAccept}
-      />
-      <ActionButton
         icon={<Heart className="w-7 h-7 text-[#FF0000]" />}
         bgColor="bg-[#FFCCD7]"
         hoverColor="hover:bg-[#FF809C]"
         size="large"
-        onClick={onSuperLike}
+        onClick={onAccept}
       />
     </div>
   );

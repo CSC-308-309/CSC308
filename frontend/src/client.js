@@ -140,6 +140,14 @@ export const api = {
       `/users/${encodeURIComponent(resolveUsername(username))}/block`,
       { targetUsername: requireUsername(targetUsername) },
     ),
+  undoInteraction: (targetUsername, interactionType, username) =>
+    requestTypes.delete(
+      `/users/${encodeURIComponent(resolveUsername(username))}/interactions/${encodeURIComponent(requireUsername(targetUsername))}/${encodeURIComponent(interactionType)}`,
+    ),
+  listMatches: (username) =>
+    requestTypes.get(
+      `/users/${encodeURIComponent(resolveUsername(username))}/matches`,
+    ),
 
   // Messaging routes
   listChats: (params = {}) => {
