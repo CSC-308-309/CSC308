@@ -21,9 +21,16 @@ export default function ChatHeader({ chat, onInfo }) {
         )}
       </div>
 
-      <h2 className="font-semibold text-lg text-gray-700 flex-1">
-        {chat.name}
-      </h2>
+      <div className="flex flex-col">
+        <h2 className="font-semibold text-lg text-gray-700">
+          {chat.displayName || chat.name}
+        </h2>
+        {chat.displayHandle && (
+          <div className="text-xs text-gray-500">{chat.displayHandle}</div>
+        )}
+      </div>
+
+      <div className="flex-1" />
 
       <button
         onClick={onInfo}

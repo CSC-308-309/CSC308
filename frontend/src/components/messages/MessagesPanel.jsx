@@ -22,14 +22,14 @@ export default function MessagesPanel() {
 
   function normalizeChat(c) {
     return {
+      ...c,
       id: c.id,
       name: c.name || "(Unnamed chat)",
       lastMessage: c.last_message_content || "",
-      time: c.last_message_at
-        ? new Date(c.last_message_at).toLocaleString()
-        : "",
-      avatarUrl: c.group_photo_url || null,
-      ...c,
+      time: c.last_message_at ? new Date(c.last_message_at).toLocaleString() : "",
+      avatarUrl: c.avatarUrl ?? c.group_photo_url ?? null,
+      displayName: c.displayName ?? c.name ?? "(Unnamed chat)",
+      displayHandle: c.displayHandle ?? null,
     };
   }
 
@@ -38,6 +38,8 @@ export default function MessagesPanel() {
       return {
         id: m.id,
         sender: m.sender_name || m.sender_username || "Unknown",
+        senderUsername: m.sender_username || null,
+        senderAvatar: m.sender_avatar || null,
         text: m.content ?? "",
         isOwnMessage: !!myUsername && m.sender_username === myUsername,
         ...m,
@@ -66,7 +68,22 @@ export default function MessagesPanel() {
       setIsInfoOpen(true);
 
       const data = await api.listChatParticipants(selectedChat.id);
-      const list = Array.isArray(data) ? data : data?.participants || [];
+      let list = Array.isArray(data) ? data : data?.participants || [];
+      list = await Promise.all(
+        list.map(async (p) => {
+          if (!p.avatar) return p;
+
+          try {
+            const resp = await api.presignView({
+              fileUrl: p.avatar,
+              expiresIn: 3600,
+            });
+            return { ...p, avatar: resp?.viewUrl || null };
+          } catch {
+            return { ...p, avatar: null };
+          }
+        })
+      );
 
       setParticipants(list);
     } catch (e) {
@@ -87,16 +104,12 @@ export default function MessagesPanel() {
 
     if (selectChatId) {
       setSelectedChat(
-        list.find((c) => String(c.id) === String(selectChatId)) ||
-          list[0] ||
-          null,
+        list.find((c) => String(c.id) === String(selectChatId)) || null
       );
     } else {
       setSelectedChat((prev) => {
-        if (!prev) return list[0] || null;
-        return (
-          list.find((c) => String(c.id) === String(prev.id)) || list[0] || null
-        );
+        if (!prev) return null;
+        return list.find((c) => String(c.id) === String(prev.id)) || null;
       });
     }
   }
@@ -123,7 +136,7 @@ export default function MessagesPanel() {
         if (!isMounted) return;
 
         setChats(list);
-        setSelectedChat(list[0] || null);
+        setSelectedChat(null);
       } catch (e) {
         if (!isMounted) return;
         setError(e?.message || "Failed to load chats");
@@ -151,23 +164,71 @@ export default function MessagesPanel() {
       if (!missing.length) return;
 
       try {
-        const results = await Promise.allSettled(
+        const settled = await Promise.allSettled(
           missing.map(async (chat) => {
             const data = await api.listChatParticipants(chat.id);
-            const usernames = (Array.isArray(data) ? data : []).map(
-              (p) => p.username,
+            let participantObjects = Array.isArray(data) ? data : [];
+
+            participantObjects = await Promise.all(
+              participantObjects.map(async (p) => {
+                if (!p.avatar) return p;
+
+                try {
+                  const resp = await api.presignView({
+                    fileUrl: p.avatar,  
+                    expiresIn: 3600,
+                  });
+
+                  return { ...p, avatar: resp?.viewUrl || null };
+                } catch {
+                  return { ...p, avatar: null };
+                }
+              })
             );
-            return { chatId: chat.id, participants: usernames };
-          }),
+
+            const usernames = participantObjects.map((p) => p.username).filter(Boolean);
+            return { chatId: chat.id, participants: usernames, participantObjects };
+          })
         );
 
         if (cancelled) return;
 
+        const results = settled
+          .filter((r) => r.status === "fulfilled")
+          .map((r) => r.value);
+
         setChats((prev) =>
           prev.map((chat) => {
-            const found = results.find((r) => r.chatId === chat.id);
-            return found ? { ...chat, participants: found.participants } : chat;
-          }),
+            const found = results.find((r) => String(r.chatId) === String(chat.id));
+            if (!found) return chat;
+
+            const isGroup = !!chat.is_group;
+
+            const other =
+              found.participantObjects.find((p) => p.username && p.username !== myUsername) ||
+              found.participantObjects[0];
+
+            const groupFallbackAvatar =
+              chat.group_photo_url || found.participantObjects.find((p) => p.avatar)?.avatar || null;
+
+if (chat.name === "grammys") {
+  console.log("GRAMMYS participantObjects:", found.participantObjects);
+  console.log("GRAMMYS groupFallbackAvatar:", groupFallbackAvatar);
+}
+
+            return {
+              ...chat,
+              participants: found.participants,
+              participantObjects: found.participantObjects,
+              displayName: isGroup
+                ? (chat.name || "(Unnamed group)")
+                : (other?.name || other?.username || chat.name),
+              displayHandle: isGroup ? null : (other?.username ? `@${other.username}` : null),
+              avatarUrl: isGroup
+                ? (chat.group_photo_url || groupFallbackAvatar)
+                : (other?.avatar || null),
+              };
+          })
         );
       } catch (e) {
         setError(e?.message || "Failed to load chat participants");
@@ -178,7 +239,12 @@ export default function MessagesPanel() {
     return () => {
       cancelled = true;
     };
-  }, [chats]);
+  }, [chats, myUsername]);
+
+  useEffect(() => {
+  if (chats.length) console.log("Sample chat after hydrate:", chats[0]);
+}, [chats]);
+
 
   // loads messages whenever selectedChat changes
   useEffect(() => {
@@ -310,7 +376,22 @@ export default function MessagesPanel() {
         )}
 
         {!isLoadingChats && !selectedChat && (
-          <div className="p-6 text-sm text-gray-500">No chats yet.</div>
+          <div className="h-full flex items-center justify-center p-10">
+            <div className="text-center max-w-md">
+              <div className="text-xl font-semibold text-gray-700 mb-2">
+                Messages
+              </div>
+              <div className="text-sm text-gray-500 mb-6">
+                Click a conversation on the left, or start a new one.
+              </div>
+              <button
+                onClick={() => setIsNewChatOpen(true)}
+                className="bg-melodious-purple text-white rounded-xl px-4 py-2"
+              >
+                New conversation
+              </button>
+            </div>
+          </div>
         )}
 
         {!isLoadingChats && selectedChat && (

@@ -28,7 +28,7 @@ function timeAgo(dateString) {
   return `${years} year${years !== 1 ? "s" : ""} ago`;
 }
 
-export default function NotificationSection({ title, items = [] }) {
+export default function NotificationSection({ title, items = [], onDelete }) {
   const iconForType = (type) => {
     switch (type) {
       case "message":
@@ -79,6 +79,7 @@ export default function NotificationSection({ title, items = [] }) {
               time={timeAgo(created_at)}
               actionVariant={actionVariant}
               initialIsRead={Boolean(is_read)}
+              onDelete={onDelete}
             />
           );
         })}
