@@ -4,6 +4,7 @@ import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import Events from "./pages/Events";
 import Messages from "./pages/Messages";
+import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { NotificationsProvider } from "./components/notifications/NotificationsContext";
@@ -54,6 +55,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Messages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             }
           />

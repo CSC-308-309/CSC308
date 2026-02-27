@@ -140,6 +140,14 @@ export const api = {
       `/users/${encodeURIComponent(resolveUsername(username))}/block`,
       { targetUsername: requireUsername(targetUsername) },
     ),
+  undoInteraction: (targetUsername, interactionType, username) =>
+    requestTypes.delete(
+      `/users/${encodeURIComponent(resolveUsername(username))}/interactions/${encodeURIComponent(requireUsername(targetUsername))}/${encodeURIComponent(interactionType)}`,
+    ),
+  listMatches: (username) =>
+    requestTypes.get(
+      `/users/${encodeURIComponent(resolveUsername(username))}/matches`,
+    ),
 
   // Messaging routes
   listChats: (params = {}) => {
@@ -217,20 +225,11 @@ export const api = {
       {},
     ),
 
-  markAllNotificationsRead: (data = {}) =>
-    requestTypes.post("/notifications/readAll", data),
-  archiveNotification: (notificationId) =>
-    requestTypes.post(
-      `/notifications/${encodeURIComponent(notificationId)}/archive`,
-      {},
-    ),
-  unarchiveNotification: (notificationId) =>
-    requestTypes.post(
-      `/notifications/${encodeURIComponent(notificationId)}/unarchive`,
-      {},
-    ),
+  //markAllNotificationsRead: (data = {}) => requestTypes.post("/notifications/readAll", data),
+  //archiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/archive`,{},),
+  //unarchiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unarchive`,{},),
   deleteNotification: (notificationId) =>
-    requestTypes.delete(`/notifications/${encodeURIComponent(notificationId)}`),
+    requestTypes.delete(`/notifications/id/${encodeURIComponent(notificationId)}`),
   //getUnreadNotificationsCount: (params = {}) => requestTypes.get(withQuery('/notifications/unread-count', params)),
   getNotificationPreferences: (username) =>
     requestTypes.get(
@@ -242,14 +241,20 @@ export const api = {
       data,
     ),
 
+  // Settings Routes!
+  updateUsername: (data) => requestTypes.patch("/users/username", data),
+  updateEmail: (data) => requestTypes.patch("/users/email", data),
+  updatePassword: (data) => requestTypes.patch("/users/password", data),
+
   // Event routes
   listEvents: () => requestTypes.get("/events"),
 
   //Photo Storage routes
   presignUpload: (uploadParams) =>
     requestTypes.put("/media/presign", uploadParams),
-  presignView: (viewParams) =>
-    requestTypes.put("/media/presign-view", viewParams),
+  //presignView: (viewParams) =>
+    //requestTypes.put("/media/presign-view", viewParams),
+  presignView: (data) => requestTypes.post("/media/presign-view", data),
   // Backward-compatible helper used by existing components.
   presignViewUrl: (fileUrl) =>
     requestTypes.put("/media/presign-view", { fileUrl }),

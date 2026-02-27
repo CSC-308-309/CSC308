@@ -6,9 +6,16 @@ export function createApp({ db }) {
   const app = express();
 
   // When frontend uses credentials: "include", origin cannot be "*" — must be exact origin
-  app.use(
-    cors({
-      origin: "http://localhost:5173",
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://ashy-hill-04c3bda0f.6.azurestaticapps.net",
+  ];
+
+  app.use(cors({
+      origin: (origin, cb) => {
+        if (!origin) return cb(null, true);
+        return cb(null, allowedOrigins.includes(origin));
+      },
       credentials: true,
     }),
   );
@@ -177,6 +184,7 @@ export function createApp({ db }) {
   // Get presigned URL for S3 upload
   app.put("/media/presign", presignUpload);
   app.put("/media/presign-view", presignView);
+  app.post("/media/presign-view", presignView);
 
   //// INTERACTION ROUTES ////
   // Like another user
@@ -232,6 +240,56 @@ export function createApp({ db }) {
       res.json(result);
     } catch (err) {
       console.error("Error in block route:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Undo interaction (like/dislike/block) with a target user
+  app.delete(
+    "/users/:username/interactions/:targetUsername/:interactionType",
+    async (req, res) => {
+      try {
+        const { username, targetUsername, interactionType } = req.params;
+        const allowedTypes = new Set(["like", "dislike", "block"]);
+        if (!allowedTypes.has(interactionType)) {
+          return res.status(400).json({ error: "Invalid interaction type" });
+        }
+
+        const validation = await validateUserInteraction(username, targetUsername);
+        if (validation.error) {
+          return res.status(validation.status).json({ error: validation.message });
+        }
+
+        const result = await db.Interactions.undoInteraction(
+          username,
+          targetUsername,
+          interactionType,
+        );
+
+        if (!result.success) {
+          return res.status(404).json({ error: "Interaction not found" });
+        }
+
+        return res.json(result);
+      } catch (err) {
+        console.error("Error in undo interaction route:", err);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+    },
+  );
+
+  // List mutual likes (matches) for a user
+  app.get("/users/:username/matches", async (req, res) => {
+    try {
+      const user = await db.Profile.getUserByUsername(req.params.username);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const matches = await db.Interactions.listMatches(req.params.username);
+      res.json(matches);
+    } catch (err) {
+      console.error("Error in matches route:", err);
       res.status(500).json({ error: "Internal server error" });
     }
   });

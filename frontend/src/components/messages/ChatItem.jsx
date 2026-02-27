@@ -27,7 +27,12 @@ export default function ChatItem({ chat, isSelected, onClick }) {
       </div>
 
       <div className="flex-1">
-        <div className="font-semibold text-gray-700">{chat.name}</div>
+        <div className="font-semibold text-gray-700">
+          {chat.displayName || chat.name}
+          {chat.displayHandle && (
+            <span className="ml-2 text-xs font-normal text-gray-500">{chat.displayHandle}</span>
+          )}
+        </div>
         <div className="text-sm text-gray-500">{chat.lastMessage}</div>
       </div>
 
