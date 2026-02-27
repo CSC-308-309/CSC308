@@ -295,7 +295,7 @@ if (chat.name === "grammys") {
       if (selectedChat?.id) {
         refreshMessages(selectedChat.id, { silent: true });
       }
-    }, 60_000);
+    }, 5_000);
 
     return () => {
       clearInterval(timer);
