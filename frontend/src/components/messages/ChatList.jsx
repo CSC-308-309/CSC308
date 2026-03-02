@@ -6,6 +6,7 @@ export default function ChatList({
   selectedChat,
   setSelectedChat,
   onNewChat,
+  onDeleteChat,
 }) {
   const [search, setSearch] = useState("");
 
@@ -52,6 +53,7 @@ export default function ChatList({
             chat={chat}
             isSelected={chat.id === selectedChat?.id}
             onClick={() => setSelectedChat(chat)}
+            onDelete={() => onDeleteChat(chat.id)}
           />
         ))}
 

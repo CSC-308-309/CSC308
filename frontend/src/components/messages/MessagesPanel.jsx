@@ -93,6 +93,24 @@ export default function MessagesPanel() {
     }
   }
 
+  async function handleDeleteChat(chatId) {
+  try {
+    setError(null);
+
+    await api.deleteChat(chatId);
+
+    // If the deleted chat was selected, clear it
+    if (selectedChat?.id === chatId) {
+      setSelectedChat(null);
+    }
+
+    // Refresh chat list
+    await refreshChats();
+  } catch (e) {
+    setError(e?.message || "Failed to delete chat");
+  }
+}
+
   async function refreshChats(selectChatId = null) {
     if (!myUsername) return;
 
@@ -234,11 +252,6 @@ export default function MessagesPanel() {
 
             const groupFallbackAvatar =
               chat.group_photo_url || found.participantObjects.find((p) => p.avatar)?.avatar || null;
-
-if (chat.name === "grammys") {
-  console.log("GRAMMYS participantObjects:", found.participantObjects);
-  console.log("GRAMMYS groupFallbackAvatar:", groupFallbackAvatar);
-}
 
             return {
               ...chat,
@@ -393,6 +406,7 @@ if (chat.name === "grammys") {
         selectedChat={selectedChat}
         setSelectedChat={handleSelectChat}
         onNewChat={() => setIsNewChatOpen(true)}
+        onDeleteChat={handleDeleteChat}
       />
 
       <div className="flex-1 relative">
