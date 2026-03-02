@@ -24,7 +24,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;// || "http://localhost:8000";
 async function request(path, options = {}) {
   const token = localStorage.getItem("token");
 
-  const res = await fetch(`${VITE_BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
