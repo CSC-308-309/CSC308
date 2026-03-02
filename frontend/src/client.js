@@ -22,8 +22,14 @@ const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:8000";
 // }
 
 async function request(path, options = {}) {
+  const token = localStorage.getItem("token");
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
     ...options,
   });
 
@@ -57,8 +63,7 @@ const requestTypes = {
   get: (path) => request(path, { method: "GET" }),
   post: (path, data) =>
     request(path, { method: "POST", body: JSON.stringify(data) }),
-  put: (path, data) =>
-    request(path, { method: "PUT", body: JSON.stringify(data) }),
+  put: (path, data, options = {}) => request(path, { method: "PUT", body: JSON.stringify(data), ...options }),
   delete: (path) => request(path, { method: "DELETE" }),
 
   // patch helper for partial updates (useful for message edits, chat settings, etc.)
@@ -242,9 +247,17 @@ export const api = {
     ),
 
   // Settings Routes!
-  updateUsername: (data) => requestTypes.patch("/users/username", data),
-  updateEmail: (data) => requestTypes.patch("/users/email", data),
-  updatePassword: (data) => requestTypes.patch("/users/password", data),
+  updateEmail: (data, username) =>
+    requestTypes.put(
+      `/users/${encodeURIComponent(resolveUsername(username))}/email`,
+      data
+    ),
+
+  updatePassword: (data, username) =>
+    requestTypes.put(
+      `/users/${encodeURIComponent(resolveUsername(username))}/password`,
+      data
+    ),
 
   // Event routes
   listEvents: () => requestTypes.get("/events"),

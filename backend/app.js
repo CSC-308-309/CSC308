@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import { presignUpload, presignView } from "./models/media.js";
+import bcrypt from "bcrypt";
+import { UsersModel } from "./models/User.js"; 
+import { authenticate } from "./middleware/authMiddleware.js";
 
 export function createApp({ db }) {
   const app = express();
@@ -572,6 +575,65 @@ export function createApp({ db }) {
       req.body,
     );
     res.json(updatedPreferences);
+  });
+//// Settings Routes ////
+
+  // Change Password
+  app.put("/users/:username/password", authenticate, async (req, res) => {
+    try {
+      const { username } = req.params;
+      const { currentPassword, newPassword } = req.body || {};
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "currentPassword and newPassword are required" });
+      }
+
+      // prevent editing someone else
+      if (req.username && req.username !== username) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const existingHash = await UsersModel.getPasswordHashByUsername(username);
+      if (!existingHash) return res.status(404).json({ message: "User not found" });
+
+      const valid = await bcrypt.compare(currentPassword, existingHash);
+      if (!valid) return res.status(400).json({ message: "Incorrect current password" });
+
+      const newHash = await bcrypt.hash(newPassword, 10);
+      const ok = await UsersModel.updatePasswordHashByUsername(username, newHash);
+
+      if (!ok) return res.status(500).json({ message: "Failed to update password" });
+
+      return res.json({ message: "Password updated successfully" });
+    } catch (err) {
+      console.error("Update password error:", err);
+      return res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Change Email
+  app.put("/users/:username/email", authenticate, async (req, res) => {
+    try {
+      const { username } = req.params;
+      const { email } = req.body || {};
+
+      if (!email) return res.status(400).json({ message: "Email is required" });
+
+      if (req.username && req.username !== username) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const updated = await UsersModel.updateEmailByUsername(username, email);
+      if (!updated) return res.status(404).json({ message: "User not found" });
+
+      return res.json({ message: "Email updated successfully", user: updated });
+    } catch (err) {
+      console.error("Update email error:", err);
+      if (err.code === "23505") {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+      return res.status(500).json({ message: "Server error" });
+    }
   });
 
   //// EVENT ROUTES ////

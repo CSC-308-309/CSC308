@@ -1,41 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import { api } from "../client";
 
 export default function Settings() {
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
-  // Load current username on mount
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const current = await api.currentUsername();
-        setUsername(current.username);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    loadUser();
-  }, []);
-
-  const handleUsernameUpdate = async () => {
-    setError("");
-    setMessage("");
-
-    try {
-      await api.updateUsername({ username });
-      setMessage("Username updated successfully.");
-    } catch (err) {
-      console.error("Update username error:", err);
-      setError("Failed to update username.");
-    }
-  };
 
   const handleEmailUpdate = async () => {
     setError("");
@@ -44,6 +18,9 @@ export default function Settings() {
     try {
       await api.updateEmail({ email });
       setMessage("Email updated successfully.");
+      setEmail("");
+      localStorage.removeItem("token");
+      window.location.href = "/login";
     } catch (err) {
       console.error("Update email error:", err);
       setError("Failed to update email.");
@@ -55,9 +32,12 @@ export default function Settings() {
     setMessage("");
 
     try {
-      await api.updatePassword({ password });
-      setMessage("Password updated successfully.");
-      setPassword("");
+      await api.updatePassword({ currentPassword, newPassword });
+      setMessage("Password updated successfully. Please log in again.");
+      setCurrentPassword("");
+      setNewPassword("");
+      localStorage.removeItem("token");
+      window.location.href = "/login";
     } catch (err) {
       console.error("Update password error:", err);
       setError("Failed to update password.");
@@ -74,35 +54,8 @@ export default function Settings() {
         </h1>
 
         <div className="max-w-xl space-y-8">
-
-          {/* USERNAME */}
           <div className="bg-white p-6 rounded-xl shadow">
-            <h2 className="text-lg font-semibold mb-4">
-              Change Username
-            </h2>
-
-            <div className="flex gap-4">
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="flex-1 border rounded-lg px-4 py-2"
-              />
-
-              <button
-                onClick={handleUsernameUpdate}
-                className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-
-          {/* EMAIL */}
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h2 className="text-lg font-semibold mb-4">
-              Change Email
-            </h2>
+            <h2 className="text-lg font-semibold mb-4">Change Email</h2>
 
             <div className="flex gap-4">
               <input
@@ -122,38 +75,37 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* PASSWORD */}
           <div className="bg-white p-6 rounded-xl shadow">
-            <h2 className="text-lg font-semibold mb-4">
-              Change Password
-            </h2>
+            <h2 className="text-lg font-semibold mb-4">Change Password</h2>
 
-            <div className="flex gap-4">
+            <div className="space-y-4">
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="flex-1 border rounded-lg px-4 py-2"
-                placeholder="Enter new password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full border rounded-lg px-4 py-2"
+                placeholder="Current password"
+              />
+
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full border rounded-lg px-4 py-2"
+                placeholder="New password"
               />
 
               <button
                 onClick={handlePasswordUpdate}
-                className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600"
+                className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 w-full"
               >
-                Save
+                Update Password
               </button>
             </div>
           </div>
 
-          {/* Feedback */}
-          {message && (
-            <p className="text-green-600 font-medium">{message}</p>
-          )}
-
-          {error && (
-            <p className="text-red-600 font-medium">{error}</p>
-          )}
+          {message && <p className="text-green-600 font-medium">{message}</p>}
+          {error && <p className="text-red-600 font-medium">{error}</p>}
         </div>
       </div>
     </div>
