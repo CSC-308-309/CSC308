@@ -6,24 +6,35 @@ import { uploadViaPresign } from "../utils/s3Upload";
 import { processImageToSquare, isImageFile } from "../utils/imageProcessing";
 import { usePresignedImage } from "../hooks/usePresignedImage";
 
-export default function EditableProfilePhoto({
+export default function ProfilePhoto({
   storageKey = "profilePhotoUrl",
   fallbackSrc = defaultPhoto,
   size = 136,
   username,
   initialSrc = "",
+  editable = true,
 }) {
   const uploadSize = Math.max(size * 2, 512);
   const inputRef = useRef(null);
+
   const { src, setSrc, handleError } = usePresignedImage(
     storageKey,
     initialSrc,
-    fallbackSrc
+    fallbackSrc,
+    { useStorage: editable }, 
   );
+
   const [isUploading, setIsUploading] = useState(false);
+
+  const openPicker = () => {
+    if (!editable || isUploading) return;
+    inputRef.current?.click();
+  };
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
+    e.target.value = ""; 
+    if (!editable) return;
     if (!isImageFile(file)) return;
 
     let previewUrl = null;
@@ -44,30 +55,46 @@ export default function EditableProfilePhoto({
         userId: username,
       });
 
-      // Save URL to database
-      await api.update({ main_image: fileUrl });
+      await api.update({ main_image: fileUrl }, username);
 
       setSrc(viewUrl);
       localStorage.setItem(storageKey, fileUrl);
     } catch (err) {
-      console.error("Upload failed:", err);
-      alert(`Upload failed: ${err.message}`);
+      console.error("Profile photo upload failed:", err);
+      alert(`Upload failed: ${err?.message || "Unknown error"}`);
       setSrc(localStorage.getItem(storageKey) || fallbackSrc);
     } finally {
       setIsUploading(false);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
-      e.target.value = "";
     }
   };
+
+  if (!editable) {
+    return (
+      <div
+        className="rounded-full overflow-hidden shadow-md shadow-black/50"
+        style={{ width: size, height: size }}
+      >
+        <img
+          src={src}
+          alt="Profile"
+          className="h-full w-full object-cover"
+          draggable={false}
+          onError={handleError}
+        />
+      </div>
+    );
+  }
 
   return (
     <>
       <button
         type="button"
-        onClick={() => inputRef.current?.click()}
+        onClick={openPicker}
         className="rounded-full overflow-hidden shadow-md shadow-black/50 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#7E3AF2]/40 relative"
         style={{ width: size, height: size, opacity: isUploading ? 0.7 : 1 }}
         disabled={isUploading}
+        aria-label="Change profile photo"
       >
         <img
           src={src}

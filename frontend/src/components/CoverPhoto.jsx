@@ -14,15 +14,19 @@ export default function CoverPhoto({
   objectPosition = "center",
   username,
   initialSrc = "",
+  editable = true,
 }) {
   const { src, setSrc, handleError } = usePresignedImage(
     storageKey,
     initialSrc,
-    fallbackSrc
+    fallbackSrc,
+    { useStorage: editable },
   );
+
   const [isUploading, setIsUploading] = useState(false);
 
   const handleFileSelect = async (file) => {
+    if (!editable) return;
     if (!isImageFile(file)) return;
 
     let previewUrl = null;
@@ -43,13 +47,13 @@ export default function CoverPhoto({
         userId: username,
       });
 
-      await api.update(username, { concert_image: fileUrl });
+      await api.update({ concert_image: fileUrl }, username);
 
       setSrc(viewUrl);
       localStorage.setItem(storageKey, fileUrl);
     } catch (error) {
-      console.error("Upload failed:", error);
-      alert(`Upload failed: ${error.message}`);
+      console.error("Cover upload failed:", error);
+      alert(`Upload failed: ${error?.message || "Unknown error"}`);
       setSrc(localStorage.getItem(storageKey) || fallbackSrc);
     } finally {
       setIsUploading(false);
@@ -77,12 +81,14 @@ export default function CoverPhoto({
           </div>
         )}
 
-        <div className="absolute right-4 bottom-4">
-          <EditCoverPhotoButton
-            onSelect={handleFileSelect}
-            disabled={isUploading}
-          />
-        </div>
+        {editable && (
+          <div className="absolute right-4 bottom-4">
+            <EditCoverPhotoButton
+              onSelect={handleFileSelect}
+              disabled={isUploading}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
