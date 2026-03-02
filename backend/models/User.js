@@ -250,4 +250,32 @@ export const UsersModel = {
       throw error;
     }
   },
+
+ async getPasswordHashByUsername(username) {
+    const query = `SELECT password_hash FROM users WHERE username = $1`;
+    const { rows } = await pool.query(query, [username]);
+    return rows[0]?.password_hash || null;
+  },
+
+  async updatePasswordHashByUsername(username, passwordHash) {
+    const query = `
+      UPDATE users
+      SET password_hash = $1, updated_at = NOW()
+      WHERE username = $2
+      RETURNING id
+    `;
+    const { rows } = await pool.query(query, [passwordHash, username]);
+    return rows.length > 0;
+  },
+
+  async updateEmailByUsername(username, email) {
+    const query = `
+      UPDATE users
+      SET email = $1, updated_at = NOW()
+      WHERE username = $2
+      RETURNING id, username, email
+    `;
+    const { rows } = await pool.query(query, [email, username]);
+    return rows[0] || null;
+  }
 };
