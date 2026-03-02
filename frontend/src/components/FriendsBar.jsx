@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Heart, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../client";
 import defaultProfilePhoto from "../assets/DefaultProfilePhoto.png";
-// import CustomDropdown from './CustomDropdown';
+import { resolveViewUrl } from "../utils/s3Upload";
 
 function getColorForCategory(category) {
   const normalized = String(category || "").trim().toLowerCase();
@@ -27,6 +28,7 @@ function getColorForCategory(category) {
 }
 
 export default function FriendsBar() {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("");
   const [allPeople, setAllPeople] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,47 +36,32 @@ export default function FriendsBar() {
   useEffect(() => {
     let cancelled = false;
 
+    const resolveImage = async (rawUrl) => {
+      const value = String(rawUrl || "").trim();
+      if (!value) return defaultProfilePhoto;
+      try {
+        const viewUrl = await resolveViewUrl(value);
+        return viewUrl || value;
+      } catch {
+        return value;
+      }
+    };
+
     const loadPeople = async () => {
-      const shouldPresign = (rawUrl) => {
-        const value = String(rawUrl || "").trim();
-        if (!value) return false;
-        if (value.startsWith("data:") || value.startsWith("blob:")) return false;
-        if (value.startsWith("/")) return false;
-
-        try {
-          const parsed = new URL(value);
-          if (parsed.searchParams.has("X-Amz-Signature")) return false;
-          const host = parsed.hostname.toLowerCase();
-          return host.endsWith("amazonaws.com");
-        } catch {
-          // Non-URL values are treated as object keys that need signing.
-          return true;
-        }
-      };
-
-      const resolveImage = async (rawUrl) => {
-        const value = String(rawUrl || "").trim();
-        if (!value) return defaultProfilePhoto;
-        if (!shouldPresign(value)) return value;
-        try {
-          const { viewUrl } = await api.presignViewUrl(value);
-          return viewUrl || value;
-        } catch {
-          return value;
-        }
-      };
-
       try {
         const matches = await api.listMatches();
+
         const people = await Promise.all(
           (matches || []).map(async (user) => ({
             id: user.id,
+            username: user.username, 
             name: user.name || user.username || "Unknown",
             category: user.role || "Unspecified",
             profilePhoto: await resolveImage(user.main_image),
             isFavorite: false,
           })),
         );
+
         if (!cancelled) setAllPeople(people);
       } catch (error) {
         console.error("Failed to load matches for FriendsBar:", error);
@@ -84,9 +71,8 @@ export default function FriendsBar() {
     };
 
     loadPeople();
-    const onMatchCreated = () => {
-      loadPeople();
-    };
+
+    const onMatchCreated = () => loadPeople();
     window.addEventListener("match:created", onMatchCreated);
 
     return () => {
@@ -106,7 +92,6 @@ export default function FriendsBar() {
     }
   }, [categories, selectedCategory]);
 
-  // Toggle favorite status
   const toggleFavorite = (personId) => {
     setAllPeople((prevPeople) =>
       prevPeople.map((person) =>
@@ -117,7 +102,6 @@ export default function FriendsBar() {
     );
   };
 
-  // Filter people based on selected category
   const displayedPeople = allPeople.filter(
     (person) => person.category === selectedCategory,
   );
@@ -129,32 +113,31 @@ export default function FriendsBar() {
   if (!allPeople.length) {
     return (
       <div className="w-[280px] h-screen bg-gray-100 p-4">
-        <p className="text-sm text-gray-600 text-center mt-4">
-          No matches yet.
-        </p>
+        <p className="text-sm text-gray-600 text-center mt-4">No matches yet.</p>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col w-[280px] h-screen bg-gray-100 p-4">
-      {/* Custom Dropdown */}
       <div className="mb-6 flex justify-center">
         <CustomDropdown
           options={categories}
           value={selectedCategory}
           onChange={setSelectedCategory}
-          getColor={getColorForCategory}  // pass color getter
+          getColor={getColorForCategory}
         />
       </div>
 
-      {/* Friends Grid */}
       <div className="grid grid-cols-2 gap-6 p-[20px]">
         {displayedPeople.map((friend) => (
           <FriendCard
             key={friend.id}
             friend={friend}
             onToggleFavorite={toggleFavorite}
+            onOpenProfile={() => {
+              if (friend.username) navigate(`/profile/${friend.username}`);
+            }}
           />
         ))}
       </div>
@@ -162,7 +145,13 @@ export default function FriendsBar() {
   );
 }
 
-function CustomDropdown({ options, value, onChange, getColor, placeholder = "Select an option" }) {
+function CustomDropdown({
+  options,
+  value,
+  onChange,
+  getColor,
+  placeholder = "Select an option",
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const currentColor = getColor(value);
 
@@ -170,12 +159,19 @@ function CustomDropdown({ options, value, onChange, getColor, placeholder = "Sel
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        style={{ borderColor: currentColor.border }}  // dynamic border color
+        style={{ borderColor: currentColor.border }}
         className="flex w-[255px] h-8 items-center justify-between px-[15px] py-1.5 bg-white rounded-[20px] border"
       >
-        <ChevronDown className={`w-[15px] h-[15px] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-          style={{ color: currentColor.border }} />
-        <span className="font-medium text-sm" style={{ color: currentColor.text, fontFamily: "Nunito, sans-serif" }}>
+        <ChevronDown
+          className={`w-[15px] h-[15px] transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          style={{ color: currentColor.border }}
+        />
+        <span
+          className="font-medium text-sm"
+          style={{ color: currentColor.text, fontFamily: "Nunito, sans-serif" }}
+        >
           {value || placeholder}
         </span>
         <div className="w-[15px]"></div>
@@ -188,16 +184,20 @@ function CustomDropdown({ options, value, onChange, getColor, placeholder = "Sel
             return (
               <button
                 key={option}
-                onClick={() => { onChange(option); setIsOpen(false); }}
+                onClick={() => {
+                  onChange(option);
+                  setIsOpen(false);
+                }}
                 className={`w-full px-6 py-4 text-left flex items-center gap-3 hover:bg-gray-50 transition-colors duration-150 ${
                   index !== options.length - 1 ? "border-b border-gray-100" : ""
                 }`}
                 style={{ fontFamily: "Nunito, sans-serif" }}
               >
-                {/* Color dot per category */}
                 <div className={`w-3 h-3 rounded-full ${color.dot}`} />
-                <span style={{ color: option === value ? color.text : "#374151" }}
-                  className={option === value ? "font-semibold" : ""}>
+                <span
+                  style={{ color: option === value ? color.text : "#374151" }}
+                  className={option === value ? "font-semibold" : ""}
+                >
                   {option}
                 </span>
               </button>
@@ -209,12 +209,16 @@ function CustomDropdown({ options, value, onChange, getColor, placeholder = "Sel
   );
 }
 
-function FriendCard({ friend, onToggleFavorite }) {
+function FriendCard({ friend, onToggleFavorite, onOpenProfile }) {
   return (
     <div className="flex flex-col items-center">
-      {/* Box with heart positioned relative to it */}
       <div className="relative w-[83px] h-[83px] mb-2">
-        <div className="w-full h-full bg-[#d9d9d9] rounded-[15px] overflow-hidden">
+        <button
+          type="button"
+          onClick={onOpenProfile}
+          className="w-full h-full bg-[#d9d9d9] rounded-[15px] overflow-hidden"
+          aria-label={`Open ${friend.name}'s profile`}
+        >
           <img
             src={friend.profilePhoto || defaultProfilePhoto}
             alt={friend.name}
@@ -225,10 +229,12 @@ function FriendCard({ friend, onToggleFavorite }) {
               e.currentTarget.src = defaultProfilePhoto;
             }}
           />
-        </div>
+        </button>
+
         <button
           onClick={() => onToggleFavorite(friend.id)}
           className="absolute bottom-1 right-1 z-10 w-6 h-6 hover:scale-110 transition-transform cursor-pointer flex items-center justify-center"
+          aria-label="Toggle favorite"
         >
           <Heart
             className={`w-6 h-6 drop-shadow-md transition-all ${
@@ -240,13 +246,14 @@ function FriendCard({ friend, onToggleFavorite }) {
         </button>
       </div>
 
-      {/* Name below box */}
-      <p
+      <button
+        type="button"
+        onClick={onOpenProfile}
         className="w-[83px] text-center text-sm font-medium text-gray-800 truncate"
         title={friend.name}
       >
         {friend.name}
-      </p>
+      </button>
     </div>
   );
 }

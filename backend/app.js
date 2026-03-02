@@ -142,6 +142,48 @@ export function createApp({ db }) {
     }
   });
 
+  // Public profile (safe fields only; no email/password)
+  app.get("/profiles/:username", async (req, res) => {
+    const user = await db.User.getUserByUsername(req.params.username);
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const {
+      id,
+      username,
+      name,
+      role,
+      age,
+      gender,
+      genre,
+      experience,
+      main_image,
+      concert_image,
+      last_song,
+      last_song_desc,
+      created_at,
+      updated_at,
+    } = user;
+
+    res.json({
+      id,
+      username,
+      name,
+      role,
+      age,
+      gender,
+      genre,
+      experience,
+      main_image,
+      concert_image,
+      last_song,
+      last_song_desc,
+      created_at,
+      updated_at,
+    });
+  });
+
   // Update user (profile info) by username
   app.put("/users/:username", async (req, res) => {
     console.log(`++++++++++++++++ Received update for user ${req.params.username} with body:`, req.body);

@@ -1,6 +1,7 @@
 import Home from "./pages/Home";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Profile from "./pages/Profile";
+import PublicProfile from "./pages/PublicProfile";
 import Notifications from "./pages/Notifications";
 import Events from "./pages/Events";
 import Messages from "./pages/Messages";
@@ -22,10 +23,9 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={
-              isLoggedIn() ? <Home /> : <Navigate to="/login" replace />
-            }
+            element={isLoggedIn() ? <Home /> : <Navigate to="/login" replace />}
           />
+
           <Route
             path="/profile"
             element={
@@ -34,6 +34,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/profile/:username"
+            element={
+              <ProtectedRoute>
+                <PublicProfile />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/notifications"
             element={
@@ -66,8 +76,10 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+
           <Route
             path="/profilesetup"
             element={
