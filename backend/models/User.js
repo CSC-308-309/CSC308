@@ -74,8 +74,8 @@ export const UsersModel = {
     const query = `
       INSERT INTO users (
         username, email, password_hash, name, role, age, gender, genre, experience,
-        main_image, concert_image, last_song, last_song_desc, profile_picture, cover_photo, concert_images, music_clips
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+        main_image, concert_image, last_song, last_song_desc
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING id, username, email, created_at
     `;
 
@@ -83,20 +83,16 @@ export const UsersModel = {
       username,
       email,
       passwordHash,
-      username, // name
-      "User", // role
-      null, // age
-      null, // gender
-      null, // genre
-      null, // experience
-      null, // main_image
-      null, // concert_image
-      null, // last_song
-      null, // last_song_desc
-      null, // profile_picture
-      null, // cover_photo
-      null, // concert_images
-      null, // music_clips
+      username,
+      "User",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     ];
 
     try {
@@ -111,7 +107,7 @@ export const UsersModel = {
   async findUserByEmail(email) {
     const query = `
       SELECT id, username, email, password_hash, name, role, age, gender, genre, experience,
-             main_image, concert_image, last_song, last_song_desc, created_at, updated_at, profile_picture, cover_photo, concert_images, music_clips
+             main_image, concert_image, last_song, last_song_desc, created_at, updated_at
       FROM users
       WHERE email = $1
     `;
@@ -128,7 +124,7 @@ export const UsersModel = {
   async listUsers() {
     const query = `
       SELECT id, username, email, name, role, age, gender, genre, experience,
-             main_image, concert_image, last_song, last_song_desc, created_at, updated_at, profile_picture, cover_photo, concert_images, music_clips
+             main_image, concert_image, last_song, last_song_desc, created_at, updated_at
       FROM users
       ORDER BY created_at DESC
     `;
@@ -145,7 +141,7 @@ export const UsersModel = {
   async getUserByUsername(username) {
     const query = `
       SELECT id, username, email, name, role, age, gender, genre, experience,
-             main_image, concert_image, last_song, last_song_desc, created_at, updated_at, profile_picture, cover_photo, concert_images, music_clips
+             main_image, concert_image, last_song, last_song_desc, created_at, updated_at
       FROM users
       WHERE username = $1
     `;
@@ -196,7 +192,7 @@ export const UsersModel = {
       SET ${updateFields.join(", ")}
       WHERE username = $${paramCount}
       RETURNING id, username, email, name, role, age, gender, genre, experience,
-                main_image, concert_image, last_song, last_song_desc, updated_at, profile_picture, cover_photo, concert_images, music_clips
+                main_image, concert_image, last_song, last_song_desc, updated_at
     `;
 
     try {

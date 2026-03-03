@@ -51,8 +51,6 @@ async function seedInteractions() {
     console.log("  Cleared existing interactions");
 
     for (const interaction of sampleInteractions) {
-      console.log(`Processing interaction: ${interaction.username} -> ${interaction.target_username} (${interaction.interaction_type})`);
-      
       // Get user IDs from usernames
       const userQuery = "SELECT id FROM users WHERE username = $1";
       const userResult = await pool.query(userQuery, [interaction.username]);
@@ -84,7 +82,8 @@ async function seedInteractions() {
       );
     }
 
-    console.log(`Successfully seeded ${sampleInteractions.length} interactions!`);
+    console.log(`Successfully seeded interactions!`);
+    process.exit(0);
   } catch (error) {
     console.error("Error seeding interactions:", error);
     process.exit(1);

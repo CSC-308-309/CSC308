@@ -163,9 +163,6 @@ async function seedNotifications() {
         const actorResult = await pool.query(userQuery, [notif.actor]);
         if (actorResult.rows.length > 0) {
           actorId = actorResult.rows[0].id;
-        } else {
-          console.log(`Skipped notification for ${notif.actor} (actor not found)`);
-          continue;
         }
       }
 
