@@ -2,7 +2,7 @@
 // Simple wrapper
 
 // Base URL for API requests. Reads from VITE_BASE_URL env var or defaults to localhost.
-const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:8000";
+const BASE_URL = "http://localhost:8000";// || "http://localhost:8000"; // will add this back
 
 
 // async function request(path, options = {}) {
@@ -22,8 +22,14 @@ const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:8000";
 // }
 
 async function request(path, options = {}) {
+  const token = localStorage.getItem("token");
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
     ...options,
   });
 
@@ -57,8 +63,7 @@ const requestTypes = {
   get: (path) => request(path, { method: "GET" }),
   post: (path, data) =>
     request(path, { method: "POST", body: JSON.stringify(data) }),
-  put: (path, data) =>
-    request(path, { method: "PUT", body: JSON.stringify(data) }),
+  put: (path, data, options = {}) => request(path, { method: "PUT", body: JSON.stringify(data), ...options }),
   delete: (path) => request(path, { method: "DELETE" }),
 
   // patch helper for partial updates (useful for message edits, chat settings, etc.)
@@ -124,13 +129,6 @@ export const api = {
   signup: (profile) => requestTypes.post("/auth/signup", profile),
   login: (credentials) => requestTypes.post("/auth/login", credentials),
 
-  // Profile setup (server expects username in body)
-  updateProfile: (profileData = {}) =>
-    requestTypes.post("/profile", {
-      ...profileData,
-      username: resolveUsername(profileData.username),
-    }),
-
   // Interaction routes
   like: (targetUsername, username) =>
     requestTypes.post(
@@ -146,6 +144,14 @@ export const api = {
     requestTypes.post(
       `/users/${encodeURIComponent(resolveUsername(username))}/block`,
       { targetUsername: requireUsername(targetUsername) },
+    ),
+  undoInteraction: (targetUsername, interactionType, username) =>
+    requestTypes.delete(
+      `/users/${encodeURIComponent(resolveUsername(username))}/interactions/${encodeURIComponent(requireUsername(targetUsername))}/${encodeURIComponent(interactionType)}`,
+    ),
+  listMatches: (username) =>
+    requestTypes.get(
+      `/users/${encodeURIComponent(resolveUsername(username))}/matches`,
     ),
 
   // Messaging routes
@@ -223,20 +229,12 @@ export const api = {
       `/notifications/${encodeURIComponent(notificationId)}/unread`,
       {},
     ),
-  markAllNotificationsRead: (data = {}) =>
-    requestTypes.post("/notifications/readAll", data),
-  archiveNotification: (notificationId) =>
-    requestTypes.post(
-      `/notifications/${encodeURIComponent(notificationId)}/archive`,
-      {},
-    ),
-  unarchiveNotification: (notificationId) =>
-    requestTypes.post(
-      `/notifications/${encodeURIComponent(notificationId)}/unarchive`,
-      {},
-    ),
+
+  //markAllNotificationsRead: (data = {}) => requestTypes.post("/notifications/readAll", data),
+  //archiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/archive`,{},),
+  //unarchiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unarchive`,{},),
   deleteNotification: (notificationId) =>
-    requestTypes.delete(`/notifications/${encodeURIComponent(notificationId)}`),
+    requestTypes.delete(`/notifications/id/${encodeURIComponent(notificationId)}`),
   //getUnreadNotificationsCount: (params = {}) => requestTypes.get(withQuery('/notifications/unread-count', params)),
   getNotificationPreferences: (username) =>
     requestTypes.get(
@@ -248,12 +246,31 @@ export const api = {
       data,
     ),
 
+  // Settings Routes!
+  updateEmail: (data, username) =>
+    requestTypes.put(
+      `/users/${encodeURIComponent(resolveUsername(username))}/email`,
+      data
+    ),
+
+  updatePassword: (data, username) =>
+    requestTypes.put(
+      `/users/${encodeURIComponent(resolveUsername(username))}/password`,
+      data
+    ),
+
   // Event routes
   listEvents: () => requestTypes.get("/events"),
 
   //Photo Storage routes
   presignUpload: (uploadParams) =>
     requestTypes.put("/media/presign", uploadParams),
+  //presignView: (viewParams) =>
+    //requestTypes.put("/media/presign-view", viewParams),
+  presignView: (data) => requestTypes.post("/media/presign-view", data),
+  // Backward-compatible helper used by existing components.
+  presignViewUrl: (fileUrl) =>
+    requestTypes.put("/media/presign-view", { fileUrl }),
 };
 
 export { BASE_URL };

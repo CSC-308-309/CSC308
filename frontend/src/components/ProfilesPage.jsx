@@ -3,9 +3,32 @@ import { api } from "../client.js";
 import ProfileCard from "./ProfileCard";
 import SwipeButtons from "./SwipeButtons";
 
+function getColorForCategory(role) {
+  const normalized = String(role || "").trim().toLowerCase();
+
+  if (normalized.includes("vocal")) {
+    return { bg: "from-rose-200 to-red-100" };
+  }
+  if (normalized.includes("instrument")) {
+    return { bg: "from-blue-200 to-cyan-100" };
+  }
+  if (normalized.includes("producer")) {
+    return { bg: "from-amber-200 to-yellow-100" };
+  }
+  if (normalized.includes("listener")) {
+    return { bg: "from-emerald-200 to-green-100" };
+  }
+  if (normalized.includes("live music lover")) {
+    return { bg: "from-orange-200 to-amber-100" };
+  }
+
+  return { bg: "from-purple-200 to-purple-100" };
+}
+
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [swipeHistory, setSwipeHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   // Pull current username from the API helper (localStorage under the hood).
@@ -22,6 +45,7 @@ export default function ProfilesPage() {
         });
         setProfiles(filteredProfiles);
         setCurrentIndex(0);
+        setSwipeHistory([]);
       } catch (err) {
         console.error("Error fetching profiles:", err);
         setError("Failed to load profiles. Please try again later.");
@@ -41,7 +65,11 @@ export default function ProfilesPage() {
     try {
       if (!currentUser) throw new Error("You must be logged in to interact");
       if (direction === "right") {
-        await api.like(targetProfile.username);
+        const result = await api.like(targetProfile.username);
+        if (result?.isMatch) {
+          window.dispatchEvent(new CustomEvent("match:created"));
+          window.alert(`You matched with ${targetProfile.name}!`);
+        }
       } else if (direction === "left") {
         await api.dislike(targetProfile.username);
       }
@@ -50,11 +78,42 @@ export default function ProfilesPage() {
       // Continue anyway - don't block UX
     }
 
+    setSwipeHistory((prev) => [
+      ...prev,
+      {
+        index: currentIndex,
+        direction,
+        targetUsername: targetProfile?.username || null,
+      },
+    ]);
     setCurrentIndex((prev) => prev + 1);
   };
 
   const handleRestart = () => {
     setCurrentIndex(0);
+    setSwipeHistory([]);
+  };
+
+  const handleUndo = async () => {
+    if (swipeHistory.length === 0) return;
+
+    const lastSwipe = swipeHistory[swipeHistory.length - 1];
+    setSwipeHistory((prev) => prev.slice(0, -1));
+    setCurrentIndex(lastSwipe.index);
+
+    try {
+      if (!lastSwipe?.targetUsername) return;
+
+      const interactionType =
+        lastSwipe.direction === "right" ? "like" : "dislike";
+      await api.undoInteraction(lastSwipe.targetUsername, interactionType);
+
+      if (interactionType === "like") {
+        window.dispatchEvent(new CustomEvent("match:created"));
+      }
+    } catch (err) {
+      console.error("Failed to undo interaction on backend:", err);
+    }
   };
 
   const handleButtonSwipe = (direction) => {
@@ -116,6 +175,7 @@ export default function ProfilesPage() {
               >
                 <ProfileCard
                   profile={profile}
+                  categoryColor={getColorForCategory(profile.role)}
                   onSwipe={isTopCard ? handleSwipe : null}
                   isActive={isTopCard}
                 />
@@ -128,10 +188,9 @@ export default function ProfilesPage() {
       {/* Swipe Buttons below the card stack */}
       <div className="mt-8">
         <SwipeButtons
-          onUndo={() => console.log("Undo")} // TODO: implement undo (no routes/backend support yet)
+          onUndo={handleUndo}
           onReject={() => handleButtonSwipe("left")}
           onAccept={() => handleButtonSwipe("right")}
-          onSuperLike={() => console.log("Super like")} // TODO: Is this a thing we're doing? No backend support
         />
       </div>
     </div>

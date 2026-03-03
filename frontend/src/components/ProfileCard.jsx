@@ -5,7 +5,12 @@ import concertImage from "../assets/concert_image.png";
 import defaultProfilePhoto from "../assets/DefaultProfilePhoto.png";
 import { api } from "../client";
 
-export default function ProfileCard({ profile, isActive = true, onSwipe }) {
+export default function ProfileCard({
+  profile,
+  isActive = true,
+  onSwipe,
+  categoryColor,
+}) {
   const defaultProfile = {
     name: "Taylor Swift",
     role: "Vocalist",
@@ -20,6 +25,7 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
   };
 
   const profileData = profile || defaultProfile;
+  const colors = categoryColor || { bg: "from-purple-200 to-purple-100" };
   const [mainImageSrc, setMainImageSrc] = useState(profileData.main_image);
   const [concertImageSrc, setConcertImageSrc] = useState(
     profileData.concert_image,
@@ -82,11 +88,11 @@ export default function ProfileCard({ profile, isActive = true, onSwipe }) {
         <div className="w-full flex flex-col items-center justify-center">
           {/* Card Container with swipe transforms */}
           <div
-            className="w-full max-w-3xl bg-gradient-to-b from-purple-200 to-purple-100 rounded-3xl p-6 shadow-md cursor-grab active:cursor-grabbing select-none"
+            className={`w-full max-w-3xl bg-gradient-to-b ${colors.bg} rounded-3xl p-6 shadow-md cursor-grab active:cursor-grabbing select-none`}
             style={{
               transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y}px) rotate(${rotation}deg)`,
               transition: isDragging ? "none" : "transform 0.3s ease-out",
-              opacity: opacity,
+              opacity,
             }}
           >
             {/* Main Content Grid */}

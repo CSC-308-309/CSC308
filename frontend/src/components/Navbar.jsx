@@ -22,25 +22,10 @@ export default function Navbar() {
   const { unreadCount, refreshUnreadCount, setUnreadCount } =
     useNotifications();
 
-  function getUsername() {
-    try {
-      const raw = localStorage.getItem("user");
-      if (!raw) return null;
-      const user = JSON.parse(raw);
-      return user?.username || null;
-    } catch {
-      return null;
-    }
-  }
-
   useEffect(() => {
     if (!loggedIn) {
-      setUnreadCount(0);
       return;
     }
-
-    const username = getUsername();
-    if (!username) return;
 
     refreshUnreadCount();
 
@@ -55,7 +40,6 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    setUnreadCount(0);
     navigate("/login");
   };
 
@@ -75,12 +59,12 @@ export default function Navbar() {
 
       {/* Main Nav */}
       <div className="flex-1 py-4">
-        <Link to="/">
-          <NavItem icon={<Home />} label="Home" />
-        </Link>
 
         {loggedIn && (
           <>
+            <Link to="/">
+              <NavItem icon={<Home />} label="Home" />
+            </Link>
             <Link to="/profile">
               <NavItem icon={<User />} label="Profile" />
             </Link>
@@ -105,6 +89,7 @@ export default function Navbar() {
 
         {!loggedIn && (
           <>
+            
             <Link to="/login">
               <NavItem icon={<LogIn />} label="Login" />
             </Link>

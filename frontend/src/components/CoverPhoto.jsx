@@ -1,36 +1,11 @@
 // src/components/CoverPhoto.jsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import EditCoverPhotoButton from "./EditCoverPhotoButton";
 import defaultCover from "../assets/DefaultBanner.jpg";
 import { api } from "../client";
 import { uploadViaPresign } from "../utils/s3Upload";
-
-async function processImageToBlob(file, maxWidth) {
-  const reader = new FileReader();
-  const fileData = await new Promise((resolve) => {
-    reader.onload = () => resolve(reader.result);
-    reader.readAsDataURL(file);
-  });
-
-  const img = new Image();
-  img.src = fileData;
-  await new Promise((resolve) => (img.onload = resolve));
-
-  const scale = img.width > maxWidth ? maxWidth / img.width : 1;
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(img.width * scale);
-  canvas.height = Math.round(img.height * scale);
-
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-  const blob = await new Promise((resolve) => {
-    canvas.toBlob((b) => resolve(b), "image/jpeg", 0.92);
-  });
-
-  if (!blob) throw new Error("Image processing failed");
-  return blob;
-}
+import { processImageToMaxWidth, isImageFile } from "../utils/imageProcessing";
+import { usePresignedImage } from "../hooks/usePresignedImage";
 
 export default function CoverPhoto({
   storageKey = "coverBannerUrl",
@@ -39,75 +14,46 @@ export default function CoverPhoto({
   objectPosition = "center",
   username,
   initialSrc = "",
+  editable = true,
 }) {
-  const [src, setSrc] = useState(fallbackSrc);
+  const { src, setSrc, handleError } = usePresignedImage(
+    storageKey,
+    initialSrc,
+    fallbackSrc,
+    { useStorage: editable },
+  );
+
   const [isUploading, setIsUploading] = useState(false);
 
-  useEffect(() => {
-    const hydrateSignedSrc = async () => {
-      const saved = localStorage.getItem(storageKey);
-      if (!saved) return;
-      try {
-        const { viewUrl } = await api.presignView({ fileUrl: saved });
-        if (viewUrl) setSrc(viewUrl);
-      } catch {
-        setSrc(saved);
-      }
-    };
-    hydrateSignedSrc();
-  }, [storageKey]);
-
-  useEffect(() => {
-    const hydrateInitialSrc = async () => {
-      if (!initialSrc) return;
-      try {
-        const { viewUrl } = await api.presignView({ fileUrl: initialSrc });
-        if (viewUrl) {
-          setSrc(viewUrl);
-          return;
-        }
-      } catch {
-        // Fallback to raw URL below.
-      }
-      setSrc(initialSrc);
-    };
-    hydrateInitialSrc();
-  }, [initialSrc]);
-
   const handleFileSelect = async (file) => {
-    if (!file?.type?.startsWith("image/")) return;
+    if (!editable) return;
+    if (!isImageFile(file)) return;
 
     let previewUrl = null;
 
     try {
       if (!username) throw new Error("Missing username (used as userId)");
-
       setIsUploading(true);
 
-      const blob = await processImageToBlob(file, 1100);
+      const blob = await processImageToMaxWidth(file, 1100);
 
       previewUrl = URL.createObjectURL(blob);
       setSrc(previewUrl);
 
-      // Use teammate's upload helper
-      const blobFile = new File([blob], "cover.jpg", { type: "image/jpeg" });
       const { fileUrl, viewUrl } = await uploadViaPresign({
         kind: "cover",
-        file: blobFile,
+        contentType: "image/jpeg",
+        file: blob,
         userId: username,
-        contentTypeOverride: "image/jpeg",
       });
 
-      // Save URL to database
-      await api.updateCoverPhoto(username, { url: fileUrl });
+      await api.update({ concert_image: fileUrl }, username);
 
-      const renderedUrl = viewUrl || fileUrl;
-
-      setSrc(renderedUrl);
+      setSrc(viewUrl);
       localStorage.setItem(storageKey, fileUrl);
     } catch (error) {
-      console.error("Upload failed:", error);
-      alert(`Upload failed: ${error.message}`);
+      console.error("Cover upload failed:", error);
+      alert(`Upload failed: ${error?.message || "Unknown error"}`);
       setSrc(localStorage.getItem(storageKey) || fallbackSrc);
     } finally {
       setIsUploading(false);
@@ -123,10 +69,7 @@ export default function CoverPhoto({
           alt="Cover"
           className="absolute inset-0 h-full w-full object-cover"
           style={{ objectPosition, opacity: isUploading ? 0.6 : 1 }}
-          onError={() => {
-            setSrc(fallbackSrc);
-            localStorage.removeItem(storageKey);
-          }}
+          onError={handleError}
         />
         <div className="absolute inset-0 bg-black/10 pointer-events-none" />
 
@@ -138,12 +81,14 @@ export default function CoverPhoto({
           </div>
         )}
 
-        <div className="absolute right-4 bottom-4">
-          <EditCoverPhotoButton
-            onSelect={handleFileSelect}
-            disabled={isUploading}
-          />
-        </div>
+        {editable && (
+          <div className="absolute right-4 bottom-4">
+            <EditCoverPhotoButton
+              onSelect={handleFileSelect}
+              disabled={isUploading}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

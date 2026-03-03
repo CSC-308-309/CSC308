@@ -33,13 +33,13 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative bg-[#7E5179]">
-      <button
+      {/* <button
         onClick={handleClose}
         className="absolute top-6 left-6 text-white hover:text-black transition"
         aria-label="Close"
       >
         <X size={35} />
-      </button>
+      </button> */}
 
       <div className="absolute top-12 left-1/2 transform -translate-x-1/2 flex items-center gap-3">
         <img src={logoIcon} alt="Mic" className="w-16 h-16" />

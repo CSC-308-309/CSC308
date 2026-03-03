@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import { presignUpload, presignView } from "./models/media.js";
+import bcrypt from "bcrypt";
+import { UsersModel } from "./models/User.js"; 
+import { authenticate } from "./middleware/authMiddleware.js";
 
 export function createApp({ db }) {
   const app = express();
@@ -142,6 +145,48 @@ export function createApp({ db }) {
     }
   });
 
+  // Public profile (safe fields only; no email/password)
+  app.get("/profiles/:username", async (req, res) => {
+    const user = await db.User.getUserByUsername(req.params.username);
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const {
+      id,
+      username,
+      name,
+      role,
+      age,
+      gender,
+      genre,
+      experience,
+      main_image,
+      concert_image,
+      last_song,
+      last_song_desc,
+      created_at,
+      updated_at,
+    } = user;
+
+    res.json({
+      id,
+      username,
+      name,
+      role,
+      age,
+      gender,
+      genre,
+      experience,
+      main_image,
+      concert_image,
+      last_song,
+      last_song_desc,
+      created_at,
+      updated_at,
+    });
+  });
+
   // Update user (profile info) by username
   app.put("/users/:username", async (req, res) => {
     console.log(`++++++++++++++++ Received update for user ${req.params.username} with body:`, req.body);
@@ -240,6 +285,56 @@ export function createApp({ db }) {
       res.json(result);
     } catch (err) {
       console.error("Error in block route:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Undo interaction (like/dislike/block) with a target user
+  app.delete(
+    "/users/:username/interactions/:targetUsername/:interactionType",
+    async (req, res) => {
+      try {
+        const { username, targetUsername, interactionType } = req.params;
+        const allowedTypes = new Set(["like", "dislike", "block"]);
+        if (!allowedTypes.has(interactionType)) {
+          return res.status(400).json({ error: "Invalid interaction type" });
+        }
+
+        const validation = await validateUserInteraction(username, targetUsername);
+        if (validation.error) {
+          return res.status(validation.status).json({ error: validation.message });
+        }
+
+        const result = await db.Interactions.undoInteraction(
+          username,
+          targetUsername,
+          interactionType,
+        );
+
+        if (!result.success) {
+          return res.status(404).json({ error: "Interaction not found" });
+        }
+
+        return res.json(result);
+      } catch (err) {
+        console.error("Error in undo interaction route:", err);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+    },
+  );
+
+  // List mutual likes (matches) for a user
+  app.get("/users/:username/matches", async (req, res) => {
+    try {
+      const user = await db.Profile.getUserByUsername(req.params.username);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const matches = await db.Interactions.listMatches(req.params.username);
+      res.json(matches);
+    } catch (err) {
+      console.error("Error in matches route:", err);
       res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -480,6 +575,65 @@ export function createApp({ db }) {
       req.body,
     );
     res.json(updatedPreferences);
+  });
+//// Settings Routes ////
+
+  // Change Password
+  app.put("/users/:username/password", authenticate, async (req, res) => {
+    try {
+      const { username } = req.params;
+      const { currentPassword, newPassword } = req.body || {};
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "currentPassword and newPassword are required" });
+      }
+
+      // prevent editing someone else
+      if (req.username && req.username !== username) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const existingHash = await UsersModel.getPasswordHashByUsername(username);
+      if (!existingHash) return res.status(404).json({ message: "User not found" });
+
+      const valid = await bcrypt.compare(currentPassword, existingHash);
+      if (!valid) return res.status(400).json({ message: "Incorrect current password" });
+
+      const newHash = await bcrypt.hash(newPassword, 10);
+      const ok = await UsersModel.updatePasswordHashByUsername(username, newHash);
+
+      if (!ok) return res.status(500).json({ message: "Failed to update password" });
+
+      return res.json({ message: "Password updated successfully" });
+    } catch (err) {
+      console.error("Update password error:", err);
+      return res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Change Email
+  app.put("/users/:username/email", authenticate, async (req, res) => {
+    try {
+      const { username } = req.params;
+      const { email } = req.body || {};
+
+      if (!email) return res.status(400).json({ message: "Email is required" });
+
+      if (req.username && req.username !== username) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const updated = await UsersModel.updateEmailByUsername(username, email);
+      if (!updated) return res.status(404).json({ message: "User not found" });
+
+      return res.json({ message: "Email updated successfully", user: updated });
+    } catch (err) {
+      console.error("Update email error:", err);
+      if (err.code === "23505") {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+      return res.status(500).json({ message: "Server error" });
+    }
   });
 
   //// EVENT ROUTES ////

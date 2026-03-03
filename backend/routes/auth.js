@@ -3,6 +3,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UsersModel } from "../models/User.js";
+import { authenticate } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -44,7 +45,7 @@ router.post("/login", async (req, res) => {
     if (!valid) return res.status(400).json({ message: "Invalid credentials" });
 
     const token = jwt.sign(
-      { username: user.username },
+      { userId: user.id,username: user.username },
       process.env.JWT_SECRET,
       {
         expiresIn: "1h",
