@@ -2,7 +2,9 @@
 // Simple wrapper
 
 // Base URL for API requests. Reads from VITE_BASE_URL env var or defaults to localhost.
-const BASE_URL = import.meta.env.VITE_BASE_URL;// || "http://localhost:8000"; // will add this back
+
+const BASE_URL = "http://localhost:8000" || "http://localhost:8000"; // will add this back
+
 
 
 // async function request(path, options = {}) {
@@ -202,7 +204,7 @@ export const api = {
 
   // Notification routes
   // NOTE: these two are not valid routes, we don't want to list all notifs in the database
-  // fix their usage in the frontend to use listNotifications with username input
+  //        fix their usage in the frontend to use listNotifications with username input
   //listMyNotifications: (params = {}) => requestTypes.get(withQuery('/notifications/me', params)),
   //getMyUnreadNotificationsCount: () => requestTypes.get('/notifications/me/unread-count'),
   listNotifications: (params = {}, username) =>
