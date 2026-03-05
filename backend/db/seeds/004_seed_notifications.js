@@ -1,4 +1,4 @@
-import { pool } from "../db/index.js";
+import { pool } from "../index.js";
 
 const sampleNotifications = [
   // Taylor Swift notifications
@@ -150,8 +150,6 @@ async function seedNotifications() {
   try {
     console.log("Seeding notifications table...");
 
-    await pool.query("TRUNCATE TABLE notifications RESTART IDENTITY CASCADE");
-    console.log("  Cleared existing notifications");
 
     for (const notif of sampleNotifications) {
       // Get user IDs
@@ -208,10 +206,10 @@ async function seedNotifications() {
     console.log(
       `Successfully seeded ${sampleNotifications.length} notifications!`,
     );
-    process.exit(0);
+    return; // Return to caller instead of exiting
   } catch (error) {
     console.error("Error seeding notifications:", error);
-    process.exit(1);
+    throw error; // Let the caller handle the exit
   }
 }
 

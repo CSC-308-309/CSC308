@@ -3,6 +3,8 @@ import { ProfileModel } from "./Profile.js";
 import { InteractionsModel } from "./Interactions.js";
 import { MessagesModel } from "./Messages.js";
 import { NotificationsModel } from "./Notifications.js";
+import { ConcertMemoriesModel } from "./ConcertMemories.js";
+import { MusicClipsModel } from "./MusicClips.js";
 // add more models here as you create them
 
 export const dbModels = {
@@ -11,5 +13,7 @@ export const dbModels = {
   Interactions: InteractionsModel,
   Messages: MessagesModel,
   Notifications: NotificationsModel,
+  ConcertMemories: ConcertMemoriesModel,
+  MusicClips: MusicClipsModel,
   // add them here as well
 };
