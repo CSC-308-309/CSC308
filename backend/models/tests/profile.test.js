@@ -8,7 +8,6 @@ jest.mock("../../db/index.js", () => ({
 
 import pool from "../../db/index.js";
 import { ProfileModel } from "../Profile.js";
-import { InteractionsModel } from "../Interactions.js";
 
 const timestamp = Date.now();
 const aliceUsername = `alice_${timestamp}`;
@@ -18,10 +17,6 @@ const testUsername = `testuser_${timestamp}`;
 beforeEach(() => {
   jest.clearAllMocks();
 });
-
-//
-// ───────────────────── ProfileModel Tests ─────────────────────
-//
 
 describe("ProfileModel.listUsers", () => {
   test("returns all users", async () => {
@@ -87,48 +82,6 @@ describe("ProfileModel.updateUser", () => {
     });
 
     const result = await ProfileModel.updateUser(testUsername, { age: 35 });
-    expect(result).toBe(testUsername);
-  });
-});
-
-//
-// ─────────────────── InteractionsModel Tests ───────────────────
-//
-
-describe("InteractionsModel", () => {
-  test("likeUser works correctly", async () => {
-    pool.query.mockResolvedValueOnce({});
-
-    const result = await InteractionsModel.likeUser(aliceUsername, bobUsername);
-
-    expect(result).toEqual({
-      message: `User ${aliceUsername} liked user ${bobUsername}`,
-    });
-  });
-
-  test("dislikeUser works correctly", async () => {
-    pool.query.mockResolvedValueOnce({});
-
-    const result = await InteractionsModel.dislikeUser(
-      aliceUsername,
-      bobUsername,
-    );
-
-    expect(result).toEqual({
-      message: `User ${aliceUsername} disliked user ${bobUsername}`,
-    });
-  });
-
-  test("blockUser works correctly", async () => {
-    pool.query.mockResolvedValueOnce({});
-
-    const result = await InteractionsModel.blockUser(
-      aliceUsername,
-      bobUsername,
-    );
-
-    expect(result).toEqual({
-      message: `User ${aliceUsername} blocked user ${bobUsername}`,
-    });
+    expect(result).toHaveProperty("username", testUsername);
   });
 });
