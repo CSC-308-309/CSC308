@@ -34,6 +34,22 @@ describe("InteractionsModel", () => {
     });
   });
 
+  test("likeUser returns match message when reciprocal like exists", async () => {
+    const insertRow = { id: 13, interaction_type: "like" };
+    pool.query
+      .mockResolvedValueOnce({ rows: [insertRow] })
+      .mockResolvedValueOnce({ rows: [{ is_match: true }] });
+
+    const result = await InteractionsModel.likeUser(aliceUsername, bobUsername);
+
+    expect(result).toEqual({
+      success: true,
+      isMatch: true,
+      message: `You matched with ${bobUsername}`,
+      interaction: insertRow,
+    });
+  });
+
   test("dislikeUser works correctly", async () => {
     const insertRow = { id: 11, interaction_type: "dislike" };
     pool.query.mockResolvedValueOnce({ rows: [insertRow] });
@@ -170,4 +186,3 @@ describe('listMatches', () => {
     ).rejects.toThrow("Query timeout");
   });
 });
-
