@@ -674,112 +674,126 @@ export function createApp({ db }) {
     res.json(result);
   });
 
-  //// CONCERT MEMORIES ROUTES ////
-  
-  // Create a new concert memory
-  app.post("/concertMemories/new/:userId", async (req, res) => {
-    try {
-      
-      const memory = await db.ConcertMemories.create(parseInt(userId), req.body);
-      res.status(201).json(memory);
-    } catch (error) {
-      console.error("Error creating concert memory:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+//// CONCERT MEMORIES ROUTES ////
 
-  // Get all concert memories
-  app.get("/concertMemories/:userId", async (req, res) => {
-    try {
-      const { userId } = req.params;
-      const memories = await db.ConcertMemories.getAllConcertMemoriesById(parseInt(userId));
-      res.json(memories);
-    } catch (error) {
-      console.error("Error getting all concert memories:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+// Create a new concert memory
+app.post("/concertMemories/new/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const memory = await db.ConcertMemories.create(Number(userId), req.body);
+    return res.status(201).json(memory);
+  } catch (error) {
+    console.error("Error creating concert memory:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
-  // Update a concert memory
-  app.put("/concertMemories/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const updateData = req.body;
-      
-      const updatedMemory = await db.ConcertMemories.updateMemory(id, req.body);
-      res.json(updatedMemory);
-    } catch (error) {
-      console.error("Error updating concert memory:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+// Get all concert memories for a user
+app.get("/concertMemories/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const memories = await db.ConcertMemories.getConcertMemoriesByUserId(
+      Number(userId),
+    );
+    return res.json(memories);
+  } catch (error) {
+    console.error("Error getting concert memories:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
-  // Delete a concert memory
-  app.delete("/concertMemories/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const deleted = await db.ConcertMemories.deleteMemory(parseInt(id));
-      if (deleted) {
-        res.json({ message: "Concert memory deleted successfully" });
-      } else {
-        res.status(404).json({ message: "Concert memory not found" });
-      }
-    } catch (error) {
-      console.error("Error deleting concert memory:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+// Update a concert memory
+app.put("/concertMemories/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await db.ConcertMemories.updateMemory(Number(id), req.body);
 
-  //// MUSIC CLIPS ROUTES ////
-  
-  // Create a new music clip
-  app.post("/musicClips/new/:userId", async (req, res) => {
-    try {
-      const clip = await db.MusicClips.create(parseInt(userId), req.body);
-      res.status(201).json(clip);
-    } catch (error) {
-      console.error("Error creating music clip:", error);
-      res.status(500).json({ message: "Server error" });
+    if (!updated) {
+      return res.status(404).json({ message: "Concert memory not found" });
     }
-  });
 
-  // Get all music clips
-  app.get("/musicClips/:userId", async (req, res) => {
-    try {
-      const clips = await db.MusicClips.getMusicClipsById(parseInt(userId));
-      res.json(clips);
-    } catch (error) {
-      console.error("Error getting music clips:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+    return res.json(updated);
+  } catch (error) {
+    console.error("Error updating concert memory:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
-  // Update a music clip
-  app.put("/musicClips/:id", async (req, res) => {
-    try {
-      
-      const updatedClip = await db.MusicClips.updateClip(parseInt(id), req.body);
-      res.json(updatedClip);
-    } catch (error) {
-      console.error("Error updating music clip:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+// Delete a concert memory
+app.delete("/concertMemories/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await db.ConcertMemories.delete(Number(id));
 
-  // Delete a music clip
-  app.delete("/musicClips/:id", async (req, res) => {
-    try {
-      const deleted = await db.MusicClips.delete(parseInt(id));
-      if (deleted) {
-        res.json({ message: "Music clip deleted successfully" });
-      } else {
-        res.status(404).json({ message: "Music clip not found" });
-      }
-    } catch (error) {
-      console.error("Error deleting music clip:", error);
-      res.status(500).json({ message: "Server error" });
+    if (deleted) {
+      return res.json({ message: "Concert memory deleted successfully" });
     }
-  });
+    return res.status(404).json({ message: "Concert memory not found" });
+  } catch (error) {
+    console.error("Error deleting concert memory:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+//// MUSIC CLIPS ROUTES ////
+
+// Create a new music clip
+app.post("/musicClips/new/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const clip = await db.MusicClips.create(Number(userId), req.body);
+    return res.status(201).json(clip);
+  } catch (error) {
+    console.error("Error creating music clip:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get all music clips for a user
+app.get("/musicClips/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const clips = await db.MusicClips.getMusicClipsById(Number(userId));
+
+    return res.json(clips);
+  } catch (error) {
+    console.error("Error getting music clips:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update a music clip
+app.put("/musicClips/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedClip = await db.MusicClips.updateClip(Number(id), req.body);
+
+    if (!updatedClip) {
+      return res.status(404).json({ message: "Music clip not found" });
+    }
+
+    return res.json(updatedClip);
+  } catch (error) {
+    console.error("Error updating music clip:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete a music clip
+app.delete("/musicClips/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await db.MusicClips.delete(Number(id));
+
+    if (deleted) {
+      return res.json({ message: "Music clip deleted successfully" });
+    }
+    return res.status(404).json({ message: "Music clip not found" });
+  } catch (error) {
+    console.error("Error deleting music clip:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
   return app;
 }

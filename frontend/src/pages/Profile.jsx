@@ -61,6 +61,7 @@ function mapProfileDataToDbUpdate(profileData = {}) {
 export default function Profile() {
   const initialUsername = api.currentUsername() || "";
   const [username, setUsername] = useState(initialUsername);
+  const [userId, setUserId] = useState(null);
   const [profileData, setProfileData] = useState(() =>
     getInitialProfileData(
       buildUserStorageKey(PROFILE_STORAGE_KEY, initialUsername),
@@ -83,6 +84,7 @@ export default function Profile() {
     const hydrateFromDb = async () => {
       try {
         const dbUser = await api.getByUsername();
+        setUserId(dbUser?.id ?? null);
         const merged = mapDbUserToProfileData(
           dbUser,
           getInitialProfileData(
@@ -186,7 +188,7 @@ export default function Profile() {
             <div className="col-span-12 lg:col-span-8 pr-5 space-y-10">
               {/* Concert Memories Section */}
               <section>
-                <ConcertMemories username={username} />
+                <ConcertMemories username={username} userId={userId} canUpload />
               </section>
 
               {/* Divider for clarity */}
@@ -194,7 +196,7 @@ export default function Profile() {
 
               {/* Music Clips Section */}
               <section>
-                <MusicClips username={username} />
+                <MusicClips username={username} userId={userId} canUpload />
               </section>
             </div>
 

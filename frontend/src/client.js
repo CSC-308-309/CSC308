@@ -5,8 +5,6 @@
 
 const BASE_URL = "http://localhost:8000" || "http://localhost:8000"; // will add this back
 
-
-
 // async function request(path, options = {}) {
 //   const res = await fetch(`${BASE_URL}${path}`, {
 //     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
@@ -65,7 +63,12 @@ const requestTypes = {
   get: (path) => request(path, { method: "GET" }),
   post: (path, data) =>
     request(path, { method: "POST", body: JSON.stringify(data) }),
-  put: (path, data, options = {}) => request(path, { method: "PUT", body: JSON.stringify(data), ...options }),
+  put: (path, data, options = {}) =>
+    request(path, {
+      method: "PUT",
+      body: JSON.stringify(data),
+      ...options,
+    }),
   delete: (path) => request(path, { method: "DELETE" }),
 
   // patch helper for partial updates (useful for message edits, chat settings, etc.)
@@ -127,7 +130,9 @@ export const api = {
       data,
     ),
   deleteUser: (username) =>
-    requestTypes.delete(`/users/${encodeURIComponent(resolveUsername(username))}`),
+    requestTypes.delete(
+      `/users/${encodeURIComponent(resolveUsername(username))}`,
+    ),
   signup: (profile) => requestTypes.post("/auth/signup", profile),
   login: (credentials) => requestTypes.post("/auth/login", credentials),
 
@@ -170,18 +175,13 @@ export const api = {
   listChatParticipants: (chatId) =>
     requestTypes.get(`/chats/${encodeURIComponent(chatId)}/participants`),
   addChatParticipants: (chatId, data) =>
-    requestTypes.post(
-      `/chats/${encodeURIComponent(chatId)}/participants`,
-      data,
-    ),
+    requestTypes.post(`/chats/${encodeURIComponent(chatId)}/participants`, data),
   removeChatParticipant: (chatId, username) =>
     requestTypes.delete(
       `/chats/${encodeURIComponent(chatId)}/participants/${encodeURIComponent(username)}`,
     ),
   listMessages: (chatId, params = {}) =>
-    requestTypes.get(
-      withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params),
-    ),
+    requestTypes.get(withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params)),
   getMessage: (chatId, messageId) =>
     requestTypes.get(
       `/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`,
@@ -203,10 +203,6 @@ export const api = {
     requestTypes.post(`/chats/${encodeURIComponent(chatId)}/typing`, data),
 
   // Notification routes
-  // NOTE: these two are not valid routes, we don't want to list all notifs in the database
-  //        fix their usage in the frontend to use listNotifications with username input
-  //listMyNotifications: (params = {}) => requestTypes.get(withQuery('/notifications/me', params)),
-  //getMyUnreadNotificationsCount: () => requestTypes.get('/notifications/me/unread-count'),
   listNotifications: (params = {}, username) =>
     requestTypes.get(
       withQuery(
@@ -222,22 +218,11 @@ export const api = {
     requestTypes.get(`/notifications/id/${encodeURIComponent(notificationId)}`),
   createNotification: (data) => requestTypes.post("/notifications", data),
   markNotificationRead: (notificationId) =>
-    requestTypes.post(
-      `/notifications/${encodeURIComponent(notificationId)}/read`,
-      {},
-    ),
+    requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/read`, {}),
   markNotificationUnread: (notificationId) =>
-    requestTypes.post(
-      `/notifications/${encodeURIComponent(notificationId)}/unread`,
-      {},
-    ),
-
-  //markAllNotificationsRead: (data = {}) => requestTypes.post("/notifications/readAll", data),
-  //archiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/archive`,{},),
-  //unarchiveNotification: (notificationId) => requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unarchive`,{},),
+    requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unread`, {}),
   deleteNotification: (notificationId) =>
     requestTypes.delete(`/notifications/id/${encodeURIComponent(notificationId)}`),
-  //getUnreadNotificationsCount: (params = {}) => requestTypes.get(withQuery('/notifications/unread-count', params)),
   getNotificationPreferences: (username) =>
     requestTypes.get(
       `/notifications/preferences/${encodeURIComponent(resolveUsername(username))}`,
@@ -250,29 +235,38 @@ export const api = {
 
   // Settings Routes!
   updateEmail: (data, username) =>
-    requestTypes.put(
-      `/users/${encodeURIComponent(resolveUsername(username))}/email`,
-      data
-    ),
+    requestTypes.put(`/users/${encodeURIComponent(resolveUsername(username))}/email`, data),
 
   updatePassword: (data, username) =>
-    requestTypes.put(
-      `/users/${encodeURIComponent(resolveUsername(username))}/password`,
-      data
-    ),
+    requestTypes.put(`/users/${encodeURIComponent(resolveUsername(username))}/password`, data),
 
   // Event routes
   listEvents: () => requestTypes.get("/events"),
 
   //Photo Storage routes
-  presignUpload: (uploadParams) =>
-    requestTypes.put("/media/presign", uploadParams),
-  //presignView: (viewParams) =>
-    //requestTypes.put("/media/presign-view", viewParams),
+  presignUpload: (uploadParams) => requestTypes.put("/media/presign", uploadParams),
   presignView: (data) => requestTypes.post("/media/presign-view", data),
   // Backward-compatible helper used by existing components.
-  presignViewUrl: (fileUrl) =>
-    requestTypes.put("/media/presign-view", { fileUrl }),
+  presignViewUrl: (fileUrl) => requestTypes.put("/media/presign-view", { fileUrl }),
+
+  // Video Storage routes (Concert Memories + Music Clips)
+  listConcertMemories: (userId) =>
+    requestTypes.get(`/concertMemories/${encodeURIComponent(userId)}`),
+  createConcertMemory: (userId, data) =>
+    requestTypes.post(`/concertMemories/new/${encodeURIComponent(userId)}`, data),
+  updateConcertMemory: (id, data) =>
+    requestTypes.put(`/concertMemories/${encodeURIComponent(id)}`, data),
+  deleteConcertMemory: (id) =>
+    requestTypes.delete(`/concertMemories/${encodeURIComponent(id)}`),
+
+  listMusicClips: (userId) =>
+    requestTypes.get(`/musicClips/${encodeURIComponent(userId)}`),
+  createMusicClip: (userId, data) =>
+    requestTypes.post(`/musicClips/new/${encodeURIComponent(userId)}`, data),
+  updateMusicClip: (id, data) =>
+    requestTypes.put(`/musicClips/${encodeURIComponent(id)}`, data),
+  deleteMusicClip: (id) =>
+    requestTypes.delete(`/musicClips/${encodeURIComponent(id)}`),
 };
 
 export { BASE_URL };

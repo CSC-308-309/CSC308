@@ -1,50 +1,144 @@
 // src/components/ConcertMemories.jsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Star, Plus } from "lucide-react";
 import ConcertIcon from "../assets/concert.svg";
 import NewConcertMemory from "./NewConcertMemory";
 import ConcertMemoryDetail from "./ConcertMemoryDetail";
+import { api } from "../client";
+import { smartResolveUrl } from "../utils/s3Upload";
 
-export default function ConcertMemories({ username }) {
-  const [memories, setMemories] = useState([
-    {
-      id: 1,
-      title: "Concert Memories",
-      updatedToday: true,
-      starred: false,
-      thumbnailViewUrl: ConcertIcon,
-      isPlaceholder: true,
-    },
-    {
-      id: 2,
-      title: "Concert Memories",
-      updatedToday: true,
-      starred: false,
-      thumbnailViewUrl: ConcertIcon,
-      isPlaceholder: true,
-    },
-    {
-      id: 3,
-      title: "Concert Memories",
-      updatedToday: true,
-      starred: false,
-      thumbnailViewUrl: ConcertIcon,
-      isPlaceholder: true,
-    },
-  ]);
+function makePlaceholders() {
+  return [1, 2, 3].map((id) => ({
+    id,
+    title: "Concert Memories",
+    updatedToday: true,
+    starred: false,
+    thumbnailViewUrl: ConcertIcon,
+    isPlaceholder: true,
+  }));
+}
+
+function normalizeDbMemory(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    title: row.title || "Concert Memory",
+    description: row.description || "",
+    updatedToday: true,
+    starred: !!row.is_starred,
+    isPlaceholder: false,
+
+    mediaUrl: row.video_url || row.videoUrl || row.mediaUrl || "",
+    thumbnailUrl: row.thumbnail_url || row.thumbnailUrl || "",
+
+    thumbnailViewUrl: "",
+  };
+}
+
+export default function ConcertMemories({ username, userId, canUpload = true }) {
+  const [memories, setMemories] = useState(() => makePlaceholders());
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMemory, setSelectedMemory] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
 
-  const toggleStar = (id) => {
+  const [resolvedUserId, setResolvedUserId] = useState(userId ?? null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function resolveId() {
+      if (userId) {
+        setResolvedUserId(userId);
+        return;
+      }
+      if (!username) {
+        setResolvedUserId(null);
+        return;
+      }
+
+      try {
+        const user = await api.getByUsername(username);
+        if (!cancelled) setResolvedUserId(user?.id ?? null);
+      } catch (e) {
+        console.error("Failed to resolve userId for concert memories:", e);
+        if (!cancelled) setResolvedUserId(null);
+      }
+    }
+
+    resolveId();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, username]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      if (!resolvedUserId) {
+        setMemories(makePlaceholders());
+        return;
+      }
+
+      try {
+        const res = await api.listConcertMemories(resolvedUserId);
+        const rows = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.memories)
+            ? res.memories
+            : Array.isArray(res?.concertMemories)
+              ? res.concertMemories
+              : [];
+
+        const normalized = rows.map(normalizeDbMemory).filter(Boolean);
+
+        const withThumbs = await Promise.all(
+          normalized.map(async (m) => {
+            const thumb = m.thumbnailUrl;
+            if (!thumb) return { ...m, thumbnailViewUrl: ConcertIcon };
+            try {
+              const view = await smartResolveUrl(thumb);
+              return { ...m, thumbnailViewUrl: view || thumb || ConcertIcon };
+            } catch {
+              return { ...m, thumbnailViewUrl: thumb || ConcertIcon };
+            }
+          }),
+        );
+
+        if (cancelled) return;
+
+        setMemories(withThumbs.length ? withThumbs : makePlaceholders());
+      } catch (e) {
+        console.error("Failed to load concert memories:", e);
+        if (!cancelled) setMemories(makePlaceholders());
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [resolvedUserId]);
+
+  const toggleStar = async (id) => {
     setMemories((prev) =>
       prev.map((m) => (m.id === id ? { ...m, starred: !m.starred } : m)),
     );
+
+    const target = memories.find((m) => m.id === id);
+    if (!target || target.isPlaceholder) return;
+
+    try {
+      await api.updateConcertMemory(id, { is_starred: !target.starred });
+    } catch (e) {
+      console.warn("Failed to persist concert memory star:", e);
+    }
   };
 
   const handleNewClick = () => {
-    if (!username) {
+    if (!canUpload) return;
+    if (!resolvedUserId) {
       alert("You must be logged in to upload a concert memory.");
       return;
     }
@@ -53,38 +147,45 @@ export default function ConcertMemories({ username }) {
 
   const handleCloseModal = () => setIsModalOpen(false);
 
-  const handleSaveMemory = (memoryData) => {
-    const firstPlaceholderIndex = memories.findIndex((m) => m.isPlaceholder);
+  const handleSaveMemory = async (memoryData) => {
+    if (!resolvedUserId) return;
 
-    const newMemory = {
-      id:
-        firstPlaceholderIndex !== -1
-          ? memories[firstPlaceholderIndex].id
-          : Date.now(),
-      title: memoryData.title,
-      description: memoryData.description || "",
-      type: "video",
-      updatedToday: true,
-      starred: false,
-      isPlaceholder: false,
-
-      mediaUrl: memoryData.mediaUrl,
-      mediaViewUrl: memoryData.mediaViewUrl,
-
-      thumbnailUrl: memoryData.thumbnailUrl || "",
-      thumbnailViewUrl: memoryData.thumbnailViewUrl || ConcertIcon,
+    // Upload already happened in NewConcertMemory.
+    const payload = {
+      title: (memoryData.title || "").trim(),
+      description: (memoryData.description || "").trim(),
+      video_url: memoryData.mediaUrl || "",
+      thumbnail_url: memoryData.thumbnailUrl || "",
     };
 
-    setMemories((prev) => {
-      if (firstPlaceholderIndex !== -1) {
-        const copy = [...prev];
-        copy[firstPlaceholderIndex] = newMemory;
-        return copy;
-      }
-      return [newMemory, ...prev];
-    });
+    try {
+      const created = await api.createConcertMemory(resolvedUserId, payload);
+      const row = created?.memory || created?.concertMemory || created;
 
-    setIsModalOpen(false);
+      const normalized = normalizeDbMemory({
+        ...payload,
+        ...row,
+      });
+
+      const thumbView = normalized.thumbnailUrl
+        ? await smartResolveUrl(normalized.thumbnailUrl)
+        : ConcertIcon;
+
+      const newMemory = {
+        ...normalized,
+        thumbnailViewUrl: thumbView || normalized.thumbnailUrl || ConcertIcon,
+      };
+
+      setMemories((prev) => {
+        const existingReal = prev.filter((m) => !m.isPlaceholder);
+        return [newMemory, ...existingReal];
+      });
+
+      setIsModalOpen(false);
+    } catch (e) {
+      console.error("Failed to save concert memory to DB:", e);
+      alert(e.message || "Failed to save concert memory");
+    }
   };
 
   const handleMemoryClick = (memory) => {
@@ -152,28 +253,32 @@ export default function ConcertMemories({ username }) {
           </div>
         ))}
 
-        <div className="flex flex-col items-start">
-          <button
-            onClick={handleNewClick}
-            className="bg-[#CCC2DC] rounded-xl p-4 hover:bg-[#A488D1] transition-colors flex items-center justify-center min-h-[180px] w-[180px] group"
-            type="button"
-          >
-            <Plus
-              size={32}
-              className="text-[#1D1B20] group-hover:text-[#1D1B20] transition-colors"
-            />
-          </button>
-          <p className="text-sm font-semibold text-gray-800 mt-2 text-left">
-            New
-          </p>
-        </div>
+        {canUpload && (
+          <div className="flex flex-col items-start">
+            <button
+              onClick={handleNewClick}
+              className="bg-[#CCC2DC] rounded-xl p-4 hover:bg-[#A488D1] transition-colors flex items-center justify-center min-h-[180px] w-[180px] group"
+              type="button"
+            >
+              <Plus
+                size={32}
+                className="text-[#1D1B20] group-hover:text-[#1D1B20] transition-colors"
+              />
+            </button>
+            <p className="text-sm font-semibold text-gray-800 mt-2 text-left">
+              New
+            </p>
+          </div>
+        )}
 
-        <NewConcertMemory
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onSave={handleSaveMemory}
-          username={username}
-        />
+        {canUpload && (
+          <NewConcertMemory
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            onSave={handleSaveMemory}
+            username={username}
+          />
+        )}
 
         <ConcertMemoryDetail
           memory={selectedMemory}
