@@ -13,7 +13,7 @@ export function createApp({ db }) {
   const allowedOrigins = [
     "http://localhost:5173",
     "https://ashy-hill-04c3bda0f.6.azurestaticapps.net",
-    "https://csc-308-frontend.vercel.app/",
+    "https://csc-308-frontend.vercel.app",
   ];
 
   app.use(
