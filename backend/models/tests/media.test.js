@@ -1,4 +1,5 @@
 import { presignUpload, presignView } from "../../models/media.js";
+import { S3Client } from "@aws-sdk/client-s3";
 
 const mockGetSignedUrl = jest.fn();
 const mockSend = jest.fn();
@@ -238,13 +239,18 @@ describe("presignUpload", () => {
     ["image/webp", "webp"],
     ["video/mp4",  "mp4"],
     ["video/webm", "webm"],
+    ["audio/mpeg", "mp3"],
+    ["audio/mp4",  "m4a"],
   ])(
     "key has correct extension for contentType %s → .%s",
     async (contentType, expectedExt) => {
       mockGetSignedUrl.mockResolvedValue("https://s3.example.com/signed");
 
       // Pick a kind that supports this contentType
-      const kind = contentType.startsWith("video") ? "video" : "profile";
+      const kind =
+        contentType.startsWith("video") || contentType.startsWith("audio")
+          ? "video"
+          : "profile";
       const { req, res } = makeReqRes({ kind, contentType, fileSize: 100, userId: "u1" });
 
       await presignUpload(req, res);
@@ -252,6 +258,40 @@ describe("presignUpload", () => {
       expect(res._body.key).toMatch(new RegExp(`\\.${expectedExt}$`));
     }
   );
+
+  test("includes AWS session token in S3 client credentials when present", async () => {
+    setEnv({ AWS_SESSION_TOKEN: "session-token-123" });
+    const { req, res } = makeReqRes({
+      kind: "profile",
+      contentType: "image/jpeg",
+      fileSize: 100,
+      userId: "u1",
+    });
+
+    await presignUpload(req, res);
+
+    const s3Args = S3Client.mock.calls.at(-1)[0];
+    expect(s3Args.credentials).toMatchObject({
+      accessKeyId: "fake-key",
+      secretAccessKey: "fake-secret",
+      sessionToken: "session-token-123",
+    });
+  });
+
+  test("returns String(e) in details when getSignedUrl rejects with a non-Error", async () => {
+    mockGetSignedUrl.mockRejectedValue("raw failure");
+    const { req, res } = makeReqRes({
+      kind: "profile",
+      contentType: "image/jpeg",
+      fileSize: 100,
+      userId: "u1",
+    });
+
+    await presignUpload(req, res);
+
+    expect(res._status).toBe(500);
+    expect(res._body.details).toBe("raw failure");
+  });
 });
 
 // ─── presignView ──
@@ -351,6 +391,16 @@ describe("presignView", () => {
     expect(res._body.error).toBe("fileUrl or key required");
   });
 
+  test("returns 400 when req.body is missing", async () => {
+    const req = {};
+    const { res } = makeReqRes();
+
+    await presignView(req, res);
+
+    expect(res._status).toBe(400);
+    expect(res._body.error).toBe("fileUrl or key required");
+  });
+
   test("returns 400 when fileUrl is an invalid URL that resolves to an empty key", async () => {
     const { req, res } = makeReqRes({ fileUrl: "not-a-url-and-not-a-key" });
 
@@ -361,6 +411,16 @@ describe("presignView", () => {
     await presignView(req2, res2);
 
     expect(res2._status).toBe(400);
+  });
+
+  test("returns 400 when fileUrl is malformed http(s) URL", async () => {
+    // Forces URL constructor to throw inside toS3Key catch path.
+    const { req, res } = makeReqRes({ fileUrl: "https://%" });
+
+    await presignView(req, res);
+
+    expect(res._status).toBe(400);
+    expect(res._body.error).toBe("fileUrl or key required");
   });
 
   // ── Environment / AWS errors ───
@@ -390,5 +450,19 @@ describe("presignView", () => {
     expect(res._status).toBe(500);
     expect(res._body.error).toBe("Failed to create view URL");
     expect(res._body.details).toBe("Token expired");
+  });
+
+  test("returns String(e) in details when getSignedUrl rejects with a non-Error", async () => {
+    mockGetSignedUrl.mockRejectedValue("view raw failure");
+
+    const { req, res } = makeReqRes({
+      key: "public/profile-photos/u1/photo.jpg",
+    });
+
+    await presignView(req, res);
+
+    expect(res._status).toBe(500);
+    expect(res._body.error).toBe("Failed to create view URL");
+    expect(res._body.details).toBe("view raw failure");
   });
 });
