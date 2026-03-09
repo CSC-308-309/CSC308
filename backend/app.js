@@ -2,19 +2,22 @@ import express from "express";
 import cors from "cors";
 import { presignUpload, presignView } from "./models/media.js";
 import bcrypt from "bcrypt";
-import { UsersModel } from "./models/User.js"; 
+import { UsersModel } from "./models/User.js";
 import { authenticate } from "./middleware/authMiddleware.js";
 
 export function createApp({ db }) {
   const app = express();
 
   // When frontend uses credentials: "include", origin cannot be "*" — must be exact origin
+
   const allowedOrigins = [
     "http://localhost:5173",
     "https://ashy-hill-04c3bda0f.6.azurestaticapps.net",
+    "https://csc-308-frontend.vercel.app/",
   ];
 
-  app.use(cors({
+  app.use(
+    cors({
       origin: (origin, cb) => {
         if (!origin) return cb(null, true);
         return cb(null, allowedOrigins.includes(origin));
@@ -33,7 +36,12 @@ export function createApp({ db }) {
 
     const target = await db.Profile.getUserByUsername(targetUsername);
     if (!target) {
-      return { error: true, status: 400, message: "Target user does not exist", targetUsername };
+      return {
+        error: true,
+        status: 400,
+        message: "Target user does not exist",
+        targetUsername,
+      };
     }
 
     return { error: false, current, target };
@@ -189,7 +197,10 @@ export function createApp({ db }) {
 
   // Update user (profile info) by username
   app.put("/users/:username", async (req, res) => {
-    console.log(`++++++++++++++++ Received update for user ${req.params.username} with body:`, req.body);
+    console.log(
+      `++++++++++++++++ Received update for user ${req.params.username} with body:`,
+      req.body,
+    );
     const updatedUser = await db.User.updateUser(req.params.username, req.body);
     if (updatedUser) {
       res.json(updatedUser);
@@ -235,9 +246,14 @@ export function createApp({ db }) {
   // Like another user
   app.post("/users/:username/like", async (req, res) => {
     try {
-      const validation = await validateUserInteraction(req.params.username, req.body.targetUsername);
+      const validation = await validateUserInteraction(
+        req.params.username,
+        req.body.targetUsername,
+      );
       if (validation.error) {
-        return res.status(validation.status).json({ error: validation.message });
+        return res
+          .status(validation.status)
+          .json({ error: validation.message });
       }
 
       const result = await db.Interactions.likeUser(
@@ -254,9 +270,14 @@ export function createApp({ db }) {
   // Dislike another user
   app.post("/users/:username/dislike", async (req, res) => {
     try {
-      const validation = await validateUserInteraction(req.params.username, req.body.targetUsername);
+      const validation = await validateUserInteraction(
+        req.params.username,
+        req.body.targetUsername,
+      );
       if (validation.error) {
-        return res.status(validation.status).json({ error: validation.message });
+        return res
+          .status(validation.status)
+          .json({ error: validation.message });
       }
 
       const result = await db.Interactions.dislikeUser(
@@ -273,9 +294,14 @@ export function createApp({ db }) {
   // Block another user
   app.post("/users/:username/block", async (req, res) => {
     try {
-      const validation = await validateUserInteraction(req.params.username, req.body.targetUsername);
+      const validation = await validateUserInteraction(
+        req.params.username,
+        req.body.targetUsername,
+      );
       if (validation.error) {
-        return res.status(validation.status).json({ error: validation.message });
+        return res
+          .status(validation.status)
+          .json({ error: validation.message });
       }
 
       const result = await db.Interactions.blockUser(
@@ -300,9 +326,14 @@ export function createApp({ db }) {
           return res.status(400).json({ error: "Invalid interaction type" });
         }
 
-        const validation = await validateUserInteraction(username, targetUsername);
+        const validation = await validateUserInteraction(
+          username,
+          targetUsername,
+        );
         if (validation.error) {
-          return res.status(validation.status).json({ error: validation.message });
+          return res
+            .status(validation.status)
+            .json({ error: validation.message });
         }
 
         const result = await db.Interactions.undoInteraction(
@@ -576,7 +607,7 @@ export function createApp({ db }) {
     );
     res.json(updatedPreferences);
   });
-//// Settings Routes ////
+  //// Settings Routes ////
 
   // Change Password
   app.put("/users/:username/password", authenticate, async (req, res) => {
@@ -585,7 +616,9 @@ export function createApp({ db }) {
       const { currentPassword, newPassword } = req.body || {};
 
       if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: "currentPassword and newPassword are required" });
+        return res
+          .status(400)
+          .json({ message: "currentPassword and newPassword are required" });
       }
 
       // prevent editing someone else
@@ -594,15 +627,21 @@ export function createApp({ db }) {
       }
 
       const existingHash = await UsersModel.getPasswordHashByUsername(username);
-      if (!existingHash) return res.status(404).json({ message: "User not found" });
+      if (!existingHash)
+        return res.status(404).json({ message: "User not found" });
 
       const valid = await bcrypt.compare(currentPassword, existingHash);
-      if (!valid) return res.status(400).json({ message: "Incorrect current password" });
+      if (!valid)
+        return res.status(400).json({ message: "Incorrect current password" });
 
       const newHash = await bcrypt.hash(newPassword, 10);
-      const ok = await UsersModel.updatePasswordHashByUsername(username, newHash);
+      const ok = await UsersModel.updatePasswordHashByUsername(
+        username,
+        newHash,
+      );
 
-      if (!ok) return res.status(500).json({ message: "Failed to update password" });
+      if (!ok)
+        return res.status(500).json({ message: "Failed to update password" });
 
       return res.json({ message: "Password updated successfully" });
     } catch (err) {
