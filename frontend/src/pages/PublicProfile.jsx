@@ -202,13 +202,21 @@ export default function PublicProfile() {
           <div className="grid grid-cols-12 mt-5 w-[1160px]">
             <div className="col-span-12 lg:col-span-8 pr-5 space-y-10">
               <section>
-                <ConcertMemories username={viewedUsername} />
+                <ConcertMemories
+                  username={viewedUsername}
+                  userId={dbUser?.id}
+                  canUpload={false}
+                />
               </section>
 
               <div className="border-t border-gray-300 my-8"></div>
 
               <section>
-                <MusicClips username={viewedUsername} />
+                <MusicClips
+                  username={viewedUsername}
+                  userId={dbUser?.id}
+                  canUpload={false}
+                />
               </section>
             </div>
 
@@ -218,7 +226,6 @@ export default function PublicProfile() {
                   <AboutSection profileData={profileData} />
                 </div>
               </AboutCard>
-
             </div>
           </div>
         </div>

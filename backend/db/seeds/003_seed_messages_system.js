@@ -1,4 +1,4 @@
-import { pool } from "../db/index.js";
+import { pool } from "../index.js";
 
 const sampleChats = [
   {
@@ -144,13 +144,6 @@ async function seedMessagesSystem() {
   try {
     console.log("Seeding messages system...");
 
-    // Clear existing tables
-    await pool.query("TRUNCATE TABLE messages_read RESTART IDENTITY CASCADE");
-    await pool.query("TRUNCATE TABLE messages RESTART IDENTITY CASCADE");
-    await pool.query("TRUNCATE TABLE chat_members RESTART IDENTITY CASCADE");
-    await pool.query("TRUNCATE TABLE chats RESTART IDENTITY CASCADE");
-    console.log("  Cleared existing message tables");
-
     for (const chatData of sampleChats) {
       // Get creator ID
       const creatorQuery = "SELECT id FROM users WHERE username = $1";
@@ -255,10 +248,10 @@ async function seedMessagesSystem() {
     }
 
     console.log(`Successfully seeded messages system!`);
-    process.exit(0);
+    return; // Return to caller instead of exiting
   } catch (error) {
     console.error("Error seeding messages system:", error);
-    process.exit(1);
+    throw error; // Let the caller handle the exit
   }
 }
 

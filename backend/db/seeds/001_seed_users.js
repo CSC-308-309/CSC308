@@ -1,4 +1,4 @@
-import { pool } from "../db/index.js";
+import { pool } from "../index.js";
 import bcrypt from "bcrypt";
 
 const sampleUsers = [
@@ -144,9 +144,6 @@ async function seedUsers() {
   try {
     console.log("Seeding users table...");
 
-    await pool.query("TRUNCATE TABLE users RESTART IDENTITY CASCADE");
-    console.log("  Cleared existing users");
-
     for (const user of sampleUsers) {
       const passwordHash = await bcrypt.hash(user.password, 10);
 
@@ -181,15 +178,15 @@ async function seedUsers() {
     }
 
     console.log(`Successfully seeded ${sampleUsers.length} users!`);
-    process.exit(0);
+    return;
   } catch (error) {
     console.error("Error seeding users:", error);
-    process.exit(1);
+    throw error;
   }
 }
 
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   seedUsers();
 }
 
-module.exports = seedUsers;
+export default seedUsers;

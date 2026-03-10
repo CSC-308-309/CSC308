@@ -1,4 +1,4 @@
-import { pool } from "../db/index.js";
+import { pool } from "../index.js";
 
 const sampleInteractions = [
   {
@@ -47,8 +47,6 @@ async function seedInteractions() {
   try {
     console.log("Seeding interactions table...");
 
-    await pool.query("TRUNCATE TABLE interactions RESTART IDENTITY CASCADE");
-    console.log("  Cleared existing interactions");
 
     for (const interaction of sampleInteractions) {
       // Get user IDs from usernames
@@ -83,10 +81,10 @@ async function seedInteractions() {
     }
 
     console.log(`Successfully seeded interactions!`);
-    process.exit(0);
+    return; // Return to caller instead of exiting
   } catch (error) {
     console.error("Error seeding interactions:", error);
-    process.exit(1);
+    throw error; // Let the caller handle the exit
   }
 }
 
