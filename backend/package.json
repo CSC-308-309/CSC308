@@ -42,6 +42,9 @@
       "^.+\\.js$": "babel-jest"
     },
     "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
     "moduleFileExtensions": [
       "js"
     ],
