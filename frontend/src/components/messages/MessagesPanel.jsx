@@ -4,6 +4,7 @@ import ChatWindow from "./ChatWindow";
 import { api } from "../../client";
 import NewChatModel from "./NewChatModel";
 import ParticipantsModel from "./ParticipantsModel";
+import { useSearchParams } from "react-router-dom";
 
 export default function MessagesPanel() {
   const [chats, setChats] = useState([]);
@@ -16,6 +17,8 @@ export default function MessagesPanel() {
   const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [participants, setParticipants] = useState([]);
   const [isLoadingParticipants, setIsLoadingParticipants] = useState(false);
+  const [searchParams] = useSearchParams();
+  const chatIdFromUrl = searchParams.get("chatId");
 
   // Single source of truth for current username.
   const myUsername = api.currentUsername();
@@ -194,6 +197,19 @@ export default function MessagesPanel() {
       isMounted = false;
     };
   }, [myUsername]);
+
+  useEffect(() => {
+    if (!chatIdFromUrl) return;
+    if (!chats.length) return;
+
+    const found = chats.find(
+      (c) => String(c.id) === String(chatIdFromUrl)
+    );
+
+    if (found) {
+      handleSelectChat(found);
+    }
+  }, [chatIdFromUrl, chats]);
 
   // hydrates participants list into chats that don't have them
   useEffect(() => {

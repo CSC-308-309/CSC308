@@ -53,29 +53,39 @@ export default function NotificationSection({ title, items = [], onDelete }) {
         {items.map((notif) => {
           const {
             id,
-            username,
+            username,    
             type,
             message,
             link,
             is_read,
-            is_archived,
             created_at,
           } = notif;
 
-          // will give sync a different function once username is fixed in api route
-          const actionVariant = type === "match" ? "sync" : "read";
+          const actionVariant = type === "like" ? "sync" : "read";
+
+          let effectiveLink = link;
+          if (!effectiveLink) {
+            if (type === "match" || type === "like") {
+              effectiveLink = username ? `/profile/${username}` : "/profile";
+            } else if (type === "message") {
+              effectiveLink = notif.reference_id ? `/messages?chatId=${notif.reference_id}` : "/messages";
+            } else {
+              effectiveLink = "/notifications";
+            }
+          }
 
           return (
             <NotificationItem
               key={id}
               id={id}
               icon={iconForType(type)}
+              actorUsername={username}
+              link={link}
               message={
                 <span>
                   <strong>{username}</strong> {message}
                 </span>
               }
-              postText={is_archived ? "(Archived)" : link ? "View" : ""}
               time={timeAgo(created_at)}
               actionVariant={actionVariant}
               initialIsRead={Boolean(is_read)}
