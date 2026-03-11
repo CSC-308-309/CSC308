@@ -243,23 +243,42 @@ export function createApp({ db }) {
   app.post("/media/presign-view", presignView);
 
   //// INTERACTION ROUTES ////
-  // Like another user
+  // Like another user (with notifications)
   app.post("/users/:username/like", async (req, res) => {
     try {
       const validation = await validateUserInteraction(
         req.params.username,
         req.body.targetUsername,
       );
+
       if (validation.error) {
-        return res
-          .status(validation.status)
-          .json({ error: validation.message });
+        return res.status(validation.status).json({ error: validation.message });
       }
 
-      const result = await db.Interactions.likeUser(
-        req.params.username,
-        req.body.targetUsername,
-      );
+      const actorUsername = req.params.username;
+      const targetUsername = req.body.targetUsername;
+      const result = await db.Interactions.likeUser(actorUsername, targetUsername);
+
+      try {
+        await db.Notifications.createNotification({
+          username: targetUsername, 
+          actorUsername,
+          type: result.isMatch ? "match" : "like",
+          referenceId: result?.interaction?.id ?? null,
+        });
+
+        if (result.isMatch) {
+          await db.Notifications.createNotification({
+            username: actorUsername,
+            actorUsername: targetUsername,
+            type: "match",
+            referenceId: result?.interaction?.id ?? null,
+          });
+        }
+      } catch (e) {
+        console.error("Failed to create like/match notification:", e);
+      }
+
       res.json(result);
     } catch (err) {
       console.error("Error in like route:", err);
@@ -469,13 +488,41 @@ export function createApp({ db }) {
     }
   });
 
+  // Send a message (with notifications)
   app.post("/chats/:chatId/messages", async (req, res) => {
-    console.log("++++++++++++++++++ message sent?", req.body);
-    const newMessage = await db.Messages.sendMessage(
-      req.params.chatId,
-      req.body,
-    );
-    res.status(201).json(newMessage);
+    try {
+
+      const chatId = req.params.chatId;
+      const senderUsername = req.body?.sender_username;
+      const newMessage = await db.Messages.sendMessage(chatId, req.body);
+
+      try {
+        const participants = await db.Messages.listChatParticipants(chatId);
+        const list = Array.isArray(participants)
+          ? participants
+          : participants?.participants || [];
+
+        for (const p of list) {
+          const recipientUsername = p?.username;
+          if (!recipientUsername) continue;
+          if (recipientUsername === senderUsername) continue;
+
+          await db.Notifications.createNotification({
+            username: recipientUsername,
+            actorUsername: senderUsername,
+            type: "message",
+            referenceId: chatId,
+          });
+        }
+      } catch (e) {
+        console.error("Failed to create message notifications:", e);
+      }
+
+      res.status(201).json(newMessage);
+    } catch (err) {
+      console.error("Error sending message:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
   app.patch("/chats/:chatId/messages/:messageId", async (req, res) => {
