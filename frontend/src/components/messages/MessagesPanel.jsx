@@ -20,18 +20,20 @@ export default function MessagesPanel() {
   // Single source of truth for current username.
   const myUsername = api.currentUsername();
 
-  function normalizeChat(c) {
+  const normalizeChat = useCallback((c) => {
     return {
       ...c,
       id: c.id,
       name: c.name || "(Unnamed chat)",
       lastMessage: c.last_message_content || "",
-      time: c.last_message_at ? new Date(c.last_message_at).toLocaleString() : "",
+      time: c.last_message_at
+        ? new Date(c.last_message_at).toLocaleString()
+        : "",
       avatarUrl: c.avatarUrl ?? c.group_photo_url ?? null,
       displayName: c.displayName ?? c.name ?? "(Unnamed chat)",
       displayHandle: c.displayHandle ?? null,
     };
-  }
+  }, []);
 
   const normalizeMessage = useCallback(
     (m) => {
@@ -82,7 +84,7 @@ export default function MessagesPanel() {
           } catch {
             return { ...p, avatar: null };
           }
-        })
+        }),
       );
 
       setParticipants(list);
@@ -94,43 +96,46 @@ export default function MessagesPanel() {
   }
 
   async function handleDeleteChat(chatId) {
-  try {
-    setError(null);
+    try {
+      setError(null);
 
-    await api.deleteChat(chatId);
+      await api.deleteChat(chatId);
 
-    // If the deleted chat was selected, clear it
-    if (selectedChat?.id === chatId) {
-      setSelectedChat(null);
-    }
+      // If the deleted chat was selected, clear it
+      if (selectedChat?.id === chatId) {
+        setSelectedChat(null);
+      }
 
-    // Refresh chat list
-    await refreshChats();
-  } catch (e) {
-    setError(e?.message || "Failed to delete chat");
-  }
-}
-
-  async function refreshChats(selectChatId = null) {
-    if (!myUsername) return;
-
-    const data = await api.listChats();
-    const listRaw = Array.isArray(data) ? data : data?.chats || [];
-    const list = listRaw.map(normalizeChat);
-
-    setChats(list);
-
-    if (selectChatId) {
-      setSelectedChat(
-        list.find((c) => String(c.id) === String(selectChatId)) || null
-      );
-    } else {
-      setSelectedChat((prev) => {
-        if (!prev) return null;
-        return list.find((c) => String(c.id) === String(prev.id)) || null;
-      });
+      // Refresh chat list
+      await refreshChats();
+    } catch (e) {
+      setError(e?.message || "Failed to delete chat");
     }
   }
+
+  const refreshChats = useCallback(
+    async (selectChatId = null) => {
+      if (!myUsername) return;
+
+      const data = await api.listChats();
+      const listRaw = Array.isArray(data) ? data : data?.chats || [];
+      const list = listRaw.map(normalizeChat);
+
+      setChats(list);
+
+      if (selectChatId) {
+        setSelectedChat(
+          list.find((c) => String(c.id) === String(selectChatId)) || null,
+        );
+      } else {
+        setSelectedChat((prev) => {
+          if (!prev) return null;
+          return list.find((c) => String(c.id) === String(prev.id)) || null;
+        });
+      }
+    },
+    [myUsername, normalizeChat],
+  );
 
   const refreshMessages = useCallback(
     async (chatId, options = {}) => {
@@ -193,7 +198,7 @@ export default function MessagesPanel() {
     return () => {
       isMounted = false;
     };
-  }, [myUsername]);
+  }, [myUsername, normalizeChat]);
 
   // hydrates participants list into chats that don't have them
   useEffect(() => {
@@ -217,7 +222,7 @@ export default function MessagesPanel() {
 
                 try {
                   const resp = await api.presignView({
-                    fileUrl: p.avatar,  
+                    fileUrl: p.avatar,
                     expiresIn: 3600,
                   });
 
@@ -225,12 +230,18 @@ export default function MessagesPanel() {
                 } catch {
                   return { ...p, avatar: null };
                 }
-              })
+              }),
             );
 
-            const usernames = participantObjects.map((p) => p.username).filter(Boolean);
-            return { chatId: chat.id, participants: usernames, participantObjects };
-          })
+            const usernames = participantObjects
+              .map((p) => p.username)
+              .filter(Boolean);
+            return {
+              chatId: chat.id,
+              participants: usernames,
+              participantObjects,
+            };
+          }),
         );
 
         if (cancelled) return;
@@ -241,31 +252,40 @@ export default function MessagesPanel() {
 
         setChats((prev) =>
           prev.map((chat) => {
-            const found = results.find((r) => String(r.chatId) === String(chat.id));
+            const found = results.find(
+              (r) => String(r.chatId) === String(chat.id),
+            );
             if (!found) return chat;
 
             const isGroup = !!chat.is_group;
 
             const other =
-              found.participantObjects.find((p) => p.username && p.username !== myUsername) ||
-              found.participantObjects[0];
+              found.participantObjects.find(
+                (p) => p.username && p.username !== myUsername,
+              ) || found.participantObjects[0];
 
             const groupFallbackAvatar =
-              chat.group_photo_url || found.participantObjects.find((p) => p.avatar)?.avatar || null;
+              chat.group_photo_url ||
+              found.participantObjects.find((p) => p.avatar)?.avatar ||
+              null;
 
             return {
               ...chat,
               participants: found.participants,
               participantObjects: found.participantObjects,
               displayName: isGroup
-                ? (chat.name || "(Unnamed group)")
-                : (other?.name || other?.username || chat.name),
-              displayHandle: isGroup ? null : (other?.username ? `@${other.username}` : null),
+                ? chat.name || "(Unnamed group)"
+                : other?.name || other?.username || chat.name,
+              displayHandle: isGroup
+                ? null
+                : other?.username
+                  ? `@${other.username}`
+                  : null,
               avatarUrl: isGroup
-                ? (chat.group_photo_url || groupFallbackAvatar)
-                : (other?.avatar || null),
-              };
-          })
+                ? chat.group_photo_url || groupFallbackAvatar
+                : other?.avatar || null,
+            };
+          }),
         );
       } catch (e) {
         setError(e?.message || "Failed to load chat participants");
@@ -279,9 +299,8 @@ export default function MessagesPanel() {
   }, [chats, myUsername]);
 
   useEffect(() => {
-  if (chats.length) console.log("Sample chat after hydrate:", chats[0]);
-}, [chats]);
-
+    if (chats.length) console.log("Sample chat after hydrate:", chats[0]);
+  }, [chats]);
 
   // loads messages whenever selectedChat changes
   useEffect(() => {

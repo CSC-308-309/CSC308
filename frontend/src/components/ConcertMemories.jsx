@@ -33,7 +33,11 @@ function normalizeDbMemory(row) {
   };
 }
 
-export default function ConcertMemories({ username, userId, canUpload = true }) {
+export default function ConcertMemories({
+  username,
+  userId,
+  canUpload = true,
+}) {
   const [memories, setMemories] = useState(() => makePlaceholders());
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -131,7 +135,7 @@ export default function ConcertMemories({ username, userId, canUpload = true }) 
   }, [resolvedUserId]);
 
   const toggleStar = async (id) => {
-    if (!canUpload) return; 
+    if (!canUpload) return;
 
     const target = memories.find((m) => m.id === id);
     if (!target || target.isPlaceholder) return;
@@ -198,19 +202,19 @@ export default function ConcertMemories({ username, userId, canUpload = true }) 
     setShowDetail(true);
   };
 
-const displayMemories = useMemo(() => {
-  const real = memories.filter((m) => !m.isPlaceholder);
+  const displayMemories = useMemo(() => {
+    const real = memories.filter((m) => !m.isPlaceholder);
 
-  if (real.length === 0) {
-    return memories.filter((m) => m.isPlaceholder).slice(0, 3);
-  }
+    if (real.length === 0) {
+      return memories.filter((m) => m.isPlaceholder).slice(0, 3);
+    }
 
-  const starred = real.filter((m) => m.starred);
+    const starred = real.filter((m) => m.starred);
 
-  const curated = starred.length > 0 ? starred : real;
+    const curated = starred.length > 0 ? starred : real;
 
-  return curated.slice(0, 3);
-}, [memories]);
+    return curated.slice(0, 3);
+  }, [memories]);
 
   return (
     <div className="max-w-4xl mx-auto bg-gray-50">
@@ -245,9 +249,7 @@ const displayMemories = useMemo(() => {
 
               <img
                 src={
-                  memory.thumbnailViewUrl ||
-                  memory.thumbnailUrl ||
-                  ConcertIcon
+                  memory.thumbnailViewUrl || memory.thumbnailUrl || ConcertIcon
                 }
                 alt="Memory"
                 className="w-full h-full object-cover opacity-90"

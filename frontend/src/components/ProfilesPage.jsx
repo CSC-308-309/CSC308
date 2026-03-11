@@ -4,7 +4,9 @@ import ProfileCard from "./ProfileCard";
 import SwipeButtons from "./SwipeButtons";
 
 function getColorForCategory(role) {
-  const normalized = String(role || "").trim().toLowerCase();
+  const normalized = String(role || "")
+    .trim()
+    .toLowerCase();
 
   if (normalized.includes("vocal")) {
     return { bg: "from-rose-200 to-red-100" };
