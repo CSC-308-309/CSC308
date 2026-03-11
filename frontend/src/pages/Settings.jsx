@@ -10,20 +10,25 @@ export default function Settings() {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleEmailUpdate = async () => {
     setError("");
     setMessage("");
 
+    const normalized = email.trim().toLowerCase();
+    if (!EMAIL_REGEX.test(normalized)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     try {
-      await api.updateEmail({ email });
-      setMessage("Email updated successfully.");
+      const response = await api.updateEmail({ email: normalized });
+      setMessage(response?.message || "Email updated successfully.");
       setEmail("");
-      localStorage.removeItem("token");
-      window.location.href = "/login";
     } catch (err) {
       console.error("Update email error:", err);
-      setError("Failed to update email.");
+      setError(err?.message || "Failed to update email.");
     }
   };
 
@@ -60,6 +65,7 @@ export default function Settings() {
             <div className="flex gap-4">
               <input
                 type="email"
+                data-cy="settings-email-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="flex-1 border rounded-lg px-4 py-2"
@@ -67,6 +73,7 @@ export default function Settings() {
               />
 
               <button
+                data-cy="settings-email-save"
                 onClick={handleEmailUpdate}
                 className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600"
               >
@@ -104,8 +111,16 @@ export default function Settings() {
             </div>
           </div>
 
-          {message && <p className="text-green-600 font-medium">{message}</p>}
-          {error && <p className="text-red-600 font-medium">{error}</p>}
+          {message && (
+            <p data-cy="settings-success" className="text-green-600 font-medium">
+              {message}
+            </p>
+          )}
+          {error && (
+            <p data-cy="settings-error" className="text-red-600 font-medium">
+              {error}
+            </p>
+          )}
         </div>
       </div>
     </div>

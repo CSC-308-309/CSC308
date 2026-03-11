@@ -5,6 +5,7 @@
 
 // eslint-disable-next-line no-constant-binary-expression
 const BASE_URL = "http://localhost:8000" || "http://localhost:8000"; // will add this back
+const API_BASE_URL = import.meta.env.VITE_BASE_URL || BASE_URL;
 
 // async function request(path, options = {}) {
 //   const res = await fetch(`${BASE_URL}${path}`, {
@@ -25,7 +26,7 @@ const BASE_URL = "http://localhost:8000" || "http://localhost:8000"; // will add
 async function request(path, options = {}) {
   const token = localStorage.getItem("token");
 
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),

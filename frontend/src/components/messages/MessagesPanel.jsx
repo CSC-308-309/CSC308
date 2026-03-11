@@ -155,13 +155,21 @@ export default function MessagesPanel() {
         const msgs = raw.map(normalizeMessage);
 
         setChatMessages((prev) => ({ ...prev, [chatId]: msgs }));
+
+        const lastMessageId = msgs.length ? msgs[msgs.length - 1]?.id : null;
+        if (lastMessageId && myUsername) {
+          await api.markChatRead(chatId, {
+            username: myUsername,
+            readUntilId: lastMessageId,
+          });
+        }
       } catch (e) {
         if (!silent) setError(e?.message || "Failed to load messages");
       } finally {
         if (!silent) setIsLoadingMessages(false);
       }
     },
-    [normalizeMessage],
+    [normalizeMessage, myUsername],
   );
 
   // loading chats

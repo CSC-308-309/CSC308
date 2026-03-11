@@ -702,14 +702,22 @@ export function createApp({ db }) {
     try {
       const { username } = req.params;
       const { email } = req.body || {};
+      const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
       if (!email) return res.status(400).json({ message: "Email is required" });
+      const normalizedEmail = String(email).trim().toLowerCase();
+      if (!EMAIL_REGEX.test(normalizedEmail)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
 
       if (req.username && req.username !== username) {
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      const updated = await UsersModel.updateEmailByUsername(username, email);
+      const updated = await UsersModel.updateEmailByUsername(
+        username,
+        normalizedEmail,
+      );
       if (!updated) return res.status(404).json({ message: "User not found" });
 
       return res.json({ message: "Email updated successfully", user: updated });
