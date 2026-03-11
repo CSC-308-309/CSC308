@@ -3,6 +3,7 @@
 
 // Base URL for API requests. Reads from VITE_BASE_URL env var or defaults to localhost.
 
+// eslint-disable-next-line no-constant-binary-expression
 const BASE_URL = "http://localhost:8000" || "http://localhost:8000"; // will add this back
 
 // async function request(path, options = {}) {
@@ -175,13 +176,18 @@ export const api = {
   listChatParticipants: (chatId) =>
     requestTypes.get(`/chats/${encodeURIComponent(chatId)}/participants`),
   addChatParticipants: (chatId, data) =>
-    requestTypes.post(`/chats/${encodeURIComponent(chatId)}/participants`, data),
+    requestTypes.post(
+      `/chats/${encodeURIComponent(chatId)}/participants`,
+      data,
+    ),
   removeChatParticipant: (chatId, username) =>
     requestTypes.delete(
       `/chats/${encodeURIComponent(chatId)}/participants/${encodeURIComponent(username)}`,
     ),
   listMessages: (chatId, params = {}) =>
-    requestTypes.get(withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params)),
+    requestTypes.get(
+      withQuery(`/chats/${encodeURIComponent(chatId)}/messages`, params),
+    ),
   getMessage: (chatId, messageId) =>
     requestTypes.get(
       `/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`,
@@ -218,11 +224,19 @@ export const api = {
     requestTypes.get(`/notifications/id/${encodeURIComponent(notificationId)}`),
   createNotification: (data) => requestTypes.post("/notifications", data),
   markNotificationRead: (notificationId) =>
-    requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/read`, {}),
+    requestTypes.post(
+      `/notifications/${encodeURIComponent(notificationId)}/read`,
+      {},
+    ),
   markNotificationUnread: (notificationId) =>
-    requestTypes.post(`/notifications/${encodeURIComponent(notificationId)}/unread`, {}),
+    requestTypes.post(
+      `/notifications/${encodeURIComponent(notificationId)}/unread`,
+      {},
+    ),
   deleteNotification: (notificationId) =>
-    requestTypes.delete(`/notifications/id/${encodeURIComponent(notificationId)}`),
+    requestTypes.delete(
+      `/notifications/id/${encodeURIComponent(notificationId)}`,
+    ),
   getNotificationPreferences: (username) =>
     requestTypes.get(
       `/notifications/preferences/${encodeURIComponent(resolveUsername(username))}`,
@@ -235,25 +249,36 @@ export const api = {
 
   // Settings Routes!
   updateEmail: (data, username) =>
-    requestTypes.put(`/users/${encodeURIComponent(resolveUsername(username))}/email`, data),
+    requestTypes.put(
+      `/users/${encodeURIComponent(resolveUsername(username))}/email`,
+      data,
+    ),
 
   updatePassword: (data, username) =>
-    requestTypes.put(`/users/${encodeURIComponent(resolveUsername(username))}/password`, data),
+    requestTypes.put(
+      `/users/${encodeURIComponent(resolveUsername(username))}/password`,
+      data,
+    ),
 
   // Event routes
   listEvents: () => requestTypes.get("/events"),
 
   //Photo Storage routes
-  presignUpload: (uploadParams) => requestTypes.put("/media/presign", uploadParams),
+  presignUpload: (uploadParams) =>
+    requestTypes.put("/media/presign", uploadParams),
   presignView: (data) => requestTypes.post("/media/presign-view", data),
   // Backward-compatible helper used by existing components.
-  presignViewUrl: (fileUrl) => requestTypes.put("/media/presign-view", { fileUrl }),
+  presignViewUrl: (fileUrl) =>
+    requestTypes.put("/media/presign-view", { fileUrl }),
 
   // Video Storage routes (Concert Memories + Music Clips)
   listConcertMemories: (userId) =>
     requestTypes.get(`/concertMemories/${encodeURIComponent(userId)}`),
   createConcertMemory: (userId, data) =>
-    requestTypes.post(`/concertMemories/new/${encodeURIComponent(userId)}`, data),
+    requestTypes.post(
+      `/concertMemories/new/${encodeURIComponent(userId)}`,
+      data,
+    ),
   updateConcertMemory: (id, data) =>
     requestTypes.put(`/concertMemories/${encodeURIComponent(id)}`, data),
   deleteConcertMemory: (id) =>

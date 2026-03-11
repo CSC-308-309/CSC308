@@ -42,7 +42,9 @@ export default function ChatItem({ chat, isSelected, onClick, onDelete }) {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="text-xs text-gray-400 whitespace-nowrap">{chat.time}</div>
+        <div className="text-xs text-gray-400 whitespace-nowrap">
+          {chat.time}
+        </div>
 
         <button
           onClick={(e) => {

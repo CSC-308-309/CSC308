@@ -188,7 +188,11 @@ export default function Profile() {
             <div className="col-span-12 lg:col-span-8 pr-5 space-y-10">
               {/* Concert Memories Section */}
               <section>
-                <ConcertMemories username={username} userId={userId} canUpload />
+                <ConcertMemories
+                  username={username}
+                  userId={userId}
+                  canUpload
+                />
               </section>
 
               {/* Divider for clarity */}

@@ -21,7 +21,7 @@ export default function ProfilePhoto({
     storageKey,
     initialSrc,
     fallbackSrc,
-    { useStorage: editable }, 
+    { useStorage: editable },
   );
 
   const [isUploading, setIsUploading] = useState(false);
@@ -33,7 +33,7 @@ export default function ProfilePhoto({
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
-    e.target.value = ""; 
+    e.target.value = "";
     if (!editable) return;
     if (!isImageFile(file)) return;
 

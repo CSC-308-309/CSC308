@@ -111,9 +111,7 @@ export default function YouMightKnowSection({ onProfileClick }) {
       </h3>
 
       <div className="space-y-4">
-        {loading && (
-          <div className="text-xs text-gray-500 px-1">Loading…</div>
-        )}
+        {loading && <div className="text-xs text-gray-500 px-1">Loading…</div>}
 
         {/* 🔥 If no matches, render nothing underneath the header */}
         {!loading &&

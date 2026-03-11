@@ -6,7 +6,9 @@ import defaultProfilePhoto from "../assets/DefaultProfilePhoto.png";
 import { resolveViewUrl } from "../utils/s3Upload";
 
 function getColorForCategory(category) {
-  const normalized = String(category || "").trim().toLowerCase();
+  const normalized = String(category || "")
+    .trim()
+    .toLowerCase();
 
   if (normalized.includes("vocal")) {
     return { border: "#f43f5e", text: "#be123c", dot: "bg-rose-500" };
@@ -54,7 +56,7 @@ export default function FriendsBar() {
         const people = await Promise.all(
           (matches || []).map(async (user) => ({
             id: user.id,
-            username: user.username, 
+            username: user.username,
             name: user.name || user.username || "Unknown",
             category: user.role || "Unspecified",
             profilePhoto: await resolveImage(user.main_image),
@@ -113,7 +115,9 @@ export default function FriendsBar() {
   if (!allPeople.length) {
     return (
       <div className="w-[280px] h-screen bg-gray-100 p-4">
-        <p className="text-sm text-gray-600 text-center mt-4">No matches yet.</p>
+        <p className="text-sm text-gray-600 text-center mt-4">
+          No matches yet.
+        </p>
       </div>
     );
   }

@@ -131,7 +131,6 @@ export default function MusicClips({ username, userId, canUpload = true }) {
         clip.id === id ? { ...clip, starred: !clip.starred } : clip,
       ),
     );
-
   };
 
   const handleSaveClip = async (clipData) => {
@@ -172,14 +171,14 @@ export default function MusicClips({ username, userId, canUpload = true }) {
     setIsDetailOpen(true);
   };
 
-const displayClips = useMemo(() => {
-  if (clips.length === 0) return [];
+  const displayClips = useMemo(() => {
+    if (clips.length === 0) return [];
 
-  const starred = clips.filter((c) => c.starred);
-  const curated = starred.length > 0 ? starred : clips;
+    const starred = clips.filter((c) => c.starred);
+    const curated = starred.length > 0 ? starred : clips;
 
-  return curated.slice(0, 3);
-}, [clips]);
+    return curated.slice(0, 3);
+  }, [clips]);
 
   const handleOpenModal = () => {
     if (!canUpload) return;
@@ -250,7 +249,10 @@ const displayClips = useMemo(() => {
               className="bg-[#CCC2DC] rounded-xl p-4 hover:bg-[#A488D1] transition-colors flex items-center justify-center min-h-[180px] w-[180px] group"
               type="button"
             >
-              <Plus size={32} className="text-[#1D1B20] group-hover:text-[#1D1B20]" />
+              <Plus
+                size={32}
+                className="text-[#1D1B20] group-hover:text-[#1D1B20]"
+              />
             </button>
             <p className="text-sm font-semibold text-gray-800 mt-2 text-left">
               New
