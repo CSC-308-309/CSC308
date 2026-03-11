@@ -49,6 +49,10 @@ https://csc-308-frontend.vercel.app/
 
 https://docs.google.com/document/d/1cBSxzDnsi8fmFt1OEzrzvhNNLxf60j3GwNR_LEQkPOk/edit?usp=sharing
 
+# Acceptance Criteria Specification
+
+https://docs.google.com/document/d/1UCSDfnOukAlMDDa9tCvZlb1Q7RUqmdO0tZTUPfsYoag/edit?usp=sharing
+
 # Code Covergae Report
 
 <img width="727" height="360" alt="image" src="https://github.com/user-attachments/assets/7c41a39e-915f-4033-b2af-860cfab8469f" />
