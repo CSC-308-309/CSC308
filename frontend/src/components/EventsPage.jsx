@@ -2,6 +2,22 @@ import React, { useState, useEffect } from "react";
 import { api } from "../client";
 import { Search, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 
+// Static events
+const staticEvents = [
+  {
+    id: "static-1",
+    date: "August 15, 2026 - 8:00 PM",
+    title: "Future & Metro Boomin Rap Concert",
+    location: "Crypto.com Arena, Los Angeles, CA",
+  },
+  {
+    id: "static-2",
+    date: "August 7–9, 2026",
+    title: "Outside Lands Music Festival",
+    location: "Golden Gate Park, San Francisco, CA",
+  },
+];
+
 // EventCard Component
 const EventCard = ({ date, title, location }) => {
   return (
@@ -31,7 +47,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         <ChevronLeft className="w-5 h-5" />
       </button>
 
-      {/* Show first page */}
       {currentPage > 3 && (
         <>
           <button
@@ -44,7 +59,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         </>
       )}
 
-      {/* Show previous page if exists */}
       {currentPage > 1 && (
         <button
           onClick={() => onPageChange(currentPage - 1)}
@@ -54,12 +68,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         </button>
       )}
 
-      {/* Current page */}
       <button className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-purple-400 text-white">
         {currentPage}
       </button>
 
-      {/* Show next page if exists */}
       {currentPage < totalPages && (
         <button
           onClick={() => onPageChange(currentPage + 1)}
@@ -69,7 +81,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         </button>
       )}
 
-      {/* Show last page */}
       {currentPage < totalPages - 2 && (
         <>
           <span className="text-gray-500 px-2">...</span>
@@ -93,7 +104,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   );
 };
 
-// EventsPage Component (without EventsTitle - that's handled by parent)
+// EventsPage Component
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("active");
   const [searchQuery, setSearchQuery] = useState("");
@@ -105,53 +116,15 @@ export default function EventsPage() {
     async function loadEvents() {
       try {
         const data = await api.listEvents();
-        setEvents(data || []);
+        setEvents([...(data || []), ...staticEvents]);
       } catch (err) {
         console.error("Failed to load events:", err);
+        setEvents(staticEvents);
       }
     }
 
     loadEvents();
   }, []);
-
-  /* const events = [
-    {
-      id: 1,
-      date: "October 29, 2025 - 8:00 PM",
-      title: "Taylor Swift Concert",
-      location: "Sunset Park, Los Angeles, CA",
-    },
-    {
-      id: 2,
-      date: "October 29, 2025 - 8:00 PM",
-      title: "Taylor Swift Concert",
-      location: "Sunset Park, Los Angeles, CA",
-    },
-    {
-      id: 3,
-      date: "October 29, 2025 - 8:00 PM",
-      title: "Taylor Swift Concert",
-      location: "Sunset Park, Los Angeles, CA",
-    },
-    {
-      id: 4,
-      date: "October 29, 2025 - 8:00 PM",
-      title: "Taylor Swift Concert",
-      location: "Sunset Park, Los Angeles, CA",
-    },
-    {
-      id: 5,
-      date: "October 29, 2025 - 8:00 PM",
-      title: "Taylor Swift Concert",
-      location: "Sunset Park, Los Angeles, CA",
-    },
-    {
-      id: 6,
-      date: 'October 29, 2025 - 8:00 PM',
-      title: 'Taylor Swift Concert',
-      location: 'Sunset Park, Los Angeles, CA'
-    }
-  ]; */
 
   return (
     <div className="max-w-[1200px] bg-[#ECE6F0] mx-auto rounded-lg p-2 m-4 sm:p-6 md:p-8 flex flex-col">
@@ -167,7 +140,7 @@ export default function EventsPage() {
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
-              Active (6)
+              Active (2)
             </button>
             <button
               onClick={() => setActiveTab("past")}
