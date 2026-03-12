@@ -2,19 +2,22 @@ import express from "express";
 import cors from "cors";
 import { presignUpload, presignView } from "./models/media.js";
 import bcrypt from "bcrypt";
-import { UsersModel } from "./models/User.js"; 
+import { UsersModel } from "./models/User.js";
 import { authenticate } from "./middleware/authMiddleware.js";
 
 export function createApp({ db }) {
   const app = express();
 
   // When frontend uses credentials: "include", origin cannot be "*" — must be exact origin
+
   const allowedOrigins = [
     "http://localhost:5173",
     "https://ashy-hill-04c3bda0f.6.azurestaticapps.net",
+    "https://csc-308-frontend.vercel.app",
   ];
 
-  app.use(cors({
+  app.use(
+    cors({
       origin: (origin, cb) => {
         if (!origin) return cb(null, true);
         return cb(null, allowedOrigins.includes(origin));
@@ -33,7 +36,12 @@ export function createApp({ db }) {
 
     const target = await db.Profile.getUserByUsername(targetUsername);
     if (!target) {
-      return { error: true, status: 400, message: "Target user does not exist", targetUsername };
+      return {
+        error: true,
+        status: 400,
+        message: "Target user does not exist",
+        targetUsername,
+      };
     }
 
     return { error: false, current, target };
@@ -189,7 +197,10 @@ export function createApp({ db }) {
 
   // Update user (profile info) by username
   app.put("/users/:username", async (req, res) => {
-    console.log(`++++++++++++++++ Received update for user ${req.params.username} with body:`, req.body);
+    console.log(
+      `++++++++++++++++ Received update for user ${req.params.username} with body:`,
+      req.body,
+    );
     const updatedUser = await db.User.updateUser(req.params.username, req.body);
     if (updatedUser) {
       res.json(updatedUser);
@@ -232,18 +243,42 @@ export function createApp({ db }) {
   app.post("/media/presign-view", presignView);
 
   //// INTERACTION ROUTES ////
-  // Like another user
+  // Like another user (with notifications)
   app.post("/users/:username/like", async (req, res) => {
     try {
-      const validation = await validateUserInteraction(req.params.username, req.body.targetUsername);
+      const validation = await validateUserInteraction(
+        req.params.username,
+        req.body.targetUsername,
+      );
+
       if (validation.error) {
         return res.status(validation.status).json({ error: validation.message });
       }
 
-      const result = await db.Interactions.likeUser(
-        req.params.username,
-        req.body.targetUsername,
-      );
+      const actorUsername = req.params.username;
+      const targetUsername = req.body.targetUsername;
+      const result = await db.Interactions.likeUser(actorUsername, targetUsername);
+
+      try {
+        await db.Notifications.createNotification({
+          username: targetUsername, 
+          actorUsername,
+          type: result.isMatch ? "match" : "like",
+          referenceId: result?.interaction?.id ?? null,
+        });
+
+        if (result.isMatch) {
+          await db.Notifications.createNotification({
+            username: actorUsername,
+            actorUsername: targetUsername,
+            type: "match",
+            referenceId: result?.interaction?.id ?? null,
+          });
+        }
+      } catch (e) {
+        console.error("Failed to create like/match notification:", e);
+      }
+
       res.json(result);
     } catch (err) {
       console.error("Error in like route:", err);
@@ -254,9 +289,14 @@ export function createApp({ db }) {
   // Dislike another user
   app.post("/users/:username/dislike", async (req, res) => {
     try {
-      const validation = await validateUserInteraction(req.params.username, req.body.targetUsername);
+      const validation = await validateUserInteraction(
+        req.params.username,
+        req.body.targetUsername,
+      );
       if (validation.error) {
-        return res.status(validation.status).json({ error: validation.message });
+        return res
+          .status(validation.status)
+          .json({ error: validation.message });
       }
 
       const result = await db.Interactions.dislikeUser(
@@ -273,9 +313,14 @@ export function createApp({ db }) {
   // Block another user
   app.post("/users/:username/block", async (req, res) => {
     try {
-      const validation = await validateUserInteraction(req.params.username, req.body.targetUsername);
+      const validation = await validateUserInteraction(
+        req.params.username,
+        req.body.targetUsername,
+      );
       if (validation.error) {
-        return res.status(validation.status).json({ error: validation.message });
+        return res
+          .status(validation.status)
+          .json({ error: validation.message });
       }
 
       const result = await db.Interactions.blockUser(
@@ -300,9 +345,14 @@ export function createApp({ db }) {
           return res.status(400).json({ error: "Invalid interaction type" });
         }
 
-        const validation = await validateUserInteraction(username, targetUsername);
+        const validation = await validateUserInteraction(
+          username,
+          targetUsername,
+        );
         if (validation.error) {
-          return res.status(validation.status).json({ error: validation.message });
+          return res
+            .status(validation.status)
+            .json({ error: validation.message });
         }
 
         const result = await db.Interactions.undoInteraction(
@@ -438,13 +488,41 @@ export function createApp({ db }) {
     }
   });
 
+  // Send a message (with notifications)
   app.post("/chats/:chatId/messages", async (req, res) => {
-    console.log("++++++++++++++++++ message sent?", req.body);
-    const newMessage = await db.Messages.sendMessage(
-      req.params.chatId,
-      req.body,
-    );
-    res.status(201).json(newMessage);
+    try {
+
+      const chatId = req.params.chatId;
+      const senderUsername = req.body?.sender_username;
+      const newMessage = await db.Messages.sendMessage(chatId, req.body);
+
+      try {
+        const participants = await db.Messages.listChatParticipants(chatId);
+        const list = Array.isArray(participants)
+          ? participants
+          : participants?.participants || [];
+
+        for (const p of list) {
+          const recipientUsername = p?.username;
+          if (!recipientUsername) continue;
+          if (recipientUsername === senderUsername) continue;
+
+          await db.Notifications.createNotification({
+            username: recipientUsername,
+            actorUsername: senderUsername,
+            type: "message",
+            referenceId: chatId,
+          });
+        }
+      } catch (e) {
+        console.error("Failed to create message notifications:", e);
+      }
+
+      res.status(201).json(newMessage);
+    } catch (err) {
+      console.error("Error sending message:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
   app.patch("/chats/:chatId/messages/:messageId", async (req, res) => {
@@ -576,7 +654,7 @@ export function createApp({ db }) {
     );
     res.json(updatedPreferences);
   });
-//// Settings Routes ////
+  //// Settings Routes ////
 
   // Change Password
   app.put("/users/:username/password", authenticate, async (req, res) => {
@@ -585,7 +663,9 @@ export function createApp({ db }) {
       const { currentPassword, newPassword } = req.body || {};
 
       if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: "currentPassword and newPassword are required" });
+        return res
+          .status(400)
+          .json({ message: "currentPassword and newPassword are required" });
       }
 
       // prevent editing someone else
@@ -594,15 +674,21 @@ export function createApp({ db }) {
       }
 
       const existingHash = await UsersModel.getPasswordHashByUsername(username);
-      if (!existingHash) return res.status(404).json({ message: "User not found" });
+      if (!existingHash)
+        return res.status(404).json({ message: "User not found" });
 
       const valid = await bcrypt.compare(currentPassword, existingHash);
-      if (!valid) return res.status(400).json({ message: "Incorrect current password" });
+      if (!valid)
+        return res.status(400).json({ message: "Incorrect current password" });
 
       const newHash = await bcrypt.hash(newPassword, 10);
-      const ok = await UsersModel.updatePasswordHashByUsername(username, newHash);
+      const ok = await UsersModel.updatePasswordHashByUsername(
+        username,
+        newHash,
+      );
 
-      if (!ok) return res.status(500).json({ message: "Failed to update password" });
+      if (!ok)
+        return res.status(500).json({ message: "Failed to update password" });
 
       return res.json({ message: "Password updated successfully" });
     } catch (err) {
@@ -616,14 +702,22 @@ export function createApp({ db }) {
     try {
       const { username } = req.params;
       const { email } = req.body || {};
+      const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
       if (!email) return res.status(400).json({ message: "Email is required" });
+      const normalizedEmail = String(email).trim().toLowerCase();
+      if (!EMAIL_REGEX.test(normalizedEmail)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
 
       if (req.username && req.username !== username) {
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      const updated = await UsersModel.updateEmailByUsername(username, email);
+      const updated = await UsersModel.updateEmailByUsername(
+        username,
+        normalizedEmail,
+      );
       if (!updated) return res.status(404).json({ message: "User not found" });
 
       return res.json({ message: "Email updated successfully", user: updated });
@@ -674,112 +768,126 @@ export function createApp({ db }) {
     res.json(result);
   });
 
-  //// CONCERT MEMORIES ROUTES ////
-  
-  // Create a new concert memory
-  app.post("/concertMemories/new/:userId", async (req, res) => {
-    try {
-      
-      const memory = await db.ConcertMemories.create(parseInt(userId), req.body);
-      res.status(201).json(memory);
-    } catch (error) {
-      console.error("Error creating concert memory:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+//// CONCERT MEMORIES ROUTES ////
 
-  // Get all concert memories
-  app.get("/concertMemories/:userId", async (req, res) => {
-    try {
-      const { userId } = req.params;
-      const memories = await db.ConcertMemories.getAllConcertMemoriesById(parseInt(userId));
-      res.json(memories);
-    } catch (error) {
-      console.error("Error getting all concert memories:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+// Create a new concert memory
+app.post("/concertMemories/new/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const memory = await db.ConcertMemories.create(Number(userId), req.body);
+    return res.status(201).json(memory);
+  } catch (error) {
+    console.error("Error creating concert memory:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
-  // Update a concert memory
-  app.put("/concertMemories/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const updateData = req.body;
-      
-      const updatedMemory = await db.ConcertMemories.updateMemory(id, req.body);
-      res.json(updatedMemory);
-    } catch (error) {
-      console.error("Error updating concert memory:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+// Get all concert memories for a user
+app.get("/concertMemories/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const memories = await db.ConcertMemories.getConcertMemoriesByUserId(
+      Number(userId),
+    );
+    return res.json(memories);
+  } catch (error) {
+    console.error("Error getting concert memories:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
-  // Delete a concert memory
-  app.delete("/concertMemories/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const deleted = await db.ConcertMemories.deleteMemory(parseInt(id));
-      if (deleted) {
-        res.json({ message: "Concert memory deleted successfully" });
-      } else {
-        res.status(404).json({ message: "Concert memory not found" });
-      }
-    } catch (error) {
-      console.error("Error deleting concert memory:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+// Update a concert memory
+app.put("/concertMemories/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await db.ConcertMemories.updateMemory(Number(id), req.body);
 
-  //// MUSIC CLIPS ROUTES ////
-  
-  // Create a new music clip
-  app.post("/musicClips/new/:userId", async (req, res) => {
-    try {
-      const clip = await db.MusicClips.create(parseInt(userId), req.body);
-      res.status(201).json(clip);
-    } catch (error) {
-      console.error("Error creating music clip:", error);
-      res.status(500).json({ message: "Server error" });
+    if (!updated) {
+      return res.status(404).json({ message: "Concert memory not found" });
     }
-  });
 
-  // Get all music clips
-  app.get("/musicClips/:userId", async (req, res) => {
-    try {
-      const clips = await db.MusicClips.getMusicClipsById(parseInt(userId));
-      res.json(clips);
-    } catch (error) {
-      console.error("Error getting music clips:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+    return res.json(updated);
+  } catch (error) {
+    console.error("Error updating concert memory:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
-  // Update a music clip
-  app.put("/musicClips/:id", async (req, res) => {
-    try {
-      
-      const updatedClip = await db.MusicClips.updateClip(parseInt(id), req.body);
-      res.json(updatedClip);
-    } catch (error) {
-      console.error("Error updating music clip:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+// Delete a concert memory
+app.delete("/concertMemories/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await db.ConcertMemories.delete(Number(id));
 
-  // Delete a music clip
-  app.delete("/musicClips/:id", async (req, res) => {
-    try {
-      const deleted = await db.MusicClips.delete(parseInt(id));
-      if (deleted) {
-        res.json({ message: "Music clip deleted successfully" });
-      } else {
-        res.status(404).json({ message: "Music clip not found" });
-      }
-    } catch (error) {
-      console.error("Error deleting music clip:", error);
-      res.status(500).json({ message: "Server error" });
+    if (deleted) {
+      return res.json({ message: "Concert memory deleted successfully" });
     }
-  });
+    return res.status(404).json({ message: "Concert memory not found" });
+  } catch (error) {
+    console.error("Error deleting concert memory:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+//// MUSIC CLIPS ROUTES ////
+
+// Create a new music clip
+app.post("/musicClips/new/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const clip = await db.MusicClips.create(Number(userId), req.body);
+    return res.status(201).json(clip);
+  } catch (error) {
+    console.error("Error creating music clip:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get all music clips for a user
+app.get("/musicClips/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const clips = await db.MusicClips.getMusicClipsById(Number(userId));
+
+    return res.json(clips);
+  } catch (error) {
+    console.error("Error getting music clips:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update a music clip
+app.put("/musicClips/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedClip = await db.MusicClips.updateClip(Number(id), req.body);
+
+    if (!updatedClip) {
+      return res.status(404).json({ message: "Music clip not found" });
+    }
+
+    return res.json(updatedClip);
+  } catch (error) {
+    console.error("Error updating music clip:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete a music clip
+app.delete("/musicClips/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await db.MusicClips.delete(Number(id));
+
+    if (deleted) {
+      return res.json({ message: "Music clip deleted successfully" });
+    }
+    return res.status(404).json({ message: "Music clip not found" });
+  } catch (error) {
+    console.error("Error deleting music clip:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
   return app;
 }

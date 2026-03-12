@@ -4,12 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../client";
 import defaultProfilePhoto from "../assets/DefaultProfilePhoto.png";
 
-export const DEFAULT_SUGGESTED_PROFILES = [
-  { id: "1", name: "talia", username: "@talia", avatarColor: "#E5D4FF" },
-  { id: "2", name: "abeyah", username: "@abeyah", avatarColor: "#FFD6EB" },
-  { id: "3", name: "yanitsa", username: "@yanitsa", avatarColor: "#D6F3FF" },
-];
-
 function formatHandle(username) {
   if (!username) return "";
   return username.startsWith("@") ? username : `@${username}`;
@@ -58,7 +52,15 @@ export default function YouMightKnowSection({ onProfileClick }) {
         setLoading(true);
 
         const matches = await api.listMatches();
-        const top3 = (matches || []).slice(0, 3);
+
+        // normalize response → always an array
+        const list = Array.isArray(matches)
+          ? matches
+          : Array.isArray(matches?.matches)
+            ? matches.matches
+            : [];
+
+        const top3 = list.slice(0, 3);
 
         const hydrated = await Promise.all(
           top3.map(async (u, idx) => {
@@ -80,7 +82,7 @@ export default function YouMightKnowSection({ onProfileClick }) {
         if (!cancelled) setProfiles(hydrated);
       } catch (e) {
         console.error("Failed to load recent matches:", e);
-        if (!cancelled) setProfiles([]);
+        if (!cancelled) setProfiles([]); // no fake data ever
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -109,14 +111,9 @@ export default function YouMightKnowSection({ onProfileClick }) {
       </h3>
 
       <div className="space-y-4">
-        {loading && (
-          <div className="text-xs text-gray-500 px-1">Loading…</div>
-        )}
+        {loading && <div className="text-xs text-gray-500 px-1">Loading…</div>}
 
-        {!loading && profiles.length === 0 && (
-          <div className="text-xs text-gray-500 px-1">No matches yet.</div>
-        )}
-
+        {/* 🔥 If no matches, render nothing underneath the header */}
         {!loading &&
           profiles.map((user) => (
             <button
@@ -134,7 +131,11 @@ export default function YouMightKnowSection({ onProfileClick }) {
             >
               <div
                 className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-100"
-                style={{ backgroundColor: user.avatarUrl ? "#F3F4F6" : (user.avatarColor || "#E5E7EB") }}
+                style={{
+                  backgroundColor: user.avatarUrl
+                    ? "#F3F4F6"
+                    : user.avatarColor || "#E5E7EB",
+                }}
               >
                 {user.avatarUrl ? (
                   <img

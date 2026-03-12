@@ -87,7 +87,8 @@ export async function generateVideoThumbnail(videoFile, seekTime = null) {
     video.playsInline = true;
 
     video.onloadedmetadata = () => {
-      const targetTime = seekTime ?? Math.min(1, video.duration ? video.duration / 2 : 1);
+      const targetTime =
+        seekTime ?? Math.min(1, video.duration ? video.duration / 2 : 1);
       video.currentTime = targetTime;
     };
 
@@ -104,11 +105,12 @@ export async function generateVideoThumbnail(videoFile, seekTime = null) {
       canvas.toBlob(
         (blob) => {
           URL.revokeObjectURL(objectUrl);
-          if (!blob) return reject(new Error("Failed to create thumbnail blob"));
+          if (!blob)
+            return reject(new Error("Failed to create thumbnail blob"));
           resolve(blob);
         },
         "image/jpeg",
-        0.8
+        0.8,
       );
     };
   });

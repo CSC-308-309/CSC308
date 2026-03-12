@@ -1,223 +1,152 @@
-// NOTE: THIS IS A MOCK IMPLEMENTATION FOR TESTING
-// REPLACE ALL MOCK DATA USES WITH ACTUAL DATABASE QUERIES
-// Note: Used AI to generate mock data because that would be a pain to write myself
+// backend/models/Notifications.js
+import pool from "../db/index.js";
+
+function buildDisplayNotification(row) {
+  const actor = row.actor_username || "System";
+
+  let message = "";
+  let link = "";
+
+  switch (row.type) {
+    case "like":
+      message = "liked your profile.";
+      link = actor !== "System" ? `/profile/${actor}` : "/profile";
+      break;
+
+    case "match":
+      message = "matched with you.";
+      link = actor !== "System" ? `/profile/${actor}` : "/profile";
+      break;
+
+    case "message":
+      message = "sent you a message.";
+      link = row.reference_id ? `/messages?chatId=${row.reference_id}` : "/messages";
+      break;
+
+    default:
+      message = "triggered a notification.";
+      link = "/notifications";
+  }
+
+  return {
+    id: row.id,
+    type: row.type,
+    username: actor,           
+    message,
+    link,
+    is_read: row.is_read,
+    created_at: row.created_at,
+    reference_id: row.reference_id ?? null,
+  };
+}
 
 const NotificationsModel = {
-  // Mock data for testing
-  mockNotifications: [
-    {
-      id: "1",
-      username: "foxes",
-      type: "match",
-      message: "You matched with Alice Johnson!",
-      link: "/messages/1",
-      is_read: false,
-      is_archived: false,
-      created_at: new Date("2025-01-20T10:30:00").toISOString(),
-    },
-    {
-      id: "2",
-      username: "foxes",
-      type: "message",
-      message: "Bob Smith sent you a message",
-      link: "/messages/2",
-      is_read: false,
-      is_archived: false,
-      created_at: new Date("2025-01-19T14:15:00").toISOString(),
-    },
-    {
-      id: "3",
-      username: "foxes",
-      type: "event",
-      message: "Concert at The Fillmore starts in 2 hours!",
-      link: "/events/123",
-      is_read: true,
-      is_archived: false,
-      created_at: new Date("2025-01-18T18:00:00").toISOString(),
-    },
-    {
-      id: "4",
-      username: "foxes",
-      type: "like",
-      message: "Someone liked your profile!",
-      link: "/profile",
-      is_read: true,
-      is_archived: false,
-      created_at: new Date("2025-01-17T12:45:00").toISOString(),
-    },
-    {
-      id: "5",
-      username: "foxes",
-      type: "message",
-      message: "You have a new message",
-      link: "/messages/3",
-      is_read: false,
-      is_archived: false,
-      created_at: new Date("2025-01-16T09:20:00").toISOString(),
-    },
-  ],
-
   async listNotifications(username) {
-    console.log(
-      `[NOTIFICATIONS] listNotifications called for username: ${username}`,
-    );
-    // Returns array of notifications for the given user, ordered by newest first
-    const result = this.mockNotifications
-      .filter((n) => n.username === username)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    console.log(`   → Returning ${result.length} notifications`);
-    return result;
+    const query = `
+      SELECT
+        n.id, n.type, n.reference_id, n.is_read, n.created_at,
+        actor.username AS actor_username
+      FROM notifications n
+      JOIN users recipient ON recipient.id = n.user_id
+      LEFT JOIN users actor ON actor.id = n.actor_user_id
+      WHERE recipient.username = $1
+      ORDER BY n.created_at DESC
+    `;
+    const { rows } = await pool.query(query, [username]);
+    return rows.map(buildDisplayNotification);
   },
 
   async getUnreadNotificationsCount(username) {
-    console.log(
-      `[NOTIFICATIONS] getUnreadNotificationsCount called for username: ${username}`,
-    );
-    // Returns the count of unread notifications for the given user
-    const count = this.mockNotifications.filter(
-      (n) => n.username === username && n.is_read === false,
-    ).length;
-    console.log(`   → Returning count: ${count}`);
-    return count;
+    const query = `
+      SELECT COUNT(*)::int AS count
+      FROM notifications n
+      JOIN users u ON u.id = n.user_id
+      WHERE u.username = $1 AND n.is_read = false
+    `;
+    const { rows } = await pool.query(query, [username]);
+    return rows[0]?.count ?? 0;
   },
 
   async getNotification(notificationId) {
-    console.log(
-      `[NOTIFICATIONS] getNotification called for notificationId: ${notificationId}`,
-    );
-    // Returns a single notification by ID
-    const result =
-      this.mockNotifications.find((n) => n.id === notificationId) || null;
-    console.log(`   → Found: ${result ? "yes" : "no"}`);
-    return result;
+    const query = `
+      SELECT
+        n.id, n.type, n.reference_id, n.is_read, n.created_at,
+        actor.username AS actor_username
+      FROM notifications n
+      LEFT JOIN users actor ON actor.id = n.actor_user_id
+      WHERE n.id = $1
+    `;
+    const { rows } = await pool.query(query, [notificationId]);
+    if (!rows[0]) return null;
+    return buildDisplayNotification(rows[0]);
   },
 
   async createNotification(data) {
-    console.log(`[NOTIFICATIONS] createNotification called with:`, data);
-    // Expected input: { username, type?, message?, link? }
-    // Expected output: new notification object
-    const { username, type = null, message = null, link = null } = data || {};
+    const { username, actorUsername = null, type, referenceId = null } = data || {};
+    if (!username) throw new Error("username (recipient) is required");
+    if (!type) throw new Error("type is required");
 
-    if (!username) {
-      throw new Error("username is required to create a notification");
-    }
+    const query = `
+      INSERT INTO notifications (user_id, actor_user_id, type, reference_id)
+      VALUES (
+        (SELECT id FROM users WHERE username = $1),
+        (SELECT id FROM users WHERE username = $2),
+        $3,
+        $4
+      )
+      RETURNING id, type, reference_id, is_read, created_at
+    `;
 
-    const newNotification = {
-      id: `notif-${Date.now()}`,
-      username,
-      type,
-      message,
-      link,
-      is_read: false,
-      is_archived: false,
-      created_at: new Date().toISOString(),
+    const { rows } = await pool.query(query, [username, actorUsername, type, referenceId]);
+    return {
+      id: rows[0].id,
+      type: rows[0].type,
+      reference_id: rows[0].reference_id,
+      is_read: rows[0].is_read,
+      created_at: rows[0].created_at,
     };
-
-    this.mockNotifications.push(newNotification);
-    console.log(`   → Created notification with id: ${newNotification.id}`);
-    return newNotification;
   },
 
   async markNotificationRead(notificationId) {
-    console.log(
-      `[NOTIFICATIONS] markNotificationRead called for notificationId: ${notificationId}`,
-    );
-    // Marks a notification as read
-    const notification = this.mockNotifications.find(
-      (n) => n.id === notificationId,
-    );
-    if (!notification) {
-      console.log(`   → Notification not found`);
-      return null;
-    }
-    notification.is_read = true;
-    console.log(`   → Marked as read`);
-    return notification;
+    const query = `
+      UPDATE notifications
+      SET is_read = true, read_at = now()
+      WHERE id = $1
+      RETURNING id, is_read
+    `;
+    const { rows } = await pool.query(query, [notificationId]);
+    return rows[0] || null;
   },
 
   async markNotificationUnread(notificationId) {
-    console.log(
-      `[NOTIFICATIONS] markNotificationUnread called for notificationId: ${notificationId}`,
-    );
-    // Marks a notification as unread
-    const notification = this.mockNotifications.find(
-      (n) => n.id === notificationId,
-    );
-    if (!notification) {
-      console.log(`   → Notification not found`);
-      return null;
-    }
-    notification.is_read = false;
-    console.log(`   → Marked as unread`);
-    return notification;
+    const query = `
+      UPDATE notifications
+      SET is_read = false, read_at = NULL
+      WHERE id = $1
+      RETURNING id, is_read
+    `;
+    const { rows } = await pool.query(query, [notificationId]);
+    return rows[0] || null;
   },
 
   async markAllNotificationsRead(body) {
-    console.log(`[NOTIFICATIONS] markAllNotificationsRead called with:`, body);
-    // Marks all notifications as read for a given user
     const username = body?.username ?? body?.user?.username;
     if (!username) throw new Error("username is required");
 
-    const updated = this.mockNotifications
-      .filter((n) => n.username === username && n.is_read === false)
-      .map((n) => {
-        n.is_read = true;
-        return n;
-      });
-
-    console.log(`   → Marked ${updated.length} notifications as read`);
+    const query = `
+      UPDATE notifications
+      SET is_read = true, read_at = now()
+      WHERE user_id = (SELECT id FROM users WHERE username = $1)
+        AND is_read = false
+    `;
+    await pool.query(query, [username]);
     return { success: true };
   },
 
-  async archiveNotification(notificationId) {
-    console.log(
-      `[NOTIFICATIONS] archiveNotification called for notificationId: ${notificationId}`,
-    );
-    // Archives a notification
-    const notification = this.mockNotifications.find(
-      (n) => n.id === notificationId,
-    );
-    if (!notification) {
-      console.log(`   → Notification not found`);
-      return null;
-    }
-    notification.is_archived = true;
-    console.log(`   → Archived`);
-    return notification;
-  },
-
-  async unarchiveNotification(notificationId) {
-    console.log(
-      `[NOTIFICATIONS] unarchiveNotification called for notificationId: ${notificationId}`,
-    );
-    // Unarchives a notification
-    const notification = this.mockNotifications.find(
-      (n) => n.id === notificationId,
-    );
-    if (!notification) {
-      console.log(`   → Notification not found`);
-      return null;
-    }
-    notification.is_archived = false;
-    console.log(`   → Unarchived`);
-    return notification;
-  },
-
   async deleteNotification(notificationId) {
-    console.log(
-      `[NOTIFICATIONS] deleteNotification called for notificationId: ${notificationId}`,
-    );
-    // Deletes a notification
-    const index = this.mockNotifications.findIndex(
-      (n) => n.id === notificationId,
-    );
-    if (index === -1) {
-      console.log(`   → Notification not found`);
-      return false;
-    }
-    this.mockNotifications.splice(index, 1);
-    console.log(`   → Deleted successfully`);
-    return true;
+    const query = `DELETE FROM notifications WHERE id = $1 RETURNING id`;
+    const { rows } = await pool.query(query, [notificationId]);
+    return rows.length > 0;
   },
 };
 

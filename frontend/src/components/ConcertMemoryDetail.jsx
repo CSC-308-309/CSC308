@@ -24,7 +24,7 @@ export default function ConcertMemoryDetail({
   ]);
 
   const mediaKey = selectedMemory?.mediaUrl || selectedMemory?.videoUrl || "";
-  
+
   const playUrl = usePresignedUrl(mediaKey, showComments && !!mediaKey);
 
   useEffect(() => {

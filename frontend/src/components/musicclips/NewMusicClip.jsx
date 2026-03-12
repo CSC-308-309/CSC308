@@ -7,7 +7,7 @@ export default function NewMusicClip({ isOpen, onClose, onSave, username }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState(null);
-  
+
   const { uploadMedia, isUploading } = useMediaUpload(username, ConcertIcon);
 
   if (!isOpen) return null;

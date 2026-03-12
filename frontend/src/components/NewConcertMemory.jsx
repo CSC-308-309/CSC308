@@ -13,7 +13,7 @@ export default function NewConcertMemory({
   const [description, setDescription] = useState("");
   const [video, setVideo] = useState(null);
   const [submitted, setSubmitted] = useState(false);
-  
+
   const { uploadMedia, isUploading } = useMediaUpload(username, ConcertIcon);
 
   if (!isOpen) return null;

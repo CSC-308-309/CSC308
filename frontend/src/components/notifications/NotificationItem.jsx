@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { api } from "../../client";
 import { useNotifications } from "./useNotifications";
+import { Link } from "react-router-dom";
 
 export default function NotificationItem({
   id,
@@ -11,12 +12,13 @@ export default function NotificationItem({
   actionVariant = "read",
   initialIsRead = false,
   onDelete,
+  link = null,          
+  actorUsername = null, 
 }) {
   const [isRead, setIsRead] = useState(Boolean(initialIsRead));
   const [isSyncedBack, setIsSyncedBack] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
   const { refreshUnreadCount } = useNotifications();
 
   const buttonText = useMemo(() => {
@@ -30,16 +32,13 @@ export default function NotificationItem({
     setLoading(true);
     try {
       if (actionVariant === "sync") {
-        // will give sync a different function once username is fixed in api route
-        if (!isSyncedBack) {
-          await api.markNotificationRead(id);
-          setIsSyncedBack(true);
-          setIsRead(true);
-        } else {
-          await api.markNotificationUnread(id);
-          setIsSyncedBack(false);
-          setIsRead(false);
-        }
+        if (!actorUsername) throw new Error("Missing actorUsername for sync");
+
+        await api.like(actorUsername);
+        await api.markNotificationRead(id);
+
+        setIsSyncedBack(true);
+        setIsRead(true);
       } else {
         if (!isRead) {
           await api.markNotificationRead(id);
@@ -90,7 +89,29 @@ export default function NotificationItem({
         <div>
           <p className="text-gray-800">{message}</p>
 
-          {postText && (
+          {link ? (
+            <div className="mt-1">
+              <Link
+                to={link}
+                className="text-sm text-purple-700 underline"
+                onClick={async () => {
+                  try {
+                    if (!isRead) {
+                      await api.markNotificationRead(id);
+                      setIsRead(true);
+                      await refreshUnreadCount();
+                    }
+                  } catch (e) {
+                    console.error("Failed to mark read on view:", e);
+                  }
+                }}
+              >
+                View
+              </Link>
+            </div>
+          ) : null}
+
+          {postText && !link && (
             <div className="bg-pink-100 text-gray-700 px-3 py-2 mt-1 rounded-xl max-w-xs text-sm">
               {postText}
             </div>

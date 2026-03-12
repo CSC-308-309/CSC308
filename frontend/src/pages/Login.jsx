@@ -11,8 +11,6 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleClose = () => navigate(-1);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -23,7 +21,7 @@ export default function Login() {
 
       localStorage.setItem("token", data.token);
       if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/profile");
+      navigate("/");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -59,6 +57,7 @@ export default function Login() {
 
           <input
             type="email"
+            data-cy="login-email"
             placeholder="Email"
             className="w-full border p-2 mb-3"
             value={email}
@@ -67,6 +66,7 @@ export default function Login() {
 
           <input
             type="password"
+            data-cy="login-password"
             placeholder="Password"
             className="w-full border p-2 mb-4"
             value={password}
@@ -74,6 +74,7 @@ export default function Login() {
           />
 
           <button
+            data-cy="login-submit"
             className="w-full bg-purple-600 text-white py-2 rounded"
             type="submit"
             disabled={isLoading}
@@ -81,7 +82,11 @@ export default function Login() {
             {isLoading ? "Logging in..." : "Log in"}
           </button>
 
-          {error && <p className="text-red-500 mt-2 text-center">{error}</p>}
+          {error && (
+            <p data-cy="login-error" className="text-red-500 mt-2 text-center">
+              {error}
+            </p>
+          )}
 
           <p className="text-sm mt-4 text-center text-white">
             Don't have an account?{" "}

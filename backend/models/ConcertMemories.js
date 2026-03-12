@@ -7,69 +7,52 @@ export const ConcertMemoriesModel = {
       description,
       thumbnail_url,
       video_url,
-      is_starred = false
+      is_starred = false,
     } = memoryData;
 
     const query = `
       INSERT INTO concert_memories (
         title, description, thumbnail_url, video_url, is_starred
-      ) VALUES ($1, $2, $3, $4, $5)
-      RETURNING id
+      ) VALUES ($1,$2,$3,$4,$5)
+      RETURNING *
     `;
 
-    const values = [
-      title, description, thumbnail_url, video_url, is_starred
-    ];
+    const values = [title, description, thumbnail_url, video_url, is_starred];
 
-    try {
-      const { rows } = await pool.query(query, values);
-      id = rows[0].id;
-    } catch (error) {
-      console.error("Error in ConcertMemoriesModel.create:", error);
-      throw error;
-    }
+    const { rows } = await pool.query(query, values);
+    const memory = rows[0];
 
     const intermediateQuery = `
       INSERT INTO concert_memories_intermediate (
         concert_memory_id, user_id
-      ) VALUES ($1, $2)
+      ) VALUES ($1,$2)
     `;
 
-    const intermediateValues = [
-      id, userId
-    ];
+    await pool.query(intermediateQuery, [memory.id, userId]);
 
-    try {
-      await pool.query(intermediateQuery, intermediateValues);
-      return id;
-    } catch (error) {
-      console.error("Error in ConcertMemoriesModel.create:", error);
-      throw error;
-    }
+    return memory;
   },
 
-  async getAllConcertMemoriesById(userId) {
+  async getConcertMemoriesByUserId(userId) {
     const query = `
-      SELECT cm.*, u.username, u.name as user_name
+      SELECT cm.*
       FROM concert_memories cm
       JOIN concert_memories_intermediate cmi ON cm.id = cmi.concert_memory_id
-      JOIN users u ON cmi.user_id = u.id
       WHERE cmi.user_id = $1
-      ORDER BY cm.created_at DESC
+      ORDER BY cm.created_at DESC, cm.id DESC
     `;
 
-    try {
-      const { rows } = await pool.query(query, [userId]);
-      return rows;
-    } catch (error) {
-      console.error("Error in ConcertMemoriesModel.getAllConcertMemories:", error);
-      throw error;
-    }
+    const { rows } = await pool.query(query, [userId]);
+    return rows;
   },
 
   async updateMemory(id, updateData) {
     const allowedFields = [
-      'title', 'description', 'thumbnail_url', 'video_url', 'is_starred'
+      "title",
+      "description",
+      "video_url",
+      "thumbnail_url",
+      "is_starred",
     ];
 
     const updateFields = [];
@@ -83,38 +66,30 @@ export const ConcertMemoriesModel = {
       }
     }
 
-    if (updateFields.length === 0) {
-      return null;
-    }
+    if (updateFields.length === 0) return null;
 
     updateFields.push(`updated_at = NOW()`);
     values.push(id);
 
     const query = `
-      UPDATE concert_memories 
-      SET ${updateFields.join(', ')}
+      UPDATE concert_memories
+      SET ${updateFields.join(", ")}
       WHERE id = $${paramCount}
       RETURNING *
     `;
 
-    try {
-      const { rows } = await pool.query(query, values);
-      return rows;
-    } catch (error) {
-      console.error("Error in ConcertMemoriesModel.update:", error);
-      throw error;
-    }
+    const { rows } = await pool.query(query, values);
+    return rows[0] || null;
   },
 
-  async deleteMemory(concert_memory_id) {
-    const query = `DELETE FROM concert_memories WHERE id = $1 RETURNING id`;
+  async delete(id) {
+    await pool.query(
+      `DELETE FROM concert_memories_intermediate WHERE concert_memory_id = $1`,
+      [id],
+    );
 
-    try {
-      const { rows } = await pool.query(query, [concert_memory_id]);
-      return rows.length > 0;
-    } catch (error) {
-      console.error("Error in ConcertMemoriesModel.delete:", error);
-      throw error;
-    }
-  }
+    const query = `DELETE FROM concert_memories WHERE id = $1 RETURNING id`;
+    const { rows } = await pool.query(query, [id]);
+    return rows.length > 0;
+  },
 };

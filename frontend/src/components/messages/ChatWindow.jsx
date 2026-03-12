@@ -9,9 +9,14 @@ export default function ChatWindow({
   onOpenInfo,
 }) {
   const [input, setInput] = useState("");
+  const [inputError, setInputError] = useState("");
 
   function handleSend() {
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      setInputError("Message cannot be empty.");
+      return;
+    }
+    setInputError("");
     onSendMessage(chat.id, input.trim());
     setInput("");
   }
@@ -28,6 +33,7 @@ export default function ChatWindow({
 
       <div className="p-4 border-t bg-white flex items-center gap-3">
         <input
+          data-cy="chat-message-input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -40,12 +46,18 @@ export default function ChatWindow({
           className="flex-1 bg-gray-100 px-4 py-2 rounded-xl"
         />
         <button
+          data-cy="chat-send-button"
           onClick={handleSend}
           className="bg-melodious-purple text-white rounded-xl px-4 py-2"
         >
           Send
         </button>
       </div>
+      {inputError && (
+        <div data-cy="chat-input-error" className="px-4 pb-3 text-sm text-red-600">
+          {inputError}
+        </div>
+      )}
     </div>
   );
 }

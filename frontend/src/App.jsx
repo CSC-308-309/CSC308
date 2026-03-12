@@ -23,7 +23,11 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={isLoggedIn() ? <Home /> : <Navigate to="/login" replace />}
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
           />
 
           <Route
