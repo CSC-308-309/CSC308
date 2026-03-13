@@ -49,6 +49,19 @@
     "moduleFileExtensions": [
       "js"
     ],
-    "coverageDirectory": "./coverage"
+    "coverageDirectory": "./coverage",
+    "collectCoverageFrom": [
+      "models/**/*.js",
+      "middleware/**/*.js",
+      "db/index.js",
+      "!babel.config.js",
+      "!coverage/**",
+      "!db/schema/**",
+      "!db/seeds/**",
+      "!db/migration.js",
+      "!db/seed_all.js",
+      "!tests/**",
+      "!**/*.test.js"
+    ]
   }
 }
