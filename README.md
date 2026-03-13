@@ -59,7 +59,7 @@ https://drawsql.app/teams/yanitsa-ivanova/diagrams/database
 
 # Code Covergae Report
 
-<img width="727" height="360" alt="image" src="https://github.com/user-attachments/assets/7c41a39e-915f-4033-b2af-860cfab8469f" />
+![Alt text](CodeCoverageReport.png)
 
 # Final 308 Demo with Narration
 
