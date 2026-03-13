@@ -73,6 +73,8 @@ npm run test:coverage     # Run tests with coverage
 
 https://youtu.be/d43Ztc0KPag
 
+Slideshow presentation with additional details: https://docs.google.com/presentation/d/1nN9K7NHVVDa2uYaUaGTo0s8Ay0OibK8aS-BEL1VRync/edit?usp=sharing
+
 # Database Setup
 
 This project uses **PostgreSQL** as the database with support for multiple environments (Production, Development). The database is hosted on [Neon](https://neon.tech/).
