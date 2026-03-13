@@ -57,6 +57,9 @@ https://docs.google.com/document/d/1UCSDfnOukAlMDDa9tCvZlb1Q7RUqmdO0tZTUPfsYoag/
 
 https://drawsql.app/teams/yanitsa-ivanova/diagrams/database
 
+# Jira Board
+https://csc308.atlassian.net/jira/software/projects/SCRUM/summary
+
 # Software Tests
 
 ```bash
