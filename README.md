@@ -57,7 +57,12 @@ https://docs.google.com/document/d/1UCSDfnOukAlMDDa9tCvZlb1Q7RUqmdO0tZTUPfsYoag/
 
 https://drawsql.app/teams/yanitsa-ivanova/diagrams/database
 
-# Code Covergae Report
+# Software Tests
+
+```bash
+npm run test              # Run all tests
+npm run test:coverage     # Run tests with coverage
+```
 
 ![Alt text](CodeCoverageReport.png)
 
