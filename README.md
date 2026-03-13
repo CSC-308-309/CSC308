@@ -28,6 +28,30 @@ Log in to your account to see your information and interact with other users.
 
 Good luck.
 
+### Installation
+
+From the repo root, install all dependencies for both frontend and backend:
+
+```bash
+npm install
+```
+
+### Running Locally
+
+Both servers must run simultaneously. Open two terminal tabs:
+
+**Terminal 1 — Backend** (runs on port 8000):
+```bash
+npm run dev:backend
+```
+
+**Terminal 2 — Frontend** (runs on port 5173):
+```bash
+npm run dev:frontend
+```
+
+The app will be available at `http://localhost:5173`.
+
 # Figma Storyboard
 
 https://www.figma.com/files/team/1562171713696228317/project/478828045/user-profile-and-swiping-page-figma?fuid=1562170179457328451
@@ -40,6 +64,18 @@ Code linter/style checker:
     To install these:
 - Open VScode, click the extensions tab on the left, search "Prettier" and install the "Prettier- Code Checker" option
 - Search "ESLint" and install
+
+To run linting and formatting from the command line:
+
+```bash
+# Check for lint errors
+npm run lint --workspace=frontend
+
+# Auto-format all frontend files
+npm run format --workspace=frontend
+```
+
+Linting runs automatically in CI on every push to `main`.
 
 # Deployment Link
 
@@ -62,12 +98,50 @@ https://csc308.atlassian.net/jira/software/projects/SCRUM/summary
 
 # Software Tests
 
+### Unit Tests (Backend — Jest)
+
 ```bash
-npm run test              # Run all tests
-npm run test:coverage     # Run tests with coverage
+npm run test:backend                                        # Run all unit tests
+npm run test --workspace=backend -- --coverage              # Run with coverage report
 ```
 
+Coverage output is written to `backend/coverage/`.
+
 ![Alt text](CodeCoverageReport.png)
+
+### Acceptance Tests (Cypress — E2E + API)
+
+Requires both servers running locally (see Running Locally above). Then from the `frontend/` directory:
+
+```bash
+cd frontend
+
+# Interactive mode — opens Cypress GUI
+npx cypress open
+
+# Headless mode — runs in terminal, saves video to cypress/videos/
+npx cypress run --spec "cypress/e2e/api_testing.cy.js,cypress/e2e/implemented_features.cy.js"
+```
+
+| File | Type | What it tests |
+|------|------|---------------|
+| `cypress/e2e/api_testing.cy.js` | API | `GET /`, `POST /auth/signup` |
+| `cypress/e2e/implemented_features.cy.js` | E2E | Sign In, Messaging, Change Email |
+| `cypress/e2e/acceptance_criteria.feature` | Gherkin docs | Acceptance criteria specs (not executable) |
+
+Acceptance tests are run locally only and are not part of the CI pipeline.
+
+# CI/CD
+
+All pipelines trigger automatically on push to `main`. No manual setup is needed for existing team members.
+
+| Workflow | File | What it does |
+|----------|------|--------------|
+| CI Testing | `.github/workflows/ci-testing.yml` | Lint frontend, run backend unit tests, build frontend |
+
+The CI Testing pipeline runs on every push: installs dependencies, lints the frontend, runs backend unit tests, and verifies the frontend builds. Fix all lint and test errors before pushing to `main`.
+
+Frontend is deployed via Vercel (see Deployment Link above). Backend deployment is managed separately.
 
 # Final 308 Demo with Narration
 
@@ -83,11 +157,17 @@ This project uses **PostgreSQL** as the database with support for multiple envir
 
 1. Go to [Neon Tech](https://neon.tech/) and Copy your connection strings from the dashboard (for production and development). It should look like: `postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require`
 
-2. Create a `.env` file in the **root directory** of your project:
+2. Create a `.env` file in the **root directory** of your project with the following variables:
 
 ```env
 DEVELOPMENT_CONNECTION_STRING=
+PRODUCTION_CONNECTION_STRING=
 PORT=8000
 DB_TYPE=DEVELOPMENT
 JWT_SECRET=
+VITE_BASE_URL=
+AWS_REGION=
+S3_BUCKET=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
 ```
