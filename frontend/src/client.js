@@ -2,9 +2,7 @@
 // Simple wrapper
 
 // Base URL for API requests. Reads from VITE_BASE_URL env var or defaults to localhost.
-
-// eslint-disable-next-line no-constant-binary-expression
-const BASE_URL = "http://localhost:8000" || "http://localhost:8000"; // will add this back
+const BASE_URL = "http://localhost:8000";
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || BASE_URL;
 
 // async function request(path, options = {}) {
